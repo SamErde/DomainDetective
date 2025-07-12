@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using DomainDetective.Helpers;
 
 namespace DomainDetective {
     /// <summary>
@@ -14,7 +15,6 @@ namespace DomainDetective {
         private readonly HashSet<string> _exactRules = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         private readonly HashSet<string> _wildcardRules = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         private readonly HashSet<string> _exceptionRules = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        private static readonly IdnMapping _idn = new();
         private const int MaxLabelLength = 63;
 
         internal PublicSuffixList() { }
@@ -76,7 +76,7 @@ namespace DomainDetective {
                 return false;
             }
 
-            domain = _idn.GetAscii(domain.Trim().Trim('.'));
+            domain = DomainHelper.ValidateIdn(domain);
             ValidateLabels(domain);
             domain = domain.ToLowerInvariant();
             if (_exceptionRules.Contains(domain)) {
@@ -107,7 +107,7 @@ namespace DomainDetective {
                 throw new ArgumentNullException(nameof(domain));
             }
 
-            var clean = _idn.GetAscii(domain.Trim().Trim('.')).ToLowerInvariant();
+            var clean = DomainHelper.ValidateIdn(domain).ToLowerInvariant();
             var parts = clean.Split('.');
             if (parts.Length <= 1) {
                 return clean;

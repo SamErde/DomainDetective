@@ -9,6 +9,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Globalization;
 using System.Text.Json;
+using DomainDetective.Helpers;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -20,7 +21,6 @@ namespace DomainDetective;
 /// <para>Part of the DomainDetective project.</para>
 public class WhoisAnalysis {
     private string TLD { get; set; }
-    private static readonly IdnMapping _idn = new();
     private string _domainName;
 
     /// <summary>The domain name being queried.</summary>
@@ -28,7 +28,7 @@ public class WhoisAnalysis {
         get => _domainName;
         set {
             try {
-                _domainName = _idn.GetAscii(value.Trim().Trim('.'));
+                _domainName = DomainHelper.ValidateIdn(value);
             } catch (ArgumentException) {
                 _domainName = value;
             }
