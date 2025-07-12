@@ -70,6 +70,7 @@ public static partial class Program {
         await ExampleAnalyseThreatIntel();
         await ExampleAnalyseTyposquatting();
         await ExampleAnalyseEdnsSupport();
+        await ExampleAnalyseGeoIp();
 
         //await ExampleQueryDNS();
         //await ExampleAnalyseByStringWHOIS();
