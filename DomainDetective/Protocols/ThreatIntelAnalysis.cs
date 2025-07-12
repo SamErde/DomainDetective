@@ -26,6 +26,8 @@ public class ThreatIntelAnalysis
     public bool ListedByPhishTank { get; private set; }
     /// <summary>True when VirusTotal lists the entry as malicious.</summary>
     public bool ListedByVirusTotal { get; private set; }
+    /// <summary>Risk score returned by the reputation service.</summary>
+    public int? RiskScore { get; private set; }
     /// <summary>If feed queries fail, explains why.</summary>
     public string? FailureReason { get; private set; }
 
@@ -121,7 +123,7 @@ public class ThreatIntelAnalysis
         return valid && inDb;
     }
 
-    private static bool ParseVirusTotal(string json)
+    private bool ParseVirusTotal(string json)
     {
         using var doc = JsonDocument.Parse(json);
         if (!doc.RootElement.TryGetProperty("data", out var data))
@@ -131,6 +133,10 @@ public class ThreatIntelAnalysis
         if (!data.TryGetProperty("attributes", out var attr))
         {
             return false;
+        }
+        if (attr.TryGetProperty("reputation", out var rep))
+        {
+            RiskScore = rep.GetInt32();
         }
         if (!attr.TryGetProperty("last_analysis_stats", out var stats))
         {
@@ -147,6 +153,7 @@ public class ThreatIntelAnalysis
         ListedByGoogle = false;
         ListedByPhishTank = false;
         ListedByVirusTotal = false;
+        RiskScore = null;
         FailureReason = null;
 
         if (!string.IsNullOrWhiteSpace(googleApiKey))
@@ -183,6 +190,10 @@ public class ThreatIntelAnalysis
             {
                 var json = await QueryVirusTotal(domainName, virusTotalApiKey, ct);
                 ListedByVirusTotal = ParseVirusTotal(json);
+                if (RiskScore.HasValue && RiskScore.Value >= 70)
+                {
+                    logger?.WriteWarning("VirusTotal risk score {0} for {1} is high.", RiskScore.Value, domainName);
+                }
             }
             catch (Exception ex)
             {

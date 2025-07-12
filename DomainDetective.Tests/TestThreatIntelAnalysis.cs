@@ -1,5 +1,6 @@
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using DomainDetective;
 
 namespace DomainDetective.Tests;
@@ -62,5 +63,22 @@ public class TestThreatIntelAnalysis
 
         Assert.False(string.IsNullOrEmpty(analysis.FailureReason));
         Assert.False(analysis.ListedByGoogle);
+    }
+
+    [Fact]
+    public async Task LogsWarningWhenRiskScoreHigh()
+    {
+        var logger = new InternalLogger();
+        var warnings = new List<LogEventArgs>();
+        logger.OnWarningMessage += (_, e) => warnings.Add(e);
+        var analysis = new ThreatIntelAnalysis
+        {
+            VirusTotalOverride = _ => Task.FromResult("{\"data\":{\"attributes\":{\"last_analysis_stats\":{\"malicious\":1},\"reputation\":90}}}")
+        };
+
+        await analysis.Analyze("example.com", null, null, "v", logger);
+
+        Assert.Equal(90, analysis.RiskScore);
+        Assert.Contains(warnings, w => w.FullMessage.Contains("risk score"));
     }
 }
