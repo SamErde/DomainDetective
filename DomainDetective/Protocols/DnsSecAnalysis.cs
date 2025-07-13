@@ -10,6 +10,7 @@ using System.Text.Json;
 using System.Globalization;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using System.Xml;
 
 namespace DomainDetective {
     /// <summary>
@@ -477,6 +478,10 @@ namespace DomainDetective {
         }
 
         private static IReadOnlyList<string> ParseTrustAnchors(string xml) {
+            if (string.IsNullOrWhiteSpace(xml) || !IsXmlWellFormed(xml)) {
+                return Array.Empty<string>();
+            }
+
             try {
                 var doc = XDocument.Parse(xml);
                 List<string> anchors = new();
@@ -492,6 +497,18 @@ namespace DomainDetective {
                 return anchors;
             } catch {
                 return Array.Empty<string>();
+            }
+        }
+
+        private static bool IsXmlWellFormed(string xml) {
+            try {
+                using var reader = XmlReader.Create(new StringReader(xml));
+                while (reader.Read()) {
+                    // Just read through to validate well-formedness
+                }
+                return true;
+            } catch {
+                return false;
             }
         }
 
