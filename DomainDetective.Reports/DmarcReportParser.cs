@@ -5,12 +5,12 @@ using System.IO.Compression;
 using System.Linq;
 using System.Xml.Linq;
 using System.Globalization;
+using DomainDetective.Helpers;
 
 namespace DomainDetective.Reports;
 
 /// <summary>Parser for zipped DMARC feedback reports.</summary>
 public static class DmarcReportParser {
-    private static readonly IdnMapping _idn = new();
     /// <summary>Parses the specified zip file and returns per-domain statistics.</summary>
     /// <param name="path">Path to the zipped XML feedback report.</param>
     public static IEnumerable<DmarcFeedbackSummary> ParseZip(string path) {
@@ -29,7 +29,7 @@ public static class DmarcReportParser {
                 continue;
             }
             try {
-                domain = _idn.GetAscii(domain.Trim().Trim('.'));
+                domain = DomainHelper.ValidateIdn(domain);
             } catch (ArgumentException) {
                 continue;
             }

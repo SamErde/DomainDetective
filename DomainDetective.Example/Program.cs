@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using DomainDetective;
+using DomainDetective.Helpers;
 
 namespace DomainDetective.Example;
 
@@ -11,9 +12,8 @@ public static partial class Program {
         if (args.Length > 0 && args.Any(a => !a.StartsWith("-"))) {
             var outputJson = args.Contains("--json");
             var domain = args.First(a => !a.StartsWith("-"));
-            var idn = new IdnMapping();
             try {
-                domain = idn.GetAscii(domain.Trim().Trim('.'));
+                domain = DomainHelper.ValidateIdn(domain);
             } catch (ArgumentException) {
             }
             var healthCheck = new DomainHealthCheck();

@@ -4,6 +4,7 @@ using System.Collections;
 using System.Linq;
 using System.Text;
 using System.Globalization;
+using DomainDetective.Helpers;
 
 namespace DomainDetective.CLI;
 
@@ -42,7 +43,7 @@ internal static class CliHelpers
 
         try
         {
-            return _idn.GetAscii(domain.Trim().Trim('.'));
+            return DomainHelper.ValidateIdn(domain);
         }
         catch (ArgumentException)
         {
