@@ -38,6 +38,9 @@ namespace DomainDetective {
         /// <summary>Override geolocation lookup for testing.</summary>
         internal Func<string, CancellationToken, Task<GeoLocationInfo?>>? GeoLookupOverride { get; set; }
 
+        /// <summary>Override BGP lookup for testing.</summary>
+        internal Func<string, CancellationToken, Task<int?>>? BgpLookupOverride { get; set; }
+      
         /// <summary>GeoIP database used for lookups.</summary>
         public GeoIpAnalysis GeoIp { get; } = new GeoIpAnalysis();
 
@@ -316,6 +319,46 @@ namespace DomainDetective {
             }
 
             return Task.FromResult(GeoIp.Lookup(ip));
+        }
+
+        internal async Task<int?> LookupAsnAsync(string ip, CancellationToken ct) {
+            if (BgpLookupOverride != null) {
+                return await BgpLookupOverride(ip, ct).ConfigureAwait(false);
+            }
+
+            var url = $"https://stat.ripe.net/data/prefix-overview/data.json?resource={ip}";
+            using var request = new HttpRequestMessage(HttpMethod.Get, url);
+            using var response = await SharedHttpClient.Instance.SendAsync(request, ct).ConfigureAwait(false);
+            if (!response.IsSuccessStatusCode) {
+                return null;
+            }
+#if NET6_0_OR_GREATER
+            using var stream = await response.Content.ReadAsStreamAsync(ct).ConfigureAwait(false);
+#else
+            using var stream = await response.Content.ReadAsStreamAsync().WaitWithCancellation(ct).ConfigureAwait(false);
+#endif
+            using var doc = await JsonDocument.ParseAsync(stream, cancellationToken: ct).ConfigureAwait(false);
+            if (!doc.RootElement.TryGetProperty("data", out var data) || !data.TryGetProperty("asns", out var asns)) {
+                return null;
+            }
+            if (asns.GetArrayLength() == 0) {
+                return null;
+            }
+            return asns[0].GetProperty("asn").GetInt32();
+        }
+
+        public async Task ValidateServerAsnsAsync(InternalLogger? logger = null, CancellationToken ct = default) {
+            foreach (var server in _servers) {
+                ct.ThrowIfCancellationRequested();
+                if (string.IsNullOrWhiteSpace(server.ASN)) {
+                    continue;
+                }
+
+                var asn = await LookupAsnAsync(server.IPAddress.ToString(), ct).ConfigureAwait(false);
+                if (asn.HasValue && !string.Equals(server.ASN, asn.Value.ToString(), StringComparison.OrdinalIgnoreCase)) {
+                    logger?.WriteWarning("Server {0} expected ASN {1} but is announced by AS{2}", server.IPAddress, server.ASN, asn.Value);
+                }
+            }
         }
 
         /// <summary>
