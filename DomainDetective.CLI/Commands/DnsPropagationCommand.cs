@@ -108,7 +108,7 @@ internal sealed class DnsPropagationCommand : AsyncCommand<DnsPropagationSetting
                 foreach (var r in results) {
                     var records = r.Records.Select(rec => {
                         if (settings.Geo && r.Geo != null && r.Geo.TryGetValue(rec, out var info)) {
-                            return $"{rec} ({info.Country}/{info.City})";
+                            return $"{rec} ({info.Country}/{info.Region})";
                         }
                         return rec;
                     });
