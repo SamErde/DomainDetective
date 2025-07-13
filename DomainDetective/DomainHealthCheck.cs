@@ -319,6 +319,12 @@ namespace DomainDetective {
         /// <summary>Alias used by <see cref="GetAnalysisMap"/>.</summary>
         public FlatteningServiceAnalysis FLATTENINGSERVICEAnalysis => FlatteningServiceAnalysis;
 
+        /// <summary>Gets the takeover CNAME analysis.</summary>
+        /// <value>Information about risky cloud provider aliases.</value>
+        public TakeoverCnameAnalysis TakeoverCnameAnalysis { get; private set; } = new TakeoverCnameAnalysis();
+        /// <summary>Alias used by <see cref="GetAnalysisMap"/>.</summary>
+        public TakeoverCnameAnalysis TAKEOVERCNAMEAnalysis => TakeoverCnameAnalysis;
+
         // Settings properties moved to DomainHealthCheck.Settings.cs
 
         /// <summary>
@@ -398,6 +404,7 @@ namespace DomainDetective {
             WildcardDnsAnalysis.DnsConfiguration = DnsConfiguration;
             EdnsSupportAnalysis.DnsConfiguration = DnsConfiguration;
             FlatteningServiceAnalysis.DnsConfiguration = DnsConfiguration;
+            TakeoverCnameAnalysis.DnsConfiguration = DnsConfiguration;
 
             _logger.WriteVerbose("DomainHealthCheck initialized.");
             _logger.WriteVerbose("DnsEndpoint: {0}", DnsEndpoint);
