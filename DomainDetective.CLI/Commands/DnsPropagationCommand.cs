@@ -2,10 +2,11 @@ using DnsClientX;
 using DomainDetective;
 using Spectre.Console;
 using Spectre.Console.Cli;
+using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Reflection;
 using System.Text.Json;
 using System.Threading;
-using System.IO;
 
 namespace DomainDetective.CLI;
 
@@ -52,6 +53,10 @@ internal sealed class DnsPropagationSettings : CommandSettings {
     /// <summary>Include geolocation information.</summary>
     [CommandOption("--geo")]
     public bool Geo { get; set; }
+
+    /// <summary>Verify that server IPs are announced by expected ASNs.</summary>
+    [CommandOption("--validate-asn")]
+    public bool ValidateAsn { get; set; }
 }
 
 /// <summary>
@@ -59,6 +64,9 @@ internal sealed class DnsPropagationSettings : CommandSettings {
 /// </summary>
 internal sealed class DnsPropagationCommand : AsyncCommand<DnsPropagationSettings> {
     /// <inheritdoc/>
+    [RequiresUnreferencedCode("Calls System.Text.Json.JsonSerializer.Serialize<TValue>(TValue, JsonSerializerOptions)")]
+    [RequiresDynamicCode("Calls System.Text.Json.JsonSerializer.Serialize<TValue>(TValue, JsonSerializerOptions)")]
+    [RequiresAssemblyFiles("Calls System.Reflection.Assembly.Location")]
     public override async Task<int> ExecuteAsync(CommandContext context, DnsPropagationSettings settings) {
         var analysis = new DnsPropagationAnalysis { SnapshotDirectory = settings.SnapshotPath?.FullName };
         if (settings.ServersFile != null) {
@@ -71,6 +79,10 @@ internal sealed class DnsPropagationCommand : AsyncCommand<DnsPropagationSetting
             analysis.LoadBuiltinServers();
         }
         var servers = analysis.Servers;
+        if (settings.ValidateAsn) {
+            await analysis.ValidateServerAsnsAsync(new InternalLogger());
+        }
+
         var domain = CliHelpers.ToAscii(settings.Domain);
 
         List<DnsPropagationResult> results = new();

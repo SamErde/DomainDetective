@@ -1,8 +1,8 @@
+using DomainDetective;
 using System;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
-using DomainDetective;
 
 namespace DomainDetective.Example;
 
@@ -64,6 +64,7 @@ public static partial class Program {
         await ExampleAnalyseOpenRelay();
         await ExampleAnalyseSecurityTXT();
         await ExampleAnalyseDnsPropagation();
+        await ExampleValidateServerAsn();
         await ExampleAnalyseDnsPropagationRegions();
         await ExampleAnalyseDnsTtl();
         await ExampleDomainSummary();
@@ -77,6 +78,10 @@ public static partial class Program {
 
     public static async Task ExampleAnalyseDnsPropagation() {
         await ExampleAnalyseDnsPropagationClass.Run();
+    }
+
+    public static async Task ExampleValidateServerAsn() {
+        await ExampleValidateServerAsnClass.Run();
     }
 
     public static async Task ExampleAnalyseDnsPropagationRegions() {
