@@ -1,51 +1,7 @@
 ﻿@{
-    AliasesToExport      = @(
-        'Add-DnsblProvider',
-        'Clear-DnsblProvider',
-        'Get-DomainSummary',
-        'Get-DomainWhois',
-        'Get-DomainFlattenedSpfIp',
-        'Import-DnsblConfig',
-        'Import-DmarcReport',
-        'Remove-DnsblProvider',
-        'Test-EmailArc',
-        'Test-EmailBimi',
-        'Test-EmailDkim',
-        'Test-EmailDmarc',
-        'Test-EmailSpf',
-        'Test-EmailTlsRpt',
-        'Test-EmailStartTls',
-        'Test-EmailSmtpTls',
-        'Test-EmailOpenRelay',
-        'Get-EmailHeaderInfo',
-        'Test-EmailLatency',
-        'Test-DnsCaa',
-        'Test-DnsNs',
-        'Test-DnsSoa',
-        'Test-DnsSec',
-        'Test-DnsBlacklist',
-        'Test-DnsDomainBlacklist',
-        'Test-DnsDanglingCname',
-        'Test-DnsPropagation',
-        'Test-DnsTtl',
-        'Test-DnsTunneling',
-        'Test-DnsWildcard',
-        'Test-DnsEdnsSupport',
-        'Test-DnsSmimea',
-        'Test-DnsFcrDns',
-        'Test-MxRecord',
-        'Test-DomainContact',
-        'Test-DomainSecurityTxt',
-        'Test-DomainCertificate',
-        'Test-DomainHealth',
-        'Test-DomainThreatIntel',
-        'Test-TlsDane',
-        'Test-NetworkIpNeighbor',
-        'Test-NetworkPortAvailability',
-        'Test-Rpki'
-    )
+    AliasesToExport      = @('Add-DnsblProvider', 'Clear-DnsblProvider', 'Get-DomainSummary', 'Get-DomainFlattenedSpfIp', 'Get-DomainWhois', 'Import-DmarcReport', 'Import-DnsblConfig', 'Remove-DnsblProvider', 'Test-EmailArc', 'Test-EmailBimi', 'Test-DnsDomainBlacklist', 'Test-DnsCaa', 'Test-DomainContact', 'Test-TlsDane', 'Test-DnsDanglingCname', 'Test-EmailDkim', 'Test-EmailDmarc', 'Test-DnsBlacklist', 'Test-DnsPropagation', 'Test-DnsSec', 'Test-DnsTtl', 'Test-DnsTunneling', 'Test-DomainHealth', 'Test-DnsEdnsSupport', 'Test-DnsFcrDns', 'Test-NetworkIpNeighbor', 'Test-EmailLatency', 'Get-EmailHeaderInfo', 'Test-MxRecord', 'Test-DnsNs', 'Test-EmailOpenRelay', 'Test-NetworkPortAvailability', 'Test-Rpki', 'Test-DomainSecurityTxt', 'Test-DnsSmimea', 'Test-EmailSmtpTls', 'Test-DnsSoa', 'Test-EmailSpf', 'Test-EmailStartTls', 'Test-DomainThreatIntel', 'Test-EmailTlsRpt', 'Test-DomainCertificate', 'Test-DnsWildcard')
     Author               = 'Przemyslaw Klys'
-    CmdletsToExport      = @('Add-DDDnsblProvider', 'Clear-DDDnsblProviderList', 'Get-DDDomainHealthReport', 'Get-DDDomainWhois', 'Get-DDFlattenedSpfIp', 'Import-DDDnsblConfig', 'Import-DDDmarcReport', 'Remove-DDDnsblProvider', 'Test-DDEmailArcRecord', 'Test-DDEmailBimiRecord', 'Test-DDDnsDomainBlacklist', 'Test-DDDnsCaaRecord', 'Test-DDDomainContactRecord', 'Test-DDTlsDaneRecord', 'Test-DDSmimeaRecord', 'Test-DDEmailDkimRecord', 'Test-DDEmailDmarcRecord', 'Test-DDDnsBlacklistRecord', 'Test-DDDnsPropagation', 'Test-DDDnsSecStatus', 'Test-DDDomainOverallHealth', 'Test-DDDnsMxRecord', 'Test-DDDnsNsRecord', 'Test-DDEmailOpenRelay', 'Get-DDEmailMessageHeaderInfo', 'Test-DDDomainSecurityTxt', 'Test-DDEmailSmtpTls', 'Test-DDMailLatency', 'Test-DDDnsSoaRecord', 'Test-DDEmailSpfRecord', 'Test-DDEmailStartTls', 'Test-DDEmailTlsRptRecord', 'Test-DDDomainCertificate', 'Test-DDDnsDanglingCname', 'Test-DDDnsForwardReverse', 'Test-DDThreatIntel', 'Test-DDDnsTtl', 'Test-DDDnsTunneling', 'Test-DDIpNeighbor', 'Test-DDPortAvailability', 'Test-DDDnsWildcard', 'Test-DDEdnsSupport', 'Test-DDRpki')
+    CmdletsToExport      = @('Add-DDDnsblProvider', 'Clear-DDDnsblProviderList', 'Get-CertificateInfo', 'Get-DDDomainHealthReport', 'Get-DDFlattenedSpfIp', 'Get-DDDomainWhois', 'Import-DDDmarcReport', 'Import-DDDnsblConfig', 'Import-TlsRpt', 'Invoke-DomainWizard', 'New-DmarcRecord', 'Remove-DDDnsblProvider', 'Start-DnsPropagationMonitor', 'Stop-DnsPropagationMonitor', 'Test-DDEmailArcRecord', 'Test-Autodiscover', 'Test-DDEmailBimiRecord', 'Test-DDDnsDomainBlacklist', 'Test-DDDnsCaaRecord', 'Test-DDDomainContactRecord', 'Test-DDTlsDaneRecord', 'Test-DDDnsDanglingCname', 'Test-Delegation', 'Test-DDEmailDkimRecord', 'Test-DmarcAggregate', 'Test-DDEmailDmarcRecord', 'Test-DDDnsBlacklistRecord', 'Test-DDDnsPropagation', 'Test-DDDnsSecStatus', 'Test-DDDnsTtl', 'Test-DDDnsTunneling', 'Test-DDDomainOverallHealth', 'Test-DDEdnsSupport', 'Test-DDDnsForwardReverse', 'Test-ImapTls', 'Test-DDIpNeighbor', 'Test-DDMailLatency', 'Get-DDEmailMessageHeaderInfo', 'Test-DDDnsMxRecord', 'Test-DDDnsNsRecord', 'Test-DDEmailOpenRelay', 'Test-Pop3Tls', 'Test-DDPortAvailability', 'Test-ReverseDns', 'Test-DDRpki', 'Test-DDDomainSecurityTxt', 'Test-DDSmimeaRecord', 'Test-SmtpBanner', 'Test-DDEmailSmtpTls', 'Test-DDDnsSoaRecord', 'Test-DDEmailSpfRecord', 'Test-DDEmailStartTls', 'Test-DDThreatIntel', 'Test-DDEmailTlsRptRecord', 'Test-DDDomainCertificate', 'Test-DDDnsWildcard', 'Test-ZoneTransfer')
     CompanyName          = 'Evotec'
     CompatiblePSEditions = @('Desktop', 'Core')
     Copyright            = '(c) 2011 - 2025 Przemyslaw Klys @ Evotec. All rights reserved.'
@@ -60,4 +16,5 @@
             Tags       = @('Windows', 'MacOS', 'Linux')
         }
     }
-    RootModule           = 'DomainDetective.psm1'}
+    RootModule           = 'DomainDetective.psm1'
+}
