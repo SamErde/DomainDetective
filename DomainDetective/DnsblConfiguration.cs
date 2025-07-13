@@ -11,5 +11,8 @@ using System.Collections.Generic;
 
         /// <summary>Gets or sets domain based block lists.</summary>
         public List<DnsblEntry> DomainBlockLists { get; set; } = new();
+
+        /// <summary>Gets or sets IP based block lists.</summary>
+        public List<BlockListEntry> IpBlockLists { get; set; } = new();
     }
 }
