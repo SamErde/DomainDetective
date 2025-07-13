@@ -12,7 +12,7 @@ namespace DomainDetective.Example {
             var results = await analysis.QueryAsync("example.com", DnsRecordType.A, servers, includeGeo: true);
             foreach (var result in results) {
                 var records = result.Records.Select(r => result.Geo != null && result.Geo.TryGetValue(r, out var info)
-                    ? $"{r} ({info.Country}/{info.City})" : r);
+                    ? $"{r} ({info.Country}/{info.Region})" : r);
                 Console.WriteLine($"{result.Server.IPAddress} - {string.Join(',', records)}");
             }
         }

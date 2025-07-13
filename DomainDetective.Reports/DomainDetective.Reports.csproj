@@ -7,4 +7,7 @@
     <Reference Include="System.IO.Compression" />
     <Reference Include="System.IO.Compression.FileSystem" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DomainDetective\DomainDetective.csproj" />
+  </ItemGroup>
 </Project>

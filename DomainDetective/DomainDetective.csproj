@@ -19,6 +19,7 @@
         <EmbeddedResource Include="..\Data\dnsbl.json" />
         <EmbeddedResource Include="..\Data\DNS\PublicDNS.json"
             LogicalName="DomainDetective.DNS.PublicDNS.json" />
+        <EmbeddedResource Include="..\Data\geoip.csv" />
         <AdditionalFiles Include="..\Data\DNS\PublicDNS.json" />
     </ItemGroup>
 

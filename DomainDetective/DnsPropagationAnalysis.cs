@@ -40,6 +40,14 @@ namespace DomainDetective {
 
         /// <summary>Override BGP lookup for testing.</summary>
         internal Func<string, CancellationToken, Task<int?>>? BgpLookupOverride { get; set; }
+      
+        /// <summary>GeoIP database used for lookups.</summary>
+        public GeoIpAnalysis GeoIp { get; } = new GeoIpAnalysis();
+
+        /// <summary>Initializes a new instance of the class.</summary>
+        public DnsPropagationAnalysis() {
+            GeoIp.LoadBuiltinDatabase();
+        }
 
         /// <summary>
         /// Loads DNS server definitions from a JSON file.
@@ -305,29 +313,12 @@ namespace DomainDetective {
                 : ipAddress.ToString();
         }
 
-        internal async Task<GeoLocationInfo?> GetGeoLocationAsync(string ip, CancellationToken ct) {
+        internal Task<GeoLocationInfo?> GetGeoLocationAsync(string ip, CancellationToken ct) {
             if (GeoLookupOverride != null) {
-                return await GeoLookupOverride(ip, ct).ConfigureAwait(false);
+                return GeoLookupOverride(ip, ct);
             }
 
-            var url = $"https://ipwho.is/{ip}";
-            using var request = new HttpRequestMessage(HttpMethod.Get, url);
-            using var response = await SharedHttpClient.Instance.SendAsync(request, ct).ConfigureAwait(false);
-            if (!response.IsSuccessStatusCode) {
-                return null;
-            }
-#if NET6_0_OR_GREATER
-            using var stream = await response.Content.ReadAsStreamAsync(ct).ConfigureAwait(false);
-#else
-            using var stream = await response.Content.ReadAsStreamAsync().WaitWithCancellation(ct).ConfigureAwait(false);
-#endif
-            using var doc = await JsonDocument.ParseAsync(stream, cancellationToken: ct).ConfigureAwait(false);
-            if (doc.RootElement.TryGetProperty("success", out var success) && success.ValueKind == JsonValueKind.False) {
-                return null;
-            }
-            var country = doc.RootElement.TryGetProperty("country", out var cElem) ? cElem.GetString() : null;
-            var city = doc.RootElement.TryGetProperty("city", out var cityElem) ? cityElem.GetString() : null;
-            return new GeoLocationInfo { Country = country, City = city };
+            return Task.FromResult(GeoIp.Lookup(ip));
         }
 
         internal async Task<int?> LookupAsnAsync(string ip, CancellationToken ct) {

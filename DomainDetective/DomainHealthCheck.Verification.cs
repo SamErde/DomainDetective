@@ -10,6 +10,7 @@ using System.Reflection;
 using System.Linq.Expressions;
 using System.Globalization;
 using DomainDetective.Network;
+using DomainDetective.Helpers;
 
 namespace DomainDetective {
     /// <summary>
@@ -17,11 +18,10 @@ namespace DomainDetective {
     /// </summary>
     /// <para>Part of the DomainDetective project.</para>
     public partial class DomainHealthCheck {
-        private static readonly IdnMapping _idn = new();
 
         private static string NormalizeDomain(string input)
         {
-            return _idn.GetAscii(input.Trim().Trim('.')).ToLowerInvariant();
+            return DomainHelper.ValidateIdn(input).ToLowerInvariant();
         }
 
         private static string CreateServiceQuery(int port, string domain) {
@@ -56,7 +56,7 @@ namespace DomainDetective {
                 host = uri.Host;
             } else {
                 try {
-                    host = _idn.GetAscii(domainName.Trim().Trim('.'));
+                    host = DomainHelper.ValidateIdn(domainName);
                 } catch (ArgumentException) {
                 }
             }
@@ -1361,7 +1361,7 @@ namespace DomainDetective {
                 }
 
                 try {
-                    host = _idn.GetAscii(host.Trim().Trim('.'));
+                    host = DomainHelper.ValidateIdn(host);
                 } catch (ArgumentException) {
                     throw new ArgumentException("Invalid host name.", nameof(domainName));
                 }
