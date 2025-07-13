@@ -72,4 +72,32 @@ public class TestMonitorScheduler
         Assert.Equal(1, callCount);
         Assert.Single(notifier.Messages);
     }
+
+    [Fact]
+    public async Task AlertsOnBgpChange()
+    {
+        var notifier = new CaptureNotifier();
+        var call = 0;
+        var scheduler = new MonitorScheduler
+        {
+            Notifier = notifier,
+            SummaryOverride = _ => Task.FromResult(new DomainSummary { HasMxRecord = true, ExpiryDate = "2025" }),
+            CertificateOverride = _ => Task.FromResult(new CertificateMonitor.Entry
+            {
+                Host = "example.com",
+                Expired = false,
+                ExpiryDate = System.DateTime.UtcNow.AddDays(10),
+                Analysis = new CertificateAnalysis()
+            }),
+            BgpOverride = (_, _) => Task.FromResult(call++ == 0
+                ? new System.Collections.Generic.Dictionary<string, int> { ["1.1.1.0/24"] = 65000 }
+                : new System.Collections.Generic.Dictionary<string, int> { ["1.1.1.0/24"] = 65001 })
+        };
+        scheduler.Domains.Add("example.com");
+
+        await scheduler.RunAsync();
+        await scheduler.RunAsync();
+
+        Assert.Contains(notifier.Messages, m => m.Contains("changed"));
+    }
 }

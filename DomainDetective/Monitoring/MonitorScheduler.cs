@@ -25,8 +25,11 @@ public class MonitorScheduler
     public Func<string, Task<DomainSummary>>? SummaryOverride { private get; set; }
     /// <summary>Override certificate check for testing.</summary>
     public Func<string, Task<CertificateMonitor.Entry>>? CertificateOverride { private get; set; }
+    /// <summary>Override BGP prefix query for testing.</summary>
+    public Func<string, CancellationToken, Task<Dictionary<string, int>>>? BgpOverride { private get; set; }
 
     private readonly ConcurrentDictionary<string, DomainSummary> _previous = new();
+    private readonly ConcurrentDictionary<string, Dictionary<string, int>> _bgpPrevious = new();
     private readonly SemaphoreSlim _runLock = new(1, 1);
     private Timer? _timer;
 
@@ -77,6 +80,28 @@ public class MonitorScheduler
                 {
                     await Notifier.SendAsync($"Certificate for {domain} expires on {cert.ExpiryDate:yyyy-MM-dd}", ct);
                 }
+
+                var prefixes = BgpOverride != null
+                    ? await BgpOverride(domain, ct)
+                    : await BgpPrefixMonitor.QueryPrefixesAsync(domain, ct);
+                if (_bgpPrevious.TryGetValue(domain, out var prevPrefixes))
+                {
+                    foreach (var kv in prefixes)
+                    {
+                        if (prevPrefixes.TryGetValue(kv.Key, out var prevAsn))
+                        {
+                            if (prevAsn != kv.Value && Notifier != null)
+                            {
+                                await Notifier.SendAsync($"Prefix {kv.Key} for {domain} changed from AS{prevAsn} to AS{kv.Value}", ct);
+                            }
+                        }
+                        else if (Notifier != null)
+                        {
+                            await Notifier.SendAsync($"Prefix {kv.Key} for {domain} announced by AS{kv.Value}", ct);
+                        }
+                    }
+                }
+                _bgpPrevious[domain] = prefixes;
             }
         }
         finally
