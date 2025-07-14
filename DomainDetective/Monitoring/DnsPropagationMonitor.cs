@@ -8,6 +8,10 @@ using System.Threading.Tasks;
 namespace DomainDetective.Monitoring {
     /// <summary>Monitors DNS propagation discrepancies over time.</summary>
     /// <para>Part of the DomainDetective project.</para>
+    /// <remarks>
+    /// Regular queries against a set of public resolvers track how quickly
+    /// records spread and highlight inconsistent answers.
+    /// </remarks>
     public class DnsPropagationMonitor {
         /// <summary>Domain to query.</summary>
         public string Domain { get; set; } = string.Empty;

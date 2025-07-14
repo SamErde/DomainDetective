@@ -10,6 +10,10 @@ namespace DomainDetective;
 /// Resolves CNAME targets and detects dangling references.
 /// </summary>
 /// <para>Part of the DomainDetective project.</para>
+/// <remarks>
+/// A dangling CNAME occurs when the target no longer resolves. Such records may
+/// expose domains to subdomain takeovers.
+/// </remarks>
 public class DanglingCnameAnalysis {
     /// <summary>Gets or sets DNS configuration for queries.</summary>
     public DnsConfiguration DnsConfiguration { get; set; }

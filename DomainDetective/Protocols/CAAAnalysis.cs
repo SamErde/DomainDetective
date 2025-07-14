@@ -12,6 +12,10 @@ namespace DomainDetective {
     /// Performs analysis of CAA DNS records for a domain.
     /// </summary>
     /// <para>Part of the DomainDetective project.</para>
+    /// <remarks>
+    /// The analysis inspects CAA tags to determine which certificate
+    /// authorities are permitted to issue certificates for the domain.
+    /// </remarks>
     public class CAAAnalysis {
         /// <summary>Gets or sets the domain name that provided the record.</summary>
         public string? DomainName { get; set; }

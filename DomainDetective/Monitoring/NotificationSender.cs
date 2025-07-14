@@ -8,6 +8,10 @@ using System.Threading.Tasks;
 namespace DomainDetective.Monitoring;
 
 /// <summary>Defines notification sending behavior.</summary>
+/// <remarks>
+/// Implementations can deliver messages through various channels such as
+/// webhooks or email.
+/// </remarks>
 public interface INotificationSender
 {
     /// <summary>Sends a notification message.</summary>
@@ -15,6 +19,9 @@ public interface INotificationSender
 }
 
 /// <summary>Sends notifications via HTTP webhook.</summary>
+/// <remarks>
+/// The message payload is sent as UTF-8 plain text to the configured URL.
+/// </remarks>
 public class WebhookNotificationSender : INotificationSender
 {
     private readonly HttpClient _client = new();
@@ -33,6 +40,10 @@ public class WebhookNotificationSender : INotificationSender
 }
 
 /// <summary>Sends notifications via SMTP.</summary>
+/// <remarks>
+/// A plain text email is constructed and sent using the provided SMTP
+/// connection information.
+/// </remarks>
 public class EmailNotificationSender : INotificationSender
 {
     public string SmtpHost { get; set; } = "localhost";

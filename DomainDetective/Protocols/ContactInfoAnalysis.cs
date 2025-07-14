@@ -9,6 +9,10 @@ namespace DomainDetective;
 /// Parses and validates contact TXT records.
 /// </summary>
 /// <para>Part of the DomainDetective project.</para>
+/// <remarks>
+/// The TXT record format follows draft security.txt guidelines and may include
+/// multiple fields such as contact email addresses or policy links.
+/// </remarks>
 public class ContactInfoAnalysis {
     /// <summary>Raw contact TXT record.</summary>
     public string? ContactRecord { get; private set; }

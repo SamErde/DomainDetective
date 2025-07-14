@@ -9,6 +9,10 @@ namespace DomainDetective {
     /// Represents the configuration for DNS queries.
     /// </summary>
     /// <para>Part of the DomainDetective project.</para>
+    /// <remarks>
+    /// This configuration object controls which DNS servers are queried
+    /// as well as the strategy used when multiple endpoints are defined.
+    /// </remarks>
     public class DnsConfiguration {
         internal const string DefaultUserAgent = "Mozilla/5.0";
         /// <summary>

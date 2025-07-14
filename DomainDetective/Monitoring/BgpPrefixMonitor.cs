@@ -13,6 +13,10 @@ namespace DomainDetective.Monitoring;
 /// Monitors BGP origin ASNs for domain IP prefixes.
 /// </summary>
 /// <para>Part of the DomainDetective project.</para>
+/// <remarks>
+/// Notifications are generated when the announcing ASN for a prefix changes,
+/// helping detect possible hijacks or routing errors.
+/// </remarks>
 public class BgpPrefixMonitor
 {
     /// <summary>Domain to monitor.</summary>

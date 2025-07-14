@@ -10,6 +10,11 @@ namespace DomainDetective {
     ///     Validates ARC headers following RFC 8617.
     /// </summary>
     /// <para>Part of the DomainDetective project.</para>
+    /// <remarks>
+    /// ARC (Authenticated Received Chain) is used to preserve authentication
+    /// results during message forwarding. This analysis checks the chain for
+    /// completeness and signature validity.
+    /// </remarks>
     public class ARCAnalysis {
         internal static Func<byte[], Stream> CreateStream = b => new MemoryStream(b);
         /// <summary>Collected ARC-Seal header values.</summary>

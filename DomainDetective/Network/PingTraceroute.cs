@@ -9,6 +9,10 @@ namespace DomainDetective.Network;
 /// Provides ICMP ping and traceroute capabilities.
 /// </summary>
 /// <para>Part of the DomainDetective project.</para>
+/// <remarks>
+/// Methods in this class rely on the underlying operating system's network
+/// stack and therefore require appropriate permissions.
+/// </remarks>
 public static class PingTraceroute
 {
     /// <summary>Represents a single traceroute hop.</summary>

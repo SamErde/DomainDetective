@@ -12,6 +12,10 @@ namespace DomainDetective {
     /// https://datatracker.ietf.org/doc/html/rfc6698
     /// </summary>
     /// <para>Part of the DomainDetective project.</para>
+    /// <remarks>
+    /// DANE policies are evaluated by querying TLSA records for the specified
+    /// host and port combination.
+    /// </remarks>
     public class DANEAnalysis {
         public List<DANERecordAnalysis> AnalysisResults { get; private set; } = new List<DANERecordAnalysis>();
         public int NumberOfRecords { get; private set; }

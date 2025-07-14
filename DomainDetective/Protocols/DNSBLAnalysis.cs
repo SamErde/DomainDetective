@@ -88,6 +88,10 @@ namespace DomainDetective {
     /// Provides routines to query DNS block lists for a host.
     /// </summary>
     /// <para>Part of the DomainDetective project.</para>
+    /// <remarks>
+    /// Both IP- and domain-based blacklists are supported. Results include
+    /// detailed reply codes for further interpretation.
+    /// </remarks>
     public partial class DNSBLAnalysis {
         public DnsConfiguration DnsConfiguration { get; set; }
 
