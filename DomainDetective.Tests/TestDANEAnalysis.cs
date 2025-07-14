@@ -84,7 +84,7 @@ namespace DomainDetective.Tests {
             var healthCheck = new DomainHealthCheck(internalLogger: logger) {
                 Verbose = false
             };
-            await healthCheck.Verify("ipv6.google.com", [HealthCheckType.DANE], daneServiceType: [ServiceType.HTTPS]);
+            await healthCheck.VerifyDANE("ipv6.google.com", [ServiceType.HTTPS]);
 
             Assert.False(healthCheck.DaneAnalysis.HasDuplicateRecords);
             Assert.False(healthCheck.DaneAnalysis.HasInvalidRecords);
@@ -101,7 +101,7 @@ namespace DomainDetective.Tests {
                 Verbose = false,
                 DnsEndpoint = DnsEndpoint.System
             };
-            await healthCheck.Verify("ipv6.google.com", [HealthCheckType.DANE], daneServiceType: [ServiceType.HTTPS]);
+            await healthCheck.VerifyDANE("ipv6.google.com", [ServiceType.HTTPS]);
 
             Assert.False(healthCheck.DaneAnalysis.HasDuplicateRecords);
             Assert.False(healthCheck.DaneAnalysis.HasInvalidRecords);
@@ -396,4 +396,5 @@ namespace DomainDetective.Tests {
             Assert.False(healthCheck.DaneAnalysis.HasInvalidRecords);
             Assert.Equal(2, healthCheck.DaneAnalysis.AnalysisResults.Count);
         }
-    }}
+    }
+}
