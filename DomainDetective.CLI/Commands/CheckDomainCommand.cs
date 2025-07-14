@@ -24,6 +24,10 @@ internal sealed class CheckDomainSettings : CommandSettings {
     [CommandOption("--check-http")]
     public bool CheckHttp { get; set; }
 
+    /// <summary>Check for takeover vulnerable CNAMEs.</summary>
+    [CommandOption("--check-takeover")]
+    public bool CheckTakeover { get; set; }
+
     /// <summary>Show condensed summary instead of full results.</summary>
     [CommandOption("--summary")]
     public bool Summary { get; set; }
@@ -115,6 +119,7 @@ internal sealed class CheckDomainCommand : AsyncCommand<CheckDomainSettings> {
             settings.Domains,
             selected.Count > 0 ? selected.ToArray() : null,
             settings.CheckHttp,
+            settings.CheckTakeover,
             settings.Json,
             settings.Summary,
             settings.SubdomainPolicy,

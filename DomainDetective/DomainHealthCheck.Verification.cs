@@ -988,6 +988,15 @@ namespace DomainDetective {
             await DanglingCnameAnalysis.Analyze(domainName, _logger, cancellationToken);
         }
 
+        /// <summary>
+        /// Checks for CNAMEs pointing to takeover prone providers.
+        /// </summary>
+        public async Task VerifyTakeoverCname(string domainName, CancellationToken cancellationToken = default) {
+            domainName = NormalizeDomain(domainName);
+            TakeoverCnameAnalysis = new TakeoverCnameAnalysis { DnsConfiguration = DnsConfiguration };
+            await TakeoverCnameAnalysis.Analyze(domainName, _logger, cancellationToken);
+        }
+
         /// Queries Autodiscover related records for a domain.
         /// </summary>
         /// <param name="domainName">Domain to verify.</param>

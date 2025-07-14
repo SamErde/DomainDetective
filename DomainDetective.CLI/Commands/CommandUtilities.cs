@@ -139,11 +139,12 @@ internal static class CommandUtilities {
         var checkHttp = AnsiConsole.Confirm("Perform plain HTTP check?");
         var subPolicy = AnsiConsole.Confirm("Evaluate subdomain policy?");
 
-        await RunChecks(domains, checks, checkHttp, outputJson, summaryOnly, subPolicy, false, null, true, false, cancellationToken);
+        var checkTakeover = AnsiConsole.Confirm("Check for takeover CNAMEs?");
+        await RunChecks(domains, checks, checkHttp, checkTakeover, outputJson, summaryOnly, subPolicy, false, null, true, false, cancellationToken);
         return 0;
     }
 
-internal static async Task RunChecks(string[] domains, HealthCheckType[]? checks, bool checkHttp, bool outputJson, bool summaryOnly, bool subdomainPolicy, bool unicodeOutput, int[]? danePorts, bool showProgress, bool skipRevocation, CancellationToken cancellationToken) {
+internal static async Task RunChecks(string[] domains, HealthCheckType[]? checks, bool checkHttp, bool checkTakeover, bool outputJson, bool summaryOnly, bool subdomainPolicy, bool unicodeOutput, int[]? danePorts, bool showProgress, bool skipRevocation, CancellationToken cancellationToken) {
         foreach (var domain in domains) {
             var logger = new InternalLogger { IsProgress = showProgress };
             var hc = new DomainHealthCheck(internalLogger: logger) { Verbose = false, UseSubdomainPolicy = subdomainPolicy, UnicodeOutput = unicodeOutput, Progress = showProgress };
@@ -169,6 +170,9 @@ internal static async Task RunChecks(string[] domains, HealthCheckType[]? checks
                         if (checkHttp) {
                             await hc.VerifyPlainHttp(domain, cancellationToken);
                         }
+                        if (checkTakeover) {
+                            await hc.VerifyTakeoverCname(domain, cancellationToken);
+                        }
                     } finally {
                         logger.OnProgressMessage -= Handler;
                     }
@@ -177,6 +181,9 @@ internal static async Task RunChecks(string[] domains, HealthCheckType[]? checks
                 await hc.Verify(domain, checks, null, null, danePorts, cancellationToken);
                 if (checkHttp) {
                     await hc.VerifyPlainHttp(domain, cancellationToken);
+                }
+                if (checkTakeover) {
+                    await hc.VerifyTakeoverCname(domain, cancellationToken);
                 }
             }
 
@@ -230,6 +237,9 @@ internal static async Task RunChecks(string[] domains, HealthCheckType[]? checks
             }
             if (checkHttp) {
                 CliHelpers.ShowPropertiesTable($"PLAIN HTTP for {domain}", hc.HttpAnalysis, unicodeOutput);
+            }
+            if (checkTakeover) {
+                CliHelpers.ShowPropertiesTable($"TAKEOVER for {domain}", hc.TakeoverCnameAnalysis, unicodeOutput);
             }
         }
     }
