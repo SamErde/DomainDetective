@@ -19,6 +19,10 @@ namespace DomainDetective {
     /// 6.	The DMARC record can have an optional "pct" tag, which is the percentage of messages subjected to filtering.
     /// </summary>
     /// <para>Part of the DomainDetective project.</para>
+    /// <remarks>
+    /// DMARC TXT records are parsed and validated according to RFC 7489 with
+    /// additional checks for common mistakes such as missing rua addresses.
+    /// </remarks>
     public class DmarcAnalysis {
         public DnsConfiguration DnsConfiguration { get; set; }
         public Func<string, DnsRecordType, Task<DnsAnswer[]>>? QueryDnsOverride { private get; set; }

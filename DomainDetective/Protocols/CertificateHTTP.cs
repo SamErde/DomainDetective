@@ -23,6 +23,10 @@ namespace DomainDetective {
     /// Represents certificate validation results for an HTTP endpoint.
     /// </summary>
     /// <para>Part of the DomainDetective project.</para>
+    /// <remarks>
+    /// Validation includes hostname matching and chain verification using the
+    /// system trust store.
+    /// </remarks>
     public class CertificateAnalysis {
         /// <summary>Gets or sets the URL that was checked.</summary>
         public string Url { get; set; }

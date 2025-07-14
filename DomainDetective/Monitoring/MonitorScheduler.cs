@@ -11,6 +11,10 @@ namespace DomainDetective.Monitoring;
 /// Schedules periodic domain analyses and issues notifications on changes.
 /// </summary>
 /// <para>Part of the DomainDetective project.</para>
+/// <remarks>
+/// The scheduler orchestrates several monitoring components and raises
+/// notifications when their state changes between executions.
+/// </remarks>
 public class MonitorScheduler
 {
     /// <summary>Domains to monitor.</summary>

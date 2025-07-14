@@ -8,6 +8,10 @@ namespace DomainDetective {
     /// Represents a DNS query result.
     /// </summary>
     /// <para>Part of the DomainDetective project.</para>
+    /// <remarks>
+    /// The <see cref="Data"/> property exposes raw record strings exactly as
+    /// returned by the DNS resolver.
+    /// </remarks>
     public class DnsResult {
         /// <summary>Gets or sets the queried name.</summary>
         public string Name { get; set; }

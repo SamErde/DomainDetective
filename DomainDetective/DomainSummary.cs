@@ -6,6 +6,10 @@ namespace DomainDetective {
     ///     Represents condensed results of domain health checks.
     /// </summary>
     /// <para>Part of the DomainDetective project.</para>
+    /// <remarks>
+    /// This model is suited for displaying a quick overview or change
+    /// detection between subsequent analyses.
+    /// </remarks>
     /// <example>
     ///   <summary>Inspect WHOIS expiration details.</summary>
     ///   <code>

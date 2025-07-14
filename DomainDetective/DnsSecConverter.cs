@@ -116,6 +116,10 @@ namespace DomainDetective {
     ///     DNSSEC validation results in a simplified form.
     /// </summary>
     /// <para>Part of the DomainDetective project.</para>
+    /// <remarks>
+    /// The class aggregates DS, DNSKEY and RRSIG information for easy
+    /// consumption by tools that don't require full record details.
+    /// </remarks>
     public class DnsSecInfo {
         /// <summary>Returned DS records.</summary>
         public IReadOnlyList<DsRecordInfo> DsRecords { get; set; }
@@ -155,6 +159,7 @@ namespace DomainDetective {
     ///     Simplified representation of a DS record.
     /// </summary>
     /// <para>Part of the DomainDetective project.</para>
+    /// <remarks>Information is derived from standard DNS record text.</remarks>
     public class DsRecordInfo {
         /// <summary>Key tag value.</summary>
         public int KeyTag { get; set; }
@@ -173,6 +178,9 @@ namespace DomainDetective {
     ///     Simplified representation of a DNSKEY record.
     /// </summary>
     /// <para>Part of the DomainDetective project.</para>
+    /// <remarks>
+    /// Only the fields relevant for display and analysis are retained.
+    /// </remarks>
     public class DnsKeyInfo {
         /// <summary>Record flags.</summary>
         public int Flags { get; set; }
@@ -191,6 +199,9 @@ namespace DomainDetective {
     ///     Simplified representation of an RRSIG record.
     /// </summary>
     /// <para>Part of the DomainDetective project.</para>
+    /// <remarks>
+    /// Contains timing information useful for detecting signature rollovers.
+    /// </remarks>
     public class RrsigInfo {
         /// <summary>Key tag value.</summary>
         public int KeyTag { get; set; }

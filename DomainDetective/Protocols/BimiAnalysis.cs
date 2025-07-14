@@ -17,6 +17,11 @@ namespace DomainDetective {
     /// Analyse BIMI records according to draft specifications.
     /// </summary>
     /// <para>Part of the DomainDetective project.</para>
+    /// <remarks>
+    /// BIMI (Brand Indicators for Message Identification) uses DNS TXT records
+    /// that reference an SVG logo file and an optional certificate. This class
+    /// validates presence and accessibility of those resources.
+    /// </remarks>
 public class BimiAnalysis {
         /// <summary>Gets the concatenated BIMI record text.</summary>
         public string? BimiRecord { get; private set; }

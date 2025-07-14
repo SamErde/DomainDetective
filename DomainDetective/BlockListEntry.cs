@@ -3,6 +3,10 @@ namespace DomainDetective;
 /// <summary>
 /// Represents an HTTP based IP block list source.
 /// </summary>
+/// <remarks>
+/// Entries are typically loaded from text files where each line contains a URL
+/// pointing to a list of blocked IP addresses.
+/// </remarks>
 public class BlockListEntry {
     /// <summary>Gets or sets the list name.</summary>
     public string Name { get; set; }

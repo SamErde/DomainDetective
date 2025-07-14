@@ -15,6 +15,10 @@ namespace DomainDetective {
     /// Performs DKIM record and key validation checks.
     /// </summary>
     /// <para>Part of the DomainDetective project.</para>
+    /// <remarks>
+    /// DKIM selectors are queried for public keys and the syntax and key size
+    /// are validated. Additional ADSP records are also parsed when present.
+    /// </remarks>
     public class DkimAnalysis {
         /// <summary>Minimum allowed RSA key size in bits.</summary>
         public const int MinimumRsaKeyBits = 1024;

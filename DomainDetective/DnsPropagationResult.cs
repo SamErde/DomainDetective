@@ -6,6 +6,10 @@ namespace DomainDetective {
     /// Result of a DNS propagation query for a single server.
     /// </summary>
     /// <para>Part of the DomainDetective project.</para>
+    /// <remarks>
+    /// Each result captures the raw answers returned by the resolver along
+    /// with metadata about query success and duration.
+    /// </remarks>
     public class DnsPropagationResult {
         /// <summary>Gets the server that was queried.</summary>
         public PublicDnsEntry Server { get; init; }

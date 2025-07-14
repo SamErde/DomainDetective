@@ -13,6 +13,10 @@ namespace DomainDetective;
 /// Scans TCP and UDP ports on a host.
 /// </summary>
 /// <para>Part of the DomainDetective project.</para>
+/// <remarks>
+/// This analysis attempts connections in parallel and records latency or
+/// failure reasons for each tested port.
+/// </remarks>
 public class PortScanAnalysis
 {
     /// <summary>Result of a single port scan.</summary>

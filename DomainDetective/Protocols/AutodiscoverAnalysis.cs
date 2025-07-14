@@ -9,6 +9,10 @@ namespace DomainDetective {
     /// Analyzes Autodiscover related DNS records.
     /// </summary>
     /// <para>Part of the DomainDetective project.</para>
+    /// <remarks>
+    /// Results indicate whether common autodiscover records are present and
+    /// where they point, assisting in troubleshooting client configuration.
+    /// </remarks>
     public class AutodiscoverAnalysis {
         /// <summary>DNS configuration used for lookups.</summary>
         public DnsConfiguration DnsConfiguration { get; set; }

@@ -6,6 +6,10 @@ namespace DomainDetective {
     /// Internal logger that allows to write to console, error or wherever else is needed
     /// </summary>
     /// <para>Part of the DomainDetective project.</para>
+    /// <remarks>
+    /// Consumers subscribe to events to integrate logging with other systems
+    /// while optional console output aids troubleshooting during development.
+    /// </remarks>
     public class InternalLogger {
         private readonly object _lock = new object();
         private readonly Dictionary<string, int> _progressSteps = new();

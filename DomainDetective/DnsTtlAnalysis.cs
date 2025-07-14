@@ -10,6 +10,10 @@ namespace DomainDetective {
     /// when values fall outside recommended ranges.
     /// </summary>
     /// <para>Part of the DomainDetective project.</para>
+    /// <remarks>
+    /// Typical TTL thresholds are based on operational best practices and may
+    /// be adjusted to suit specific environments.
+    /// </remarks>
     public class DnsTtlAnalysis {
         private readonly List<string> _warnings = new();
 

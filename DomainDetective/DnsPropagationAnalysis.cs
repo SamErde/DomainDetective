@@ -16,6 +16,10 @@ namespace DomainDetective {
     /// Provides DNS propagation checks across many public servers.
     /// </summary>
     /// <para>Part of the DomainDetective project.</para>
+    /// <remarks>
+    /// The analysis compares DNS answers from multiple resolvers to detect
+    /// discrepancies during record updates.
+    /// </remarks>
     public class DnsPropagationAnalysis {
         private readonly List<PublicDnsEntry> _servers = new();
         /// <summary>

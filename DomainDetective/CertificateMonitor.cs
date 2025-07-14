@@ -12,6 +12,10 @@ namespace DomainDetective {
     /// Aggregates certificate validity information for multiple hosts.
     /// </summary>
     /// <para>Part of the DomainDetective project.</para>
+    /// <remarks>
+    /// The monitor periodically connects to configured hosts and records
+    /// certificate details such as expiration, validity, and chain state.
+    /// </remarks>
     public class CertificateMonitor : IDisposable {
         /// <summary>Result entry for a single host.</summary>
         public class Entry {
