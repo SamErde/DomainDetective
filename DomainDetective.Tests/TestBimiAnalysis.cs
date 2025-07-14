@@ -124,6 +124,7 @@ namespace DomainDetective.Tests {
 
                 Assert.True(analysis.SvgFetched);
                 Assert.False(analysis.SvgValid);
+                Assert.Equal("Root element is not 'svg'", analysis.SvgInvalidReason);
             } finally {
                 cts.Cancel();
                 listener.Stop();
@@ -177,6 +178,7 @@ namespace DomainDetective.Tests {
 
                 Assert.True(analysis.SvgFetched);
                 Assert.False(analysis.SvgValid);
+                Assert.Equal("Malformed SVG", analysis.SvgInvalidReason);
             } finally {
                 cts.Cancel();
                 listener.Stop();
@@ -235,6 +237,8 @@ namespace DomainDetective.Tests {
 
                 Assert.True(analysis.SvgFetched);
                 Assert.False(analysis.SvgSizeValid);
+                Assert.False(analysis.SvgValid);
+                Assert.Contains("32 KB", analysis.SvgInvalidReason);
                 Assert.Contains(warnings, w => w.FullMessage.Contains("exceeds"));
             } finally {
                 cts.Cancel();
