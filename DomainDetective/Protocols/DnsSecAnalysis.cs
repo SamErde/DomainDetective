@@ -18,7 +18,7 @@ namespace DomainDetective {
     /// </summary>
     /// <para>Part of the DomainDetective project.</para>
     /// <remarks>
-    /// Using DNSClient.NET the full DNSSEC chain is retrieved and validated
+    /// Using dnsclientx the full DNSSEC chain is retrieved and validated
     /// against DS records from the parent zone.
     /// </remarks>
     public class DnsSecAnalysis {
