@@ -96,6 +96,7 @@ namespace DomainDetective {
 
         private static readonly List<DnsblEntry> _defaultEntries = new();
         private static readonly List<DnsblEntry> _defaultDomainBlockLists = new();
+        private static readonly List<BlockListEntry> _defaultIpBlockLists = new();
         private static Dictionary<string, Dictionary<string, (bool IsListed, string Meaning)>> _providerReplyCodes = new(StringComparer.OrdinalIgnoreCase);
         private const string DefaultUpdateUrl = "https://raw.githubusercontent.com/EvotecIT/DomainDetective/refs/heads/master/Data/dnsbl.json";
 
@@ -120,6 +121,8 @@ namespace DomainDetective {
                     }
                     if (config.DomainBlockLists != null)
                         _defaultDomainBlockLists.AddRange(config.DomainBlockLists);
+                    if (config.IpBlockLists != null)
+                        _defaultIpBlockLists.AddRange(config.IpBlockLists);
                 }
             }
         }
@@ -144,6 +147,14 @@ namespace DomainDetective {
                 return entry;
             }));
             _domainBlockLists.AddRange(_defaultDomainBlockLists.Select(e => new DnsblEntry(e.Domain, e.Enabled, e.Comment, e.Port)));
+            foreach (var entry in _defaultIpBlockLists) {
+                BlockLists.Entries.Add(new BlockListEntry {
+                    Name = entry.Name,
+                    Url = entry.Url,
+                    Enabled = entry.Enabled,
+                    Comment = entry.Comment
+                });
+            }
         }
 
         internal List<string> DNSBLLists => DnsblEntries
@@ -523,6 +534,7 @@ namespace DomainDetective {
                 ClearDNSBL();
                 _domainBlockLists.Clear();
                 _providerReplyCodes.Clear();
+                BlockLists.Entries.Clear();
             }
 
             if (config.Providers != null) {
@@ -567,6 +579,24 @@ namespace DomainDetective {
                         existing.Enabled = entry.Enabled;
                         existing.Comment = entry.Comment;
                         existing.Port = entry.Port;
+                    }
+                }
+            }
+
+            if (config.IpBlockLists != null) {
+                foreach (var entry in config.IpBlockLists) {
+                    var existing = BlockLists.Entries.FirstOrDefault(e => string.Equals(e.Name, entry.Name, StringComparison.OrdinalIgnoreCase));
+                    if (existing == null) {
+                        BlockLists.Entries.Add(new BlockListEntry {
+                            Name = entry.Name,
+                            Url = entry.Url,
+                            Enabled = entry.Enabled,
+                            Comment = entry.Comment
+                        });
+                    } else if (overwriteExisting) {
+                        existing.Url = entry.Url;
+                        existing.Enabled = entry.Enabled;
+                        existing.Comment = entry.Comment;
                     }
                 }
             }

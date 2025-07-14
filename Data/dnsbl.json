@@ -641,5 +641,19 @@
             "Enabled": true,
             "Comment": null
         }
+    ],
+    "ipBlockLists": [
+        {
+            "Name": "spamhaus-drop",
+            "Url": "https://www.spamhaus.org/drop/drop.txt",
+            "Enabled": true,
+            "Comment": null
+        },
+        {
+            "Name": "spamhaus-edrop",
+            "Url": "https://www.spamhaus.org/drop/edrop.txt",
+            "Enabled": true,
+            "Comment": null
+        }
     ]
 }

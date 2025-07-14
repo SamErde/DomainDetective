@@ -85,4 +85,24 @@ namespace DomainDetective.Tests {
                 File.Delete(file);
             }
         }
+
+        [Fact]
+        public void LoadsIpBlockLists() {
+            var json = "{\"ipBlockLists\":[{\"name\":\"drop\",\"url\":\"http://example.com/drop.txt\"}]}";
+            var file = Path.GetTempFileName();
+            try {
+                File.WriteAllText(file, json);
+
+                var analysis = new DNSBLAnalysis();
+                analysis.LoadDnsblConfig(file, clearExisting: true);
+                using (File.Open(file, FileMode.Open, FileAccess.ReadWrite, FileShare.None)) { }
+
+                var entry = Assert.Single(analysis.GetIpBlockLists());
+                Assert.Equal("drop", entry.Name);
+                Assert.Equal("http://example.com/drop.txt", entry.Url);
+            }
+            finally {
+                File.Delete(file);
+            }
+        }
     }}
