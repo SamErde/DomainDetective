@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace DomainDetective;
 
@@ -37,6 +39,15 @@ public class IpBlockListAnalysis {
             if (IpCidrRange.TryParse(token, out var range)) {
                 ranges.Add(range);
             }
+        }
+    }
+
+    /// <summary>Downloads and parses all enabled lists.</summary>
+    public async Task UpdateAsync(bool overwriteExisting = true, HttpClient? client = null) {
+        client ??= SharedHttpClient.Instance;
+        foreach (var entry in Entries.Where(e => e.Enabled && !string.IsNullOrEmpty(e.Url))) {
+            var content = await client.GetStringAsync(entry.Url);
+            LoadFromString(entry.Name, content, overwriteExisting);
         }
     }
 }
