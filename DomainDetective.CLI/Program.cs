@@ -21,25 +21,37 @@ internal static class Program {
         app.Configure(config => {
             config.SetApplicationName("DomainDetective");
             config.AddCommand<CheckDomainCommand>("check")
-                .WithDescription("Run domain health checks");
+                .WithDescription("Run domain health checks")
+                .WithExample(new[] { "check", "example.com", "--json" })
+                .WithExample(new[] { "check", "example.com", "--checks", "autodiscover" });
             config.AddCommand<AnalyzeMessageHeaderCommand>("AnalyzeMessageHeader")
-                .WithDescription("Analyze message header");
+                .WithDescription("Analyze message header")
+                .WithExample(new[] { "AnalyzeMessageHeader", "--file", "./headers.txt", "--json" });
             config.AddCommand<AnalyzeArcCommand>("AnalyzeARC")
-                .WithDescription("Analyze ARC headers");
+                .WithDescription("Analyze ARC headers")
+                .WithExample(new[] { "AnalyzeARC", "--file", "./headers.txt", "--json" });
             config.AddCommand<WhoisCommand>("Whois")
-                .WithDescription("Query WHOIS information");
+                .WithDescription("Query WHOIS information")
+                .WithExample(new[] { "Whois", "example.com" })
+                .WithExample(new[] { "Whois", "example.com", "--snapshot-path", "./whois", "--diff" });
             config.AddCommand<AnalyzeDnsTunnelingCommand>("AnalyzeDnsTunneling")
-                .WithDescription("Analyze DNS logs for tunneling patterns");
+                .WithDescription("Analyze DNS logs for tunneling patterns")
+                .WithExample(new[] { "AnalyzeDnsTunneling", "--domain", "example.com", "--file", "dns.log" });
             config.AddCommand<DnsPropagationCommand>("DnsPropagation")
-                .WithDescription("Check DNS propagation across public resolvers");
+                .WithDescription("Check DNS propagation across public resolvers")
+                .WithExample(new[] { "DnsPropagation", "--domain", "example.com", "--record-type", "A" });
             config.AddCommand<BuildDmarcCommand>("BuildDmarcRecord")
-                .WithDescription("Interactively build a DMARC record");
+                .WithDescription("Interactively build a DMARC record")
+                .WithExample(new[] { "BuildDmarcRecord" });
             config.AddCommand<RefreshSuffixListCommand>("RefreshSuffixList")
-                .WithDescription("Download the latest public suffix list");
+                .WithDescription("Download the latest public suffix list")
+                .WithExample(new[] { "RefreshSuffixList", "--force" });
             config.AddCommand<TestSmimeaCommand>("TestSMIMEA")
-                .WithDescription("Query SMIMEA record for an email address");
+                .WithDescription("Query SMIMEA record for an email address")
+                .WithExample(new[] { "TestSMIMEA", "user@example.com" });
             config.AddCommand<TestRpkiCommand>("TestRPKI")
-                .WithDescription("Validate RPKI origins for domain IPs");
+                .WithDescription("Validate RPKI origins for domain IPs")
+                .WithExample(new[] { "TestRPKI", "example.com" });
         });
         try {
             return await app.RunAsync(args).WaitAsync(cts.Token);
