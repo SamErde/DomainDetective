@@ -88,7 +88,11 @@ namespace DomainDetective {
                 var banner = await reader.ReadLineAsync().WaitWithCancellation(timeoutCts.Token);
 #endif
                 timeoutCts.Token.ThrowIfCancellationRequested();
+                bool bannerDowngrade = false;
                 if (banner == null || !banner.StartsWith("220")) {
+                    if (banner != null && banner.IndexOf("TLS", System.StringComparison.OrdinalIgnoreCase) >= 0) {
+                        bannerDowngrade = true;
+                    }
                     logger?.WriteWarning($"Unexpected banner sequence: {banner}");
                 }
                 await writer.WriteLineAsync($"EHLO example.com");
@@ -119,7 +123,8 @@ namespace DomainDetective {
                 }
 
                 bool advertised = capabilities.Contains("STARTTLS");
-                bool downgrade = false;
+                bool supports = advertised;
+                bool downgrade = bannerDowngrade;
 
                 if (!advertised) {
                     await writer.WriteLineAsync("STARTTLS");
@@ -135,6 +140,7 @@ namespace DomainDetective {
 #endif
                             using var secureWriter = new StreamWriter(ssl) { AutoFlush = true, NewLine = "\r\n" };
                             await secureWriter.WriteLineAsync("QUIT").WaitWithCancellation(timeoutCts.Token);
+                            supports = true;
                             downgrade = true;
                         } catch (Exception ex) {
                             logger?.WriteVerbose($"STARTTLS handshake failed for {host}:{port} - {ex.Message}");
@@ -152,7 +158,7 @@ namespace DomainDetective {
                     }
                 }
 
-                return (advertised || downgrade, downgrade);
+                return (supports, downgrade);
             } catch (System.Exception ex) {
                 logger?.WriteError("STARTTLS check failed for {0}:{1} - {2}", host, port, ex.Message);
                 return (false, false);

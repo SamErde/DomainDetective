@@ -29,6 +29,38 @@ namespace DomainDetective.Tests {
         }
 
         [Fact]
+        public async Task AdvertisedDoesNotSendStartTls() {
+            var listener = new System.Net.Sockets.TcpListener(System.Net.IPAddress.Loopback, 0);
+            listener.Start();
+            var port = ((System.Net.IPEndPoint)listener.LocalEndpoint).Port;
+            string? nextCommand = null;
+            var serverTask = System.Threading.Tasks.Task.Run(async () => {
+                using var client = await listener.AcceptTcpClientAsync();
+                using var stream = client.GetStream();
+                using var reader = new System.IO.StreamReader(stream);
+                using var writer = new System.IO.StreamWriter(stream) { AutoFlush = true, NewLine = "\r\n" };
+                await writer.WriteLineAsync("220 local ESMTP");
+                await reader.ReadLineAsync();
+                await writer.WriteLineAsync("250-localhost");
+                await writer.WriteLineAsync("250-STARTTLS");
+                await writer.WriteLineAsync("250 OK");
+                nextCommand = await reader.ReadLineAsync();
+                await writer.WriteLineAsync("221 bye");
+            });
+
+            try {
+                var analysis = new STARTTLSAnalysis();
+                await analysis.AnalyzeServer("localhost", port, new InternalLogger());
+                Assert.Equal("QUIT", nextCommand);
+                Assert.True(analysis.ServerResults[$"localhost:{port}"]);
+                Assert.False(analysis.DowngradeDetected[$"localhost:{port}"]);
+            } finally {
+                listener.Stop();
+                await serverTask;
+            }
+        }
+
+        [Fact]
         public async Task StartTlsAdvertisedReturnsTrueIPv6() {
             var listener = new System.Net.Sockets.TcpListener(System.Net.IPAddress.IPv6Loopback, 0);
             listener.Start();
@@ -337,6 +369,34 @@ namespace DomainDetective.Tests {
                 var analysis = new STARTTLSAnalysis();
                 await analysis.AnalyzeServer("localhost", port, logger);
                 Assert.Contains(warnings, w => w.FullMessage.Contains("Unexpected banner sequence"));
+            } finally {
+                listener.Stop();
+                await serverTask;
+            }
+        }
+
+        [Fact]
+        public async Task RecordsDowngradeWhenBannerMentionsTls() {
+            var listener = new System.Net.Sockets.TcpListener(System.Net.IPAddress.Loopback, 0);
+            listener.Start();
+            var port = ((System.Net.IPEndPoint)listener.LocalEndpoint).Port;
+            var serverTask = System.Threading.Tasks.Task.Run(async () => {
+                using var client = await listener.AcceptTcpClientAsync();
+                using var stream = client.GetStream();
+                using var reader = new System.IO.StreamReader(stream);
+                using var writer = new System.IO.StreamWriter(stream) { AutoFlush = true, NewLine = "\r\n" };
+                await writer.WriteLineAsync("554 TLS not available");
+                await reader.ReadLineAsync();
+                await writer.WriteLineAsync("250 localhost");
+                await reader.ReadLineAsync();
+                await writer.WriteLineAsync("221 bye");
+            });
+
+            try {
+                var analysis = new STARTTLSAnalysis();
+                await analysis.AnalyzeServer("localhost", port, new InternalLogger());
+                Assert.False(analysis.ServerResults[$"localhost:{port}"]);
+                Assert.True(analysis.DowngradeDetected[$"localhost:{port}"]);
             } finally {
                 listener.Stop();
                 await serverTask;
