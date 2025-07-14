@@ -106,4 +106,30 @@ namespace DomainDetective.Tests {
 
             Assert.False(analysis.PrioritiesInOrder);
         }
+
+        [Fact]
+        public async Task EvaluatesUniqueHostsInAscendingOrder() {
+            var answers = new List<DnsAnswer> {
+                new DnsAnswer { DataRaw = "20 mail2.example.com", Type = DnsRecordType.MX },
+                new DnsAnswer { DataRaw = "10 mail1.example.com", Type = DnsRecordType.MX },
+                new DnsAnswer { DataRaw = "10 mail1.example.com", Type = DnsRecordType.MX },
+                new DnsAnswer { DataRaw = "30 mail3.example.com", Type = DnsRecordType.MX }
+            };
+
+            var queriedHosts = new List<string>();
+            var analysis = new MXAnalysis {
+                DnsConfiguration = new DnsConfiguration(),
+                QueryDnsOverride = (name, type) => {
+                    if (type == DnsRecordType.CNAME) {
+                        queriedHosts.Add(name);
+                    }
+
+                    return Task.FromResult(Array.Empty<DnsAnswer>());
+                }
+            };
+
+            await analysis.AnalyzeMxRecords(answers, new InternalLogger());
+
+            Assert.Equal(new[] { "mail1.example.com", "mail2.example.com", "mail3.example.com" }, queriedHosts);
+        }
     }}

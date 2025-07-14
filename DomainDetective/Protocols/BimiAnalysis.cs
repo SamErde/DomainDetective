@@ -40,6 +40,8 @@ public class BimiAnalysis {
         public bool SvgFetched { get; private set; }
         /// <summary>Gets a value indicating whether the downloaded SVG is valid.</summary>
         public bool SvgValid { get; private set; }
+        /// <summary>Provides a reason when <see cref="SvgValid"/> is <c>false</c>.</summary>
+        public string? SvgInvalidReason { get; private set; }
         /// <summary>Gets a value indicating whether the SVG size is within limits.</summary>
         public bool SvgSizeValid { get; private set; }
         /// <summary>Gets a value indicating whether the SVG width and height are correct.</summary>
@@ -80,6 +82,7 @@ public class BimiAnalysis {
             InvalidLocation = false;
             SvgFetched = false;
             SvgValid = false;
+            SvgInvalidReason = null;
             SvgSizeValid = false;
             DimensionsValid = false;
             ViewBoxValid = false;
@@ -274,9 +277,13 @@ public class BimiAnalysis {
         }
 
         private bool ValidateSvg(string svgContent, int byteSize, InternalLogger logger) {
+            // Draft BIMI specification limits hosted SVG indicators to 32kB
+            // https://datatracker.ietf.org/doc/html/draft-blank-ietf-bimi-02#section-4
             const int maxSize = 32 * 1024;
+            SvgInvalidReason = null;
             SvgSizeValid = byteSize <= maxSize;
             if (!SvgSizeValid) {
+                SvgInvalidReason = $"Indicator exceeds 32 KB ({byteSize} bytes)";
                 logger?.WriteWarning("BIMI indicator exceeds 32 KB: {0} bytes", byteSize);
             }
 
@@ -290,6 +297,7 @@ public class BimiAnalysis {
                 var root = doc.Root;
                 var isSvg = root?.Name.LocalName.Equals("svg", StringComparison.OrdinalIgnoreCase) == true;
                 if (!isSvg) {
+                    SvgInvalidReason ??= "Root element is not 'svg'";
                     return false;
                 }
 
@@ -306,8 +314,9 @@ public class BimiAnalysis {
                     logger?.WriteWarning("BIMI SVG viewBox must be '0 0 64 64'");
                 }
 
-                return isSvg;
+                return isSvg && SvgSizeValid;
             } catch {
+                SvgInvalidReason ??= "Malformed SVG";
                 return false;
             }
         }

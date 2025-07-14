@@ -98,7 +98,13 @@ namespace DomainDetective {
                 HasBackupServers = preferences.Distinct().Count() > 1;
             }
 
-            foreach (var (_, host) in parsed) {
+            var evaluationList = parsed
+                .GroupBy(p => p.Host, StringComparer.OrdinalIgnoreCase)
+                .Select(g => (Preference: g.Min(x => x.Preference), Host: g.Key))
+                .OrderBy(p => p.Preference)
+                .ToList();
+
+            foreach (var (_, host) in evaluationList) {
                 var cnameResults = await QueryDns(host, DnsRecordType.CNAME);
                 PointsToCname = PointsToCname || (cnameResults != null && cnameResults.Any());
 
