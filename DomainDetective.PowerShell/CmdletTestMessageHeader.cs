@@ -20,6 +20,8 @@ namespace DomainDetective.PowerShell {
         private InternalLogger _logger;
         private DomainHealthCheck _healthCheck;
 
+        /// <summary>Initializes logging and helper classes.</summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         protected override Task BeginProcessingAsync() {
             _logger = new InternalLogger(false);
             var internalLoggerPowerShell = new InternalLoggerPowerShell(
@@ -35,6 +37,8 @@ namespace DomainDetective.PowerShell {
             return Task.CompletedTask;
         }
 
+        /// <summary>Executes the cmdlet operation.</summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         protected override Task ProcessRecordAsync() {
             var result = _healthCheck.CheckMessageHeaders(HeaderText, CancelToken);
             WriteObject(result);

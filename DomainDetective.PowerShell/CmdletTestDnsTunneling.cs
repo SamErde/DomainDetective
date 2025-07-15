@@ -23,6 +23,8 @@ namespace DomainDetective.PowerShell {
 
         private DomainHealthCheck _hc = new();
 
+        /// <summary>Executes the cmdlet operation.</summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         protected override async Task ProcessRecordAsync() {
             if (!File.Exists(Path)) {
                 WriteError(new ErrorRecord(new FileNotFoundException("File not found", Path), "NotFound", ErrorCategory.InvalidArgument, Path));

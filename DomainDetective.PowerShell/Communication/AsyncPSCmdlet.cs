@@ -9,6 +9,9 @@ namespace DomainDetective.PowerShell {
     /// Base class for asynchronous PowerShell cmdlets.
     /// </summary>
     public abstract class AsyncPSCmdlet : PSCmdlet, IDisposable {
+        /// <summary>
+        /// Types of pipeline messages handled by <see cref="AsyncPSCmdlet"/>.
+        /// </summary>
         private enum PipelineType {
             Output,
             OutputEnumerate,
@@ -29,24 +32,50 @@ namespace DomainDetective.PowerShell {
         /// </summary>
         protected CancellationToken CancelToken { get => _cancelSource.Token; }
 
+        /// <summary>
+        /// Invoked when the cmdlet begins execution.
+        /// Runs <see cref="BeginProcessingAsync"/> within the asynchronous pipeline.
+        /// </summary>
         protected override void BeginProcessing()
             => RunBlockInAsync(BeginProcessingAsync);
 
+        /// <summary>
+        /// Performs initialization logic for the cmdlet.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         protected virtual Task BeginProcessingAsync()
             => Task.CompletedTask;
 
+        /// <summary>
+        /// Processes input records synchronously and dispatches <see cref="ProcessRecordAsync"/>.
+        /// </summary>
         protected override void ProcessRecord()
             => RunBlockInAsync(ProcessRecordAsync);
 
+        /// <summary>
+        /// Executes the main cmdlet logic.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         protected virtual Task ProcessRecordAsync()
             => Task.CompletedTask;
 
+        /// <summary>
+        /// Invoked once when processing has completed.
+        /// Runs <see cref="EndProcessingAsync"/> within the asynchronous pipeline.
+        /// </summary>
         protected override void EndProcessing()
             => RunBlockInAsync(EndProcessingAsync);
 
+        /// <summary>
+        /// Performs cleanup logic for the cmdlet.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         protected virtual Task EndProcessingAsync()
             => Task.CompletedTask;
 
+        /// <summary>
+        /// Requests cancellation of the cmdlet execution.
+        /// </summary>
         protected override void StopProcessing()
             => _cancelSource?.Cancel();
 
