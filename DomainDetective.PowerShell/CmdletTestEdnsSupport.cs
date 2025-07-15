@@ -26,6 +26,8 @@ public sealed class CmdletTestEdnsSupport : AsyncPSCmdlet
     private InternalLogger _logger;
     private DomainHealthCheck healthCheck;
 
+        /// <summary>Initializes logging and helper classes.</summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     protected override Task BeginProcessingAsync()
     {
         _logger = new InternalLogger(false);
@@ -35,6 +37,8 @@ public sealed class CmdletTestEdnsSupport : AsyncPSCmdlet
         return Task.CompletedTask;
     }
 
+        /// <summary>Executes the cmdlet operation.</summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     protected override async Task ProcessRecordAsync()
     {
         _logger.WriteVerbose("Querying EDNS support for domain: {0}", DomainName);

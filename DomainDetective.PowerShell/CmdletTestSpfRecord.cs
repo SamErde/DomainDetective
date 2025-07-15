@@ -28,6 +28,8 @@ namespace DomainDetective.PowerShell {
         private InternalLogger _logger;
         private DomainHealthCheck healthCheck;
 
+        /// <summary>Initializes logging and helper classes.</summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         protected override Task BeginProcessingAsync() {
             // Initialize the logger to be able to see verbose, warning, debug, error, progress, and information messages.
             _logger = new InternalLogger(false);
@@ -37,6 +39,8 @@ namespace DomainDetective.PowerShell {
             healthCheck = new DomainHealthCheck(DnsEndpoint, _logger);
             return Task.CompletedTask;
         }
+        /// <summary>Executes the cmdlet operation.</summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         protected override async Task ProcessRecordAsync() {
             _logger.WriteVerbose("Querying SPF record for domain: {0}", DomainName);
             await healthCheck.VerifySPF(DomainName);
