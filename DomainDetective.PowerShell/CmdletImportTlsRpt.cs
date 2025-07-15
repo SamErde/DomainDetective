@@ -15,6 +15,9 @@ namespace DomainDetective.PowerShell {
         [ValidateNotNullOrEmpty]
         public string Path { get; set; }
 
+        /// <summary>
+        /// Reads a TLS-RPT JSON report and outputs the parsed summaries.
+        /// </summary>
         protected override void ProcessRecord() {
             var summaries = TlsRptJsonParser.ParseReport(Path);
             WriteObject(summaries, true);

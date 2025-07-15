@@ -10,10 +10,13 @@ namespace DomainDetective.PowerShell {
 [Cmdlet(VerbsCommon.Clear, "DDDnsblProviderList")]
 [Alias("Clear-DnsblProvider")]
     public sealed class CmdletClearDnsblProvider : PSCmdlet {
-        /// <param name="InputObject">Analysis object to modify.</param>
+        /// <summary>Analysis object to modify.</summary>
         [Parameter(ValueFromPipeline = true)]
         public DNSBLAnalysis InputObject { get; set; }
 
+        /// <summary>
+        /// Clears all configured DNSBL providers from the analysis object.
+        /// </summary>
         protected override void ProcessRecord() {
             var analysis = InputObject ?? new DNSBLAnalysis();
             analysis.ClearDNSBL();

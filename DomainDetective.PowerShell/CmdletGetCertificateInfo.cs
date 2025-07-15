@@ -26,6 +26,10 @@ namespace DomainDetective.PowerShell {
 
         private CertificateAnalysis _analysis;
 
+        /// <summary>
+        /// Parses the certificate file and writes the analysis to the pipeline.
+        /// </summary>
+        /// <returns>A task that represents the asynchronous operation.</returns>
         protected override async Task ProcessRecordAsync() {
             _analysis = new CertificateAnalysis { SkipRevocation = SkipRevocation };
             await _analysis.AnalyzeCertificate(new X509Certificate2(Path));

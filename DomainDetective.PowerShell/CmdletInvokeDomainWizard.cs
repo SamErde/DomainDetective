@@ -17,6 +17,11 @@ namespace DomainDetective.PowerShell {
     [Cmdlet(VerbsLifecycle.Invoke, "DomainWizard")]
     [OutputType(typeof(DomainSummary), typeof(string))]
     public sealed class CmdletInvokeDomainWizard : AsyncPSCmdlet {
+        /// <summary>
+        /// Runs the interactive wizard that guides the user through domain
+        /// verification.
+        /// </summary>
+        /// <returns>A task that represents the asynchronous operation.</returns>
         protected override async Task ProcessRecordAsync() {
             Host.UI.WriteLine("DomainDetective wizard");
             Host.UI.Write("Enter domain(s) [comma separated]: ");

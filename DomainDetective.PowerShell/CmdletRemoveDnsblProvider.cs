@@ -19,6 +19,9 @@ namespace DomainDetective.PowerShell {
         [Parameter(ValueFromPipeline = true)]
         public DNSBLAnalysis InputObject { get; set; }
 
+        /// <summary>
+        /// Removes the specified provider from the analysis object.
+        /// </summary>
         protected override void ProcessRecord() {
             var analysis = InputObject ?? new DNSBLAnalysis();
             analysis.RemoveDNSBL(Domain);

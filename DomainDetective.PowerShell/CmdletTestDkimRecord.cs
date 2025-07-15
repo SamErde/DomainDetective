@@ -38,6 +38,10 @@ namespace DomainDetective.PowerShell {
         private InternalLogger _logger;
         private DomainHealthCheck healthCheck;
 
+        /// <summary>
+        /// Initializes DKIM checking with the current settings.
+        /// </summary>
+        /// <returns>A completed task.</returns>
         protected override Task BeginProcessingAsync() {
             // Initialize the logger to be able to see verbose, warning, debug, error, progress, and information messages.
             _logger = new InternalLogger(false);
@@ -47,6 +51,10 @@ namespace DomainDetective.PowerShell {
             healthCheck = new DomainHealthCheck(DnsEndpoint, _logger);
             return Task.CompletedTask;
         }
+        /// <summary>
+        /// Validates DKIM records for the provided selectors.
+        /// </summary>
+        /// <returns>A task that represents the asynchronous operation.</returns>
         protected override async Task ProcessRecordAsync() {
             _logger.WriteVerbose("Querying DKIM records for domain: {0}", DomainName);
             await healthCheck.VerifyDKIM(DomainName, Selectors);

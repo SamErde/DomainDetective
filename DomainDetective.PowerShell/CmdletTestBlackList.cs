@@ -29,6 +29,10 @@ namespace DomainDetective.PowerShell {
         private InternalLogger _logger;
         private DomainHealthCheck healthCheck;
 
+        /// <summary>
+        /// Prepares the DNSBL health check and logging.
+        /// </summary>
+        /// <returns>A completed task.</returns>
         protected override Task BeginProcessingAsync() {
             // Initialize the logger to be able to see verbose, warning, debug, error, progress, and information messages.
             _logger = new InternalLogger(false);
@@ -38,6 +42,10 @@ namespace DomainDetective.PowerShell {
             healthCheck = new DomainHealthCheck(DnsEndpoint, _logger);
             return Task.CompletedTask;
         }
+        /// <summary>
+        /// Checks the specified host names or IP addresses against DNSBL lists.
+        /// </summary>
+        /// <returns>A task that represents the asynchronous operation.</returns>
         protected override async Task ProcessRecordAsync() {
             _logger.WriteVerbose("Querying DNSBL BlackLists for names/ip addresses: {0}", string.Join(", ", NameOrIpAddress));
             await healthCheck.CheckDNSBL(NameOrIpAddress);
