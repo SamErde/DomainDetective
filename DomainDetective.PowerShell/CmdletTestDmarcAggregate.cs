@@ -23,6 +23,10 @@ namespace DomainDetective.PowerShell {
         [ValidateNotNullOrEmpty]
         public string Path { get; set; }
 
+        /// <summary>
+        /// Parses the specified DMARC aggregate report and writes each summary.
+        /// </summary>
+        /// <returns>A completed task.</returns>
         protected override Task ProcessRecordAsync() {
             var summaries = ParseReport(Path);
             WriteObject(summaries, true);

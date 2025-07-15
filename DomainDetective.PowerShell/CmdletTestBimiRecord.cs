@@ -24,6 +24,10 @@ namespace DomainDetective.PowerShell {
         private InternalLogger _logger;
         private DomainHealthCheck healthCheck;
 
+        /// <summary>
+        /// Initializes the BIMI checker and logging.
+        /// </summary>
+        /// <returns>A completed task.</returns>
         protected override Task BeginProcessingAsync() {
             _logger = new InternalLogger(false);
             var internalLoggerPowerShell = new InternalLoggerPowerShell(_logger, this.WriteVerbose, this.WriteWarning, this.WriteDebug, this.WriteError, this.WriteProgress, this.WriteInformation);
@@ -32,6 +36,10 @@ namespace DomainDetective.PowerShell {
             return Task.CompletedTask;
         }
 
+        /// <summary>
+        /// Retrieves BIMI information for the domain.
+        /// </summary>
+        /// <returns>A task that represents the asynchronous operation.</returns>
         protected override async Task ProcessRecordAsync() {
             _logger.WriteVerbose("Querying BIMI record for domain: {0}", DomainName);
             await healthCheck.VerifyBIMI(DomainName);

@@ -24,6 +24,10 @@ namespace DomainDetective.PowerShell {
         private InternalLogger _logger;
         private DomainHealthCheck healthCheck;
 
+        /// <summary>
+        /// Initializes DNSBL analysis for the specified server list.
+        /// </summary>
+        /// <returns>A completed task.</returns>
         protected override Task BeginProcessingAsync() {
             _logger = new InternalLogger(false);
             var internalLoggerPowerShell = new InternalLoggerPowerShell(_logger, this.WriteVerbose, this.WriteWarning, this.WriteDebug, this.WriteError, this.WriteProgress, this.WriteInformation);
@@ -32,6 +36,10 @@ namespace DomainDetective.PowerShell {
             return Task.CompletedTask;
         }
 
+        /// <summary>
+        /// Queries DNSBL providers for the provided hostname or IP address.
+        /// </summary>
+        /// <returns>A task that represents the asynchronous operation.</returns>
         protected override async Task ProcessRecordAsync() {
             _logger.WriteVerbose("Querying DNSBL records for name/ip address: {0}", NameOrIpAddress);
             await foreach (var record in healthCheck.DNSBLAnalysis.AnalyzeDNSBLRecords(NameOrIpAddress, _logger)) {

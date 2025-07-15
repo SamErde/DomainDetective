@@ -23,6 +23,10 @@ namespace DomainDetective.PowerShell {
         private InternalLogger _logger;
         private DomainHealthCheck _healthCheck;
 
+        /// <summary>
+        /// Initializes the Autodiscover health checker.
+        /// </summary>
+        /// <returns>A completed task.</returns>
         protected override Task BeginProcessingAsync() {
             _logger = new InternalLogger(false);
             var internalLoggerPowerShell = new InternalLoggerPowerShell(_logger, this.WriteVerbose, this.WriteWarning, this.WriteDebug, this.WriteError, this.WriteProgress, this.WriteInformation);
@@ -31,6 +35,10 @@ namespace DomainDetective.PowerShell {
             return Task.CompletedTask;
         }
 
+        /// <summary>
+        /// Checks Autodiscover settings for the specified domain.
+        /// </summary>
+        /// <returns>A task that represents the asynchronous operation.</returns>
         protected override async Task ProcessRecordAsync() {
             _logger.WriteVerbose("Querying Autodiscover for domain: {0}", DomainName);
             await _healthCheck.VerifyAutodiscover(DomainName);

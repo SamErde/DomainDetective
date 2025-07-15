@@ -16,6 +16,9 @@ namespace DomainDetective.PowerShell {
         [ValidateNotNullOrEmpty]
         public string Path { get; set; }
 
+        /// <summary>
+        /// Parses the DMARC report archive and outputs each summary.
+        /// </summary>
         protected override void ProcessRecord() {
             foreach (var summary in DmarcReportParser.ParseZip(Path)) {
                 WriteObject(summary);

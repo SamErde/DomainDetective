@@ -15,6 +15,10 @@ namespace DomainDetective.PowerShell {
         [Parameter(Mandatory = true, Position = 0)]
         public DnsPropagationMonitor Monitor = null!;
 
+        /// <summary>
+        /// Stops the specified DNS propagation monitor instance.
+        /// </summary>
+        /// <returns>A completed task.</returns>
         protected override Task ProcessRecordAsync() {
             Monitor.Stop();
             return Task.CompletedTask;

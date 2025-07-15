@@ -30,6 +30,10 @@ namespace DomainDetective.PowerShell {
         private InternalLogger _logger;
         private DomainHealthCheck _healthCheck;
 
+        /// <summary>
+        /// Initializes the SPF analyzer and logging infrastructure.
+        /// </summary>
+        /// <returns>A completed task.</returns>
         protected override Task BeginProcessingAsync() {
             _logger = new InternalLogger(false);
             var internalLoggerPowerShell = new InternalLoggerPowerShell(
@@ -53,6 +57,10 @@ namespace DomainDetective.PowerShell {
             return Task.CompletedTask;
         }
 
+        /// <summary>
+        /// Performs SPF verification and outputs flattened IP addresses.
+        /// </summary>
+        /// <returns>A task that represents the asynchronous operation.</returns>
         protected override async Task ProcessRecordAsync() {
             _logger.WriteVerbose("Flattening SPF IPs for domain: {0}", DomainName);
             if (!string.IsNullOrEmpty(TestSpfRecord)) {

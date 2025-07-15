@@ -30,6 +30,10 @@ namespace DomainDetective.PowerShell {
         private InternalLogger _logger;
         private DomainHealthCheck _healthCheck;
 
+        /// <summary>
+        /// Initializes logging and the ARC health checker.
+        /// </summary>
+        /// <returns>A completed task.</returns>
         protected override Task BeginProcessingAsync() {
             _logger = new InternalLogger(false);
             var internalLoggerPowerShell = new InternalLoggerPowerShell(
@@ -45,6 +49,10 @@ namespace DomainDetective.PowerShell {
             return Task.CompletedTask;
         }
 
+        /// <summary>
+        /// Validates the ARC headers and writes the result to the pipeline.
+        /// </summary>
+        /// <returns>A task that represents the asynchronous operation.</returns>
         protected override async Task ProcessRecordAsync() {
             var text = ParameterSetName == "File"
                 ? System.IO.File.ReadAllText(File)

@@ -62,6 +62,10 @@ namespace DomainDetective.PowerShell {
 
         private readonly DnsPropagationMonitor _monitor = new();
 
+        /// <summary>
+        /// Configures and starts the DNS propagation monitor.
+        /// </summary>
+        /// <returns>A completed task.</returns>
         protected override Task BeginProcessingAsync() {
             _monitor.Domain = DomainName;
             _monitor.RecordType = RecordType;

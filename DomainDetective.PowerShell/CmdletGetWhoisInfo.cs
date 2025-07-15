@@ -33,6 +33,10 @@ namespace DomainDetective.PowerShell {
         private InternalLogger _logger;
         private DomainHealthCheck _healthCheck;
 
+        /// <summary>
+        /// Sets up logging and initializes WHOIS analysis.
+        /// </summary>
+        /// <returns>A completed task.</returns>
         protected override Task BeginProcessingAsync() {
             _logger = new InternalLogger(false);
             var internalLoggerPowerShell = new InternalLoggerPowerShell(
@@ -48,6 +52,10 @@ namespace DomainDetective.PowerShell {
             return Task.CompletedTask;
         }
 
+        /// <summary>
+        /// Retrieves WHOIS data and optionally stores snapshots.
+        /// </summary>
+        /// <returns>A task that represents the asynchronous operation.</returns>
         protected override async Task ProcessRecordAsync() {
             _logger.WriteVerbose("Querying WHOIS information for domain: {0}", DomainName);
             await _healthCheck.CheckWHOIS(DomainName);

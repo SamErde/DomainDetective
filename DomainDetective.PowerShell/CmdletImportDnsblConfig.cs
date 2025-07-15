@@ -27,6 +27,9 @@ namespace DomainDetective.PowerShell {
         [Parameter(ValueFromPipeline = true)]
         public DNSBLAnalysis InputObject { get; set; }
 
+        /// <summary>
+        /// Loads DNSBL configuration from the specified path.
+        /// </summary>
         protected override void ProcessRecord() {
             var analysis = InputObject ?? new DNSBLAnalysis();
             analysis.LoadDnsblConfig(Path, overwriteExisting: OverwriteExisting, clearExisting: ClearExisting);

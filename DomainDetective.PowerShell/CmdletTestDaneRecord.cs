@@ -33,6 +33,10 @@ namespace DomainDetective.PowerShell {
         private InternalLogger _logger;
         private DomainHealthCheck healthCheck;
 
+        /// <summary>
+        /// Configures the DANE analysis infrastructure.
+        /// </summary>
+        /// <returns>A completed task.</returns>
         protected override Task BeginProcessingAsync() {
             // Initialize the logger to be able to see verbose, warning, debug, error, progress, and information messages.
             _logger = new InternalLogger(false);
@@ -42,6 +46,10 @@ namespace DomainDetective.PowerShell {
             healthCheck = new DomainHealthCheck(DnsEndpoint, _logger);
             return Task.CompletedTask;
         }
+        /// <summary>
+        /// Validates DANE TLSA records for the specified ports.
+        /// </summary>
+        /// <returns>A task that represents the asynchronous operation.</returns>
         protected override async Task ProcessRecordAsync() {
             _logger.WriteVerbose("Querying DANE record for domain: {0}", DomainName);
             var ports = Ports != null && Ports.Length > 0 ? Ports : new[] { (int)ServiceType.SMTP };

@@ -72,13 +72,18 @@ namespace DomainDetective.PowerShell {
         [Parameter]
         public SwitchParameter StepByStep { get; set; }
 
+        /// <summary>
+        /// Prompts for parameters when <see cref="StepByStep"/> is specified.
+        /// </summary>
         protected override void BeginProcessing() {
             if (StepByStep) {
                 PromptForParameters();
             }
         }
 
-        /// <summary>Outputs the composed DMARC record.</summary>
+        /// <summary>
+        /// Builds and outputs the final DMARC record string.
+        /// </summary>
         protected override void EndProcessing() {
             var parts = new List<string> { "v=DMARC1", $"p={Policy}" };
             if (!string.IsNullOrWhiteSpace(SubPolicy)) {
