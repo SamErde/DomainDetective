@@ -620,6 +620,29 @@ namespace DomainDetective.Tests {
             }
         }
 
+        [Fact]
+        public async Task CapturesServerHeader() {
+            using var listener = new HttpListener();
+            var prefix = $"http://localhost:{GetFreePort()}/";
+            listener.Prefixes.Add(prefix);
+            listener.Start();
+            var serverTask = Task.Run(async () => {
+                var ctx = await listener.GetContextAsync();
+                ctx.Response.StatusCode = 200;
+                ctx.Response.Headers.Add("Server", "TestServer/1.0");
+                ctx.Response.Close();
+            });
+
+            try {
+                var analysis = new HttpAnalysis();
+                await analysis.AnalyzeUrl(prefix, false, new InternalLogger());
+                Assert.Equal("TestServer/1.0", analysis.ServerHeader);
+            } finally {
+                listener.Stop();
+                await serverTask;
+            }
+        }
+
         private static int GetFreePort() {
             return PortHelper.GetFreePort();
         }

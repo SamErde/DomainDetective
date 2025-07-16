@@ -64,6 +64,8 @@ namespace DomainDetective {
         public bool Http3Supported { get; private set; }
         /// <summary>Gets the QUIC version advertised in the Alt-Svc header.</summary>
         public string? QuicVersion { get; private set; }
+        /// <summary>Gets the value of the Server header if present.</summary>
+        public string? ServerHeader { get; private set; }
         /// <summary>Gets the response body when <c>captureBody</c> is enabled.</summary>
         public string Body { get; private set; }
         /// <summary>Gets a value indicating whether HTTPS content references insecure HTTP resources.</summary>
@@ -170,6 +172,7 @@ namespace DomainDetective {
             var sw = Stopwatch.StartNew();
             FailureReason = null;
             Body = null;
+            ServerHeader = null;
             VisitedUrls.Clear();
             MixedContentDetected = false;
             XssProtectionPresent = false;
@@ -260,6 +263,7 @@ namespace DomainDetective {
                 string? altSvcHeader = null;
                 string? hstsHeader = null;
                 string? expectCtHeader = null;
+                string? serverHeader = null;
                 if (response.Headers.TryGetValues("Alt-Svc", out var altValues)) {
                     altSvcHeader = string.Join(",", altValues);
                 }
@@ -269,6 +273,10 @@ namespace DomainDetective {
                 if (response.Headers.TryGetValues("Expect-CT", out var expectCtValues)) {
                     expectCtHeader = string.Join(",", expectCtValues);
                 }
+                if (response.Headers.TryGetValues("Server", out var serverValues)) {
+                    serverHeader = string.Join(",", serverValues);
+                }
+                ServerHeader = serverHeader;
 #if NET6_0_OR_GREATER
                 if (IsReachable && ProtocolVersion >= HttpVersion.Version30) {
                     QuicVersion = ParseQuicVersion(altSvcHeader);
