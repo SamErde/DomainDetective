@@ -184,6 +184,7 @@ $AliasMap = @{
     'Test-TlsDane'                = 'Test-DDTlsDaneRecord'
     'Test-NetworkIpNeighbor'      = 'Test-DDIpNeighbor'
     'Test-NetworkPortAvailability'= 'Test-DDPortAvailability'
+    'Get-RdapObject'            = 'Get-DDRdapObject'
 }
 
 foreach ($aliasName in $AliasMap.Keys) {
