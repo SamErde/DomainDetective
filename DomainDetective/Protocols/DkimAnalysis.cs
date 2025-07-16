@@ -24,6 +24,8 @@ namespace DomainDetective {
         public const int MinimumRsaKeyBits = 1024;
         /// <summary>Gets the analysis results keyed by selector.</summary>
         public Dictionary<string, DkimRecordAnalysis> AnalysisResults { get; private set; } = new Dictionary<string, DkimRecordAnalysis>();
+        /// <summary>Threshold for raising key age warnings.</summary>
+        public TimeSpan KeyAgeWarningThreshold { get; set; } = TimeSpan.FromDays(365);
         /// <summary>Gets the ADSP record text when present.</summary>
         public string? AdspRecord { get; private set; }
         /// <summary>Gets a value indicating whether an ADSP record exists.</summary>
@@ -185,11 +187,13 @@ namespace DomainDetective {
                         DateTimeStyles.AdjustToUniversal,
                     out var parsed)) {
                 analysis.CreationDate = parsed;
-                if (DateTime.UtcNow - parsed > TimeSpan.FromDays(365)) {
+                analysis.KeyAgeDays = (int)(DateTime.UtcNow - parsed).TotalDays;
+                if (DateTime.UtcNow - parsed >= KeyAgeWarningThreshold) {
                     analysis.OldKey = true;
                     logger?.WriteWarning(
-                        "DKIM key for selector {0} appears older than 12 months ({1:yyyy-MM-dd}).",
+                        "DKIM key for selector {0} appears older than {1} days ({2:yyyy-MM-dd}).",
                         selector,
+                        (int)KeyAgeWarningThreshold.TotalDays,
                         parsed);
                 }
             }
@@ -315,6 +319,8 @@ namespace DomainDetective {
         public string HashAlgorithm { get; set; }
         /// <summary>Date the record appears to have been created.</summary>
         public DateTime? CreationDate { get; set; }
+        /// <summary>Age of the key in days when <see cref="CreationDate"/> is known.</summary>
+        public int KeyAgeDays { get; set; }
         /// <summary>True when <see cref="CreationDate"/> is over 12 months old.</summary>
         public bool OldKey { get; set; }
     }
