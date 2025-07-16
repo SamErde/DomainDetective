@@ -141,11 +141,11 @@ internal static class CommandUtilities {
         var subPolicy = AnsiConsole.Confirm("Evaluate subdomain policy?");
 
         var checkTakeover = AnsiConsole.Confirm("Check for takeover CNAMEs?");
-        await RunChecks(domains, checks, checkHttp, checkTakeover, outputJson, summaryOnly, subPolicy, false, null, true, false, cancellationToken);
+        await RunChecks(domains, checks, checkHttp, checkTakeover, outputJson, summaryOnly, subPolicy, false, null, true, false, null, cancellationToken);
         return 0;
     }
 
-internal static async Task RunChecks(string[] domains, HealthCheckType[]? checks, bool checkHttp, bool checkTakeover, bool outputJson, bool summaryOnly, bool subdomainPolicy, bool unicodeOutput, int[]? danePorts, bool showProgress, bool skipRevocation, CancellationToken cancellationToken) {
+internal static async Task RunChecks(string[] domains, HealthCheckType[]? checks, bool checkHttp, bool checkTakeover, bool outputJson, bool summaryOnly, bool subdomainPolicy, bool unicodeOutput, int[]? danePorts, bool showProgress, bool skipRevocation, PortScanProfile[]? portScanProfiles, CancellationToken cancellationToken) {
         foreach (var domain in domains) {
             var logger = new InternalLogger { IsProgress = showProgress };
             var hc = new DomainHealthCheck(internalLogger: logger) { Verbose = false, UseSubdomainPolicy = subdomainPolicy, UnicodeOutput = unicodeOutput, Progress = showProgress };
@@ -167,7 +167,7 @@ internal static async Task RunChecks(string[] domains, HealthCheckType[]? checks
 
                     logger.OnProgressMessage += Handler;
                     try {
-                        await hc.Verify(domain, checks, null, null, danePorts, cancellationToken);
+                        await hc.Verify(domain, checks, null, null, danePorts, portScanProfiles, cancellationToken);
                         if (checkHttp) {
                             await hc.VerifyPlainHttp(domain, cancellationToken);
                         }
@@ -179,7 +179,7 @@ internal static async Task RunChecks(string[] domains, HealthCheckType[]? checks
                     }
                 });
             } else {
-                await hc.Verify(domain, checks, null, null, danePorts, cancellationToken);
+                await hc.Verify(domain, checks, null, null, danePorts, portScanProfiles, cancellationToken);
                 if (checkHttp) {
                     await hc.VerifyPlainHttp(domain, cancellationToken);
                 }
