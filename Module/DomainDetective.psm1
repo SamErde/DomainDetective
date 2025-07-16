@@ -148,6 +148,7 @@ $AliasMap = @{
     'Get-DomainFlattenedSpfIp'    = 'Get-DDFlattenedSpfIp'
     'Import-DnsblConfig'          = 'Import-DDDnsblConfig'
     'Import-DmarcReport'          = 'Import-DDDmarcReport'
+    'Import-DmarcForensic'        = 'Import-DDDmarcForensic'
     'Remove-DnsblProvider'        = 'Remove-DDDnsblProvider'
     'Test-EmailArc'               = 'Test-DDEmailArcRecord'
     'Test-EmailBimi'              = 'Test-DDEmailBimiRecord'

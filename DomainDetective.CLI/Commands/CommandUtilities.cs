@@ -1,7 +1,9 @@
 using DomainDetective;
+using DomainDetective.Reports;
 using Spectre.Console;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
 using System.Threading;
@@ -115,6 +117,20 @@ internal static class CommandUtilities {
             Console.WriteLine(jsonText);
         } else {
             CliHelpers.ShowPropertiesTable($"DNS Tunneling for {domain}", result, false);
+        }
+    }
+
+    [RequiresUnreferencedCode("Calls System.Text.Json.JsonSerializer.Serialize<T>(T, JsonSerializerOptions)")]
+    [RequiresDynamicCode("Calls System.Text.Json.JsonSerializer.Serialize<T>(T, JsonSerializerOptions)")]
+    internal static void ImportDmarcForensic(string path, bool json) {
+        var reports = DmarcForensicParser.ParseZip(path).ToList();
+        if (json) {
+            var jsonText = JsonSerializer.Serialize(reports, DomainHealthCheck.JsonOptions);
+            Console.WriteLine(jsonText);
+        } else {
+            foreach (var report in reports) {
+                CliHelpers.ShowPropertiesTable("DMARC Forensic Report", report, false);
+            }
         }
     }
 
