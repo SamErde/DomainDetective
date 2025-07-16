@@ -43,9 +43,15 @@ internal static class Program {
             config.AddCommand<BuildDmarcCommand>("BuildDmarcRecord")
                 .WithDescription("Interactively build a DMARC record")
                 .WithExample(new[] { "BuildDmarcRecord" });
+            config.AddCommand<ImportDmarcForensicCommand>("ImportDmarcForensic")
+                .WithDescription("Import DMARC forensic reports")
+                .WithExample(new[] { "ImportDmarcForensic", "forensic.zip" });
             config.AddCommand<RefreshSuffixListCommand>("RefreshSuffixList")
                 .WithDescription("Download the latest public suffix list")
                 .WithExample(new[] { "RefreshSuffixList", "--force" });
+            config.AddCommand<SearchDomainCommand>("SearchDomain")
+                .WithDescription("Search for available domains")
+                .WithExample(new[] { "SearchDomain", "mykeyword" });
             config.AddCommand<TestSmimeaCommand>("TestSMIMEA")
                 .WithDescription("Query SMIMEA record for an email address")
                 .WithExample(new[] { "TestSMIMEA", "user@example.com" });
@@ -55,6 +61,18 @@ internal static class Program {
             config.AddCommand<TestRdapCommand>("TestRDAP")
                 .WithDescription("Query RDAP registration information")
                 .WithExample(new[] { "TestRDAP", "example.com" });
+            config.AddCommand<TestRdapIpCommand>("TestRDAP-IP")
+                .WithDescription("Query RDAP information for an IP")
+                .WithExample(new[] { "TestRDAP-IP", "192.0.2.1" });
+            config.AddCommand<TestRdapAsCommand>("TestRDAP-AS")
+                .WithDescription("Query RDAP information for an autonomous system")
+                .WithExample(new[] { "TestRDAP-AS", "AS65536" });
+            config.AddCommand<TestRdapEntityCommand>("TestRDAP-Entity")
+                .WithDescription("Query RDAP information for an entity")
+                .WithExample(new[] { "TestRDAP-Entity", "ABC123" });
+            config.AddCommand<TestRdapNameserverCommand>("TestRDAP-NS")
+                .WithDescription("Query RDAP information for a nameserver")
+                .WithExample(new[] { "TestRDAP-NS", "ns1.example.com" });
         });
         try {
             return await app.RunAsync(args).WaitAsync(cts.Token);

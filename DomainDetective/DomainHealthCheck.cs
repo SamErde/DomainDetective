@@ -94,6 +94,8 @@ namespace DomainDetective {
         /// </summary>
         /// <value>DANE records and validation output.</value>
         public DANEAnalysis DaneAnalysis { get; private set; } = new DANEAnalysis();
+        /// <summary>Optional override for DNS queries used by DANE checks.</summary>
+        public Func<string, DnsRecordType, Task<DnsAnswer[]>>? DaneDnsOverride { get; set; }
 
         /// <summary>
         /// Gets the SMIMEA analysis.

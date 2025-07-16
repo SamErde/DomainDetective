@@ -1,6 +1,7 @@
 using DnsClientX;
 using System.Management.Automation;
 using System.Threading.Tasks;
+using DomainDetective;
 
 namespace DomainDetective.PowerShell {
     /// <summary>Runs multiple domain health checks and returns the results.</summary>
@@ -40,6 +41,10 @@ namespace DomainDetective.PowerShell {
         /// <param name="BrandKeyword">Protected brand terms for typosquatting analysis.</param>
         [Parameter(Mandatory = false)]
         public string[]? BrandKeyword;
+        
+        /// <param name="PortScanProfile">Port scan profiles to use.</param>
+        [Parameter(Mandatory = false)]
+        public PortScanProfile[]? PortScanProfile;
 
         private InternalLogger _logger;
         private DomainHealthCheck _healthCheck;
@@ -73,7 +78,7 @@ namespace DomainDetective.PowerShell {
                 _healthCheck.TyposquattingBrandKeywords.Clear();
                 _healthCheck.TyposquattingBrandKeywords.AddRange(BrandKeyword);
             }
-            await _healthCheck.Verify(DomainName, HealthCheckType, DkimSelectors, DaneServiceType, DanePorts);
+            await _healthCheck.Verify(DomainName, HealthCheckType, DkimSelectors, DaneServiceType, DanePorts, PortScanProfile);
             var result = _healthCheck.FilterAnalyses(HealthCheckType);
             WriteObject(result);
         }
