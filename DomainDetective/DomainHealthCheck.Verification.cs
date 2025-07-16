@@ -1015,6 +1015,14 @@ namespace DomainDetective {
             await AutodiscoverAnalysis.Analyze(domainName, DnsConfiguration, _logger, cancellationToken);
         }
 
+        private async Task<DnsAnswer[]> QueryDaneDns(string name, CancellationToken cancellationToken) {
+            if (DaneAnalysis.QueryDnsOverride != null) {
+                return await DaneAnalysis.QueryDnsOverride(name, DnsRecordType.TLSA);
+            }
+
+            return await DnsConfiguration.QueryDNS(name, DnsRecordType.TLSA, cancellationToken: cancellationToken);
+        }
+
         /// <summary>
         /// Queries TLSA records for specific ports on a domain. Generated names use
         /// the `_tcp` or `_udp` label depending on the protocol.
@@ -1037,12 +1045,13 @@ namespace DomainDetective {
             }
 
             DaneAnalysis = new DANEAnalysis();
+            DaneAnalysis.QueryDnsOverride = DaneDnsOverride;
             var allDaneRecords = new List<DnsAnswer>();
             foreach (var port in ports) {
                 cancellationToken.ThrowIfCancellationRequested();
                 var query = CreateServiceQuery(port, domainName);
                 ValidateServiceQueryProtocol(query);
-                var dane = await DnsConfiguration.QueryDNS(query, DnsRecordType.TLSA, cancellationToken: cancellationToken);
+                var dane = await QueryDaneDns(query, cancellationToken);
                 allDaneRecords.AddRange(dane);
             }
 
@@ -1065,6 +1074,7 @@ namespace DomainDetective {
             }
 
             DaneAnalysis = new DANEAnalysis();
+            DaneAnalysis.QueryDnsOverride = DaneDnsOverride;
             var allDaneRecords = new List<DnsAnswer>();
 
             foreach (var service in services.Distinct()) {
@@ -1072,7 +1082,7 @@ namespace DomainDetective {
                 var host = NormalizeDomain(service.Host).TrimEnd('.');
                 var daneName = CreateServiceQuery(service.Port, host);
                 ValidateServiceQueryProtocol(daneName);
-                var dane = await DnsConfiguration.QueryDNS(daneName, DnsRecordType.TLSA, cancellationToken: cancellationToken);
+                var dane = await QueryDaneDns(daneName, cancellationToken);
                 if (dane.Any()) {
                     allDaneRecords.AddRange(dane);
                 }
@@ -1099,6 +1109,7 @@ namespace DomainDetective {
             domainName = NormalizeDomain(domainName);
             UpdateIsPublicSuffix(domainName);
             DaneAnalysis = new DANEAnalysis();
+            DaneAnalysis.QueryDnsOverride = DaneDnsOverride;
             if (serviceTypes == null || serviceTypes.Length == 0) {
                 serviceTypes = new[] { ServiceType.SMTP, ServiceType.HTTPS };
             }
@@ -1144,7 +1155,7 @@ namespace DomainDetective {
                     }
                     var daneRecord = CreateServiceQuery(port, domain);
                     ValidateServiceQueryProtocol(daneRecord);
-                    var dane = await DnsConfiguration.QueryDNS(daneRecord, DnsRecordType.TLSA, cancellationToken: cancellationToken);
+                    var dane = await QueryDaneDns(daneRecord, cancellationToken);
                     if (dane.Any()) {
                         allDaneRecords.AddRange(dane);
                     }

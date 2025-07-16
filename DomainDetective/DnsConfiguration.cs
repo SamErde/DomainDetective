@@ -19,6 +19,8 @@ namespace DomainDetective {
         /// Gets or sets the default User-Agent header for DNS queries.
         /// </summary>
         public string UserAgent { get; set; } = DefaultUserAgent;
+        /// <summary>Optional override for DNS queries.</summary>
+        public Func<string, DnsRecordType, Task<DnsAnswer[]>>? QueryDnsOverride { get; set; }
         /// <summary>
         /// Gets or sets the DNS endpoint.
         /// </summary>
@@ -53,6 +55,9 @@ namespace DomainDetective {
             if (string.IsNullOrEmpty(name)) {
                 throw new ArgumentNullException(nameof(name), $"Domain name cannot be null or empty when querying {recordType} records.");
             }
+            if (QueryDnsOverride != null) {
+                return await QueryDnsOverride(name, recordType);
+            }
             ClientX client = new(endpoint: DnsEndpoint, DnsSelectionStrategy);
             client.EndpointConfiguration.UserAgent = UserAgent;
             if (filter != string.Empty) {
@@ -71,6 +76,13 @@ namespace DomainDetective {
             cancellationToken.ThrowIfCancellationRequested();
             if (names == null || names.Length == 0) {
                 throw new ArgumentNullException(nameof(names), $"No domain names provided for querying {recordType} records.");
+            }
+            if (QueryDnsOverride != null) {
+                List<DnsAnswer> all = new();
+                foreach (var n in names) {
+                    all.AddRange(await QueryDnsOverride(n, recordType));
+                }
+                return all;
             }
             List<DnsAnswer> allAnswers = new();
 

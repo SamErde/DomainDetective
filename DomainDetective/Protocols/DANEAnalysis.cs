@@ -17,6 +17,8 @@ namespace DomainDetective {
     /// host and port combination.
     /// </remarks>
     public class DANEAnalysis {
+        /// <summary>Optional override for DNS queries.</summary>
+        public Func<string, DnsRecordType, Task<DnsAnswer[]>>? QueryDnsOverride { get; set; }
         public List<DANERecordAnalysis> AnalysisResults { get; private set; } = new List<DANERecordAnalysis>();
         public int NumberOfRecords { get; private set; }
         public bool HasDuplicateRecords { get; private set; }
