@@ -259,7 +259,28 @@ namespace DomainDetective.Tests {
 
             var result = healthCheck.DKIMAnalysis.AnalysisResults["default"];
             Assert.Equal(new DateTime(2000, 1, 1), result.CreationDate!.Value.Date);
+            Assert.True(result.KeyAgeDays > 0);
             Assert.True(result.OldKey);
+        }
+
+        [Fact]
+        public async Task RespectsKeyAgeWarningThreshold() {
+            const string record =
+                "v=DKIM1; k=rsa; n=2020-01-01; p=QUJD";
+
+            var logger = new InternalLogger();
+            var warnings = new List<LogEventArgs>();
+            logger.OnWarningMessage += (_, e) => warnings.Add(e);
+            var analysis = new DkimAnalysis { KeyAgeWarningThreshold = TimeSpan.FromDays(30) };
+            await analysis.AnalyzeDkimRecords(
+                "default",
+                new List<DnsAnswer> { new DnsAnswer { DataRaw = record, Type = DnsRecordType.TXT } },
+                logger);
+
+            var result = analysis.AnalysisResults["default"];
+            Assert.True(result.KeyAgeDays > 0);
+            Assert.True(result.OldKey);
+            Assert.Contains(warnings, w => w.FullMessage.Contains("older than"));
         }
 
         [Fact]
