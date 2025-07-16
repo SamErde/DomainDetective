@@ -37,6 +37,10 @@ namespace DomainDetective.PowerShell {
         [Parameter(Mandatory = false)]
         public int[]? DanePorts;
 
+        /// <param name="BrandKeyword">Protected brand terms for typosquatting analysis.</param>
+        [Parameter(Mandatory = false)]
+        public string[]? BrandKeyword;
+
         private InternalLogger _logger;
         private DomainHealthCheck _healthCheck;
 
@@ -54,6 +58,10 @@ namespace DomainDetective.PowerShell {
                 this.WriteInformation);
             internalLoggerPowerShell.ResetActivityIdCounter();
             _healthCheck = new DomainHealthCheck(DnsEndpoint, _logger);
+            if (BrandKeyword != null)
+            {
+                _healthCheck.TyposquattingBrandKeywords.AddRange(BrandKeyword);
+            }
             return Task.CompletedTask;
         }
 
@@ -61,6 +69,10 @@ namespace DomainDetective.PowerShell {
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         protected override async Task ProcessRecordAsync() {
             _logger.WriteVerbose("Querying domain health for domain: {0}", DomainName);
+            if (BrandKeyword != null) {
+                _healthCheck.TyposquattingBrandKeywords.Clear();
+                _healthCheck.TyposquattingBrandKeywords.AddRange(BrandKeyword);
+            }
             await _healthCheck.Verify(DomainName, HealthCheckType, DkimSelectors, DaneServiceType, DanePorts);
             var result = _healthCheck.FilterAnalyses(HealthCheckType);
             WriteObject(result);
