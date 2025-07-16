@@ -73,6 +73,7 @@ public static partial class Program {
         await ExampleAnalyseTyposquatting();
         await ExampleAnalyseEdnsSupport();
         await ExampleAnalyseGeoIp();
+        await ExamplePortScan();
 
         //await ExampleQueryDNS();
         //await ExampleAnalyseByStringWHOIS();

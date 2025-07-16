@@ -30,6 +30,8 @@ public class PortScanAnalysis
         public TimeSpan TcpLatency { get; init; }
         /// <summary>Socket exception message, if the scan failed.</summary>
         public string? Error { get; init; }
+        /// <summary>Optional service banner or detected protocol.</summary>
+        public string? Banner { get; init; }
     }
 
     /// <summary>Scan results keyed by port number.</summary>
@@ -54,6 +56,27 @@ public class PortScanAnalysis
 
     internal static void OverrideProfilePorts(PortScanProfile profile, int[] ports) =>
         ProfilePorts[profile] = ports;
+
+    private static readonly Func<NetworkStream, CancellationToken, Task<string?>>[] DefaultDetectors =
+    {
+        DetectBannerAsync,
+        DetectSshAsync,
+        DetectHttpAsync,
+        DetectRdpAsync
+    };
+
+    private static readonly Dictionary<int, Func<NetworkStream, CancellationToken, Task<string?>>[]> DetectionStrategies = new()
+    {
+        [21] = new[] { DetectBannerAsync },
+        [22] = new[] { DetectSshAsync },
+        [25] = new[] { DetectBannerAsync },
+        [80] = new[] { DetectHttpAsync },
+        [110] = new[] { DetectBannerAsync },
+        [143] = new[] { DetectBannerAsync },
+        [443] = new[] { DetectHttpAsync },
+        [3389] = new[] { DetectRdpAsync },
+        [8080] = new[] { DetectHttpAsync }
+    };
 
 
     /// <summary>List of default ports to scan.</summary>
@@ -101,6 +124,7 @@ public class PortScanAnalysis
     {
         bool tcpOpen = false;
         bool udpOpen = false;
+        string? banner = null;
         var sw = Stopwatch.StartNew();
         string? error = null;
 
@@ -132,6 +156,7 @@ public class PortScanAnalysis
                 await client.ConnectAsync(address, port).WaitWithCancellation(cts.Token).ConfigureAwait(false);
 #endif
                 tcpOpen = true;
+                banner = await DetectServiceAsync(client, port, cts.Token).ConfigureAwait(false);
             }
             catch (Exception ex) when (ex is SocketException || ex is OperationCanceledException)
             {
@@ -177,7 +202,94 @@ public class PortScanAnalysis
             }
         }
 
-        return new ScanResult { TcpOpen = tcpOpen, UdpOpen = udpOpen, TcpLatency = sw.Elapsed, Error = error };
+        return new ScanResult { TcpOpen = tcpOpen, UdpOpen = udpOpen, TcpLatency = sw.Elapsed, Error = error, Banner = banner };
+    }
+
+    private static IEnumerable<Func<NetworkStream, CancellationToken, Task<string?>>> GetStrategies(int port)
+    {
+        if (DetectionStrategies.TryGetValue(port, out var specific))
+        {
+            foreach (var s in specific)
+            {
+                yield return s;
+            }
+
+            foreach (var d in DefaultDetectors)
+            {
+                if (Array.IndexOf(specific, d) == -1)
+                {
+                    yield return d;
+                }
+            }
+        }
+        else
+        {
+            foreach (var d in DefaultDetectors)
+            {
+                yield return d;
+            }
+        }
+    }
+
+    private static async Task<string?> DetectServiceAsync(TcpClient client, int port, CancellationToken token)
+    {
+        var stream = client.GetStream();
+        foreach (var strategy in GetStrategies(port))
+        {
+            try
+            {
+                using var cts = CancellationTokenSource.CreateLinkedTokenSource(token);
+                cts.CancelAfter(TimeSpan.FromMilliseconds(200));
+                var result = await strategy(stream, cts.Token).ConfigureAwait(false);
+                if (!string.IsNullOrEmpty(result))
+                {
+                    return result;
+                }
+            }
+            catch
+            {
+                // ignore and try next strategy
+            }
+
+            if (!client.Connected)
+            {
+                break;
+            }
+        }
+
+        return null;
+    }
+
+    private static async Task<string?> DetectBannerAsync(NetworkStream stream, CancellationToken token)
+    {
+        var buffer = new byte[256];
+        var bytes = await stream.ReadAsync(buffer, 0, buffer.Length, token).ConfigureAwait(false);
+        return bytes > 0 ? System.Text.Encoding.ASCII.GetString(buffer, 0, bytes).Trim() : null;
+    }
+
+    private static async Task<string?> DetectSshAsync(NetworkStream stream, CancellationToken token)
+    {
+        var banner = await DetectBannerAsync(stream, token).ConfigureAwait(false);
+        return banner != null && banner.StartsWith("SSH-", StringComparison.OrdinalIgnoreCase) ? banner : banner;
+    }
+
+    private static async Task<string?> DetectHttpAsync(NetworkStream stream, CancellationToken token)
+    {
+        var request = System.Text.Encoding.ASCII.GetBytes("HEAD / HTTP/1.0\r\n\r\n");
+        await stream.WriteAsync(request, 0, request.Length, token).ConfigureAwait(false);
+        var buffer = new byte[256];
+        var bytes = await stream.ReadAsync(buffer, 0, buffer.Length, token).ConfigureAwait(false);
+        var text = System.Text.Encoding.ASCII.GetString(buffer, 0, bytes);
+        return text.StartsWith("HTTP/", StringComparison.OrdinalIgnoreCase) ? "HTTP" : null;
+    }
+
+    private static async Task<string?> DetectRdpAsync(NetworkStream stream, CancellationToken token)
+    {
+        var request = new byte[] { 0x03, 0x00, 0x00, 0x0b, 0x06, 0xe0, 0x00, 0x00, 0x00, 0x00, 0x00 };
+        await stream.WriteAsync(request, 0, request.Length, token).ConfigureAwait(false);
+        var buffer = new byte[4];
+        var bytes = await stream.ReadAsync(buffer, 0, buffer.Length, token).ConfigureAwait(false);
+        return bytes >= 2 && buffer[0] == 0x03 && buffer[1] == 0x00 ? "RDP" : null;
     }
 
     /// <summary>Determines whether the host has a reachable IPv6 address.</summary>
