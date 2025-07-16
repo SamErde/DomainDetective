@@ -229,7 +229,11 @@ public static class CheckDescriptions {
             [HealthCheckType.FLATTENINGSERVICE] = new(
                 "Detect CNAME flattening services.",
                 null,
-                "Review CNAME targets and consider removing provider-specific aliases.")
+                "Review CNAME targets and consider removing provider-specific aliases."),
+            [HealthCheckType.RDAP] = new(
+                "Query RDAP registration data.",
+                null,
+                "Inspect RDAP for registration details.")
         };
 
     /// <summary>Gets the description for the specified check type.</summary>

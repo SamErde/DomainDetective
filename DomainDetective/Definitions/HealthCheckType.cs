@@ -96,5 +96,7 @@ public enum HealthCheckType {
     /// <summary>Measure SMTP connection and banner latency.</summary>
     MAILLATENCY,
     /// <summary>Detect CNAMEs pointing to flattening services.</summary>
-    FLATTENINGSERVICE
+    FLATTENINGSERVICE,
+    /// <summary>Query RDAP registration information.</summary>
+    RDAP
 }
