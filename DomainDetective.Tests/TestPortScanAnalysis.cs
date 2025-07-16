@@ -155,6 +155,29 @@ namespace DomainDetective.Tests {
             }
         }
 
+        [Fact]
+        public async Task DetectsServiceBanners() {
+            var listener = new TcpListener(IPAddress.Loopback, 0);
+            listener.Start();
+            var port = ((IPEndPoint)listener.LocalEndpoint).Port;
+            var serverTask = Task.Run(async () => {
+                using var client = await listener.AcceptTcpClientAsync();
+                using var stream = client.GetStream();
+                var data = System.Text.Encoding.ASCII.GetBytes("SSH-2.0-Test\r\n");
+                await stream.WriteAsync(data, 0, data.Length);
+                await Task.Delay(10);
+            });
+
+            try {
+                var analysis = new PortScanAnalysis { Timeout = TimeSpan.FromMilliseconds(200) };
+                await analysis.Scan("127.0.0.1", new[] { port }, new InternalLogger());
+                Assert.Equal("SSH-2.0-Test", analysis.Results[port].Banner);
+            } finally {
+                listener.Stop();
+                await serverTask;
+            }
+        }
+
         private static int GetFreePort() {
             return PortHelper.GetFreePort();
         }
