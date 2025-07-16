@@ -55,6 +55,9 @@ internal static class Program {
             config.AddCommand<TestRpkiCommand>("TestRPKI")
                 .WithDescription("Validate RPKI origins for domain IPs")
                 .WithExample(new[] { "TestRPKI", "example.com" });
+            config.AddCommand<TestRdapCommand>("TestRDAP")
+                .WithDescription("Query RDAP registration information")
+                .WithExample(new[] { "TestRDAP", "example.com" });
         });
         try {
             return await app.RunAsync(args).WaitAsync(cts.Token);

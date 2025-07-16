@@ -1264,6 +1264,22 @@ namespace DomainDetective {
         }
 
         /// <summary>
+        /// Queries RDAP information for a domain.
+        /// </summary>
+        /// <param name="domain">Domain name to query.</param>
+        /// <param name="cancellationToken">Token to cancel the operation.</param>
+        public async Task QueryRDAP(string domain, CancellationToken cancellationToken = default) {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (string.IsNullOrWhiteSpace(domain)) {
+                throw new ArgumentNullException(nameof(domain));
+            }
+
+            domain = NormalizeDomain(domain);
+            UpdateIsPublicSuffix(domain);
+            await RdapAnalysis.Analyze(domain, _logger, cancellationToken);
+        }
+
+        /// <summary>
         /// Creates a high level summary of key analyses.
         /// </summary>
         /// <returns>A populated <see cref="DomainSummary"/>.</returns>

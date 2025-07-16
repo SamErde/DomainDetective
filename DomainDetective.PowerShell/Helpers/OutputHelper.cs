@@ -39,6 +39,7 @@ namespace DomainDetective.PowerShell {
                     KeyType = result.KeyType,
                     HashAlgorithm = result.HashAlgorithm,
                     CreationDate = result.CreationDate,
+                    KeyAgeDays = result.KeyAgeDays,
                     OldKey = result.OldKey,
                     DeprecatedTags = result.DeprecatedTags
                 };
@@ -138,6 +139,9 @@ namespace DomainDetective.PowerShell {
 
         /// <summary>Date the record appears to have been created.</summary>
         public DateTime? CreationDate { get; set; }
+
+        /// <summary>Age of the key in days.</summary>
+        public int KeyAgeDays { get; set; }
 
         /// <summary>True when <see cref="CreationDate"/> is over 12 months old.</summary>
         public bool OldKey { get; set; }
