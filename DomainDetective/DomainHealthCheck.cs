@@ -146,6 +146,14 @@ namespace DomainDetective {
         public WhoisAnalysis WhoisAnalysis { get; private set; } = new WhoisAnalysis();
 
         /// <summary>
+        /// Gets the RDAP analysis.
+        /// </summary>
+        /// <value>Registration data from RDAP.</value>
+        public RdapAnalysis RdapAnalysis { get; private set; } = new RdapAnalysis();
+        /// <summary>Alias used by <see cref="GetAnalysisMap"/>.</summary>
+        public RdapAnalysis RDAPAnalysis => RdapAnalysis;
+
+        /// <summary>
         /// Gets the zone transfer analysis.
         /// </summary>
         /// <value>AXFR test results per name server.</value>
