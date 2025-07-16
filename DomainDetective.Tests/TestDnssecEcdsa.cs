@@ -9,8 +9,8 @@ namespace DomainDetective.Tests {
         public void VerifyP256Signature() {
             using ECDsa ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
             byte[] data = { 1, 2, 3, 4 };
-            byte[] derSig = ecdsa.SignData(data, HashAlgorithmName.SHA256);
-            byte[] sig = DerToP1363(derSig, 32);
+            byte[] rawSig = ecdsa.SignData(data, HashAlgorithmName.SHA256);
+            byte[] sig = EnsureP1363(rawSig, 32);
             ECParameters p = ecdsa.ExportParameters(false);
             byte[] pub = new byte[64];
             Buffer.BlockCopy(p.Q.X, 0, pub, 0, 32);
@@ -26,8 +26,8 @@ namespace DomainDetective.Tests {
         public void VerifyP384Signature() {
             using ECDsa ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP384);
             byte[] data = { 5, 6, 7, 8 };
-            byte[] derSig = ecdsa.SignData(data, HashAlgorithmName.SHA384);
-            byte[] sig = DerToP1363(derSig, 48);
+            byte[] rawSig = ecdsa.SignData(data, HashAlgorithmName.SHA384);
+            byte[] sig = EnsureP1363(rawSig, 48);
             ECParameters p = ecdsa.ExportParameters(false);
             byte[] pub = new byte[96];
             Buffer.BlockCopy(p.Q.X, 0, pub, 0, 48);
@@ -39,19 +39,30 @@ namespace DomainDetective.Tests {
             Assert.True(result);
         }
 
-        private static byte[] DerToP1363(byte[] der, int size) {
+        private static byte[] EnsureP1363(byte[] signature, int size) {
+            if (signature.Length == size * 2 && signature[0] != 0x30) {
+                return signature;
+            }
+
             int pos = 0;
-            if (der[pos++] != 0x30) { throw new InvalidOperationException(); }
-            _ = der[pos++];
-            if (der[pos++] != 0x02) { throw new InvalidOperationException(); }
-            int rLen = der[pos++];
+            if (signature[pos++] != 0x30) { throw new InvalidOperationException(); }
+            int seqLen = signature[pos++];
+            if (seqLen >= 0x80) {
+                int lenBytes = seqLen & 0x7F;
+                seqLen = 0;
+                for (int i = 0; i < lenBytes; i++) {
+                    seqLen = (seqLen << 8) | signature[pos++];
+                }
+            }
+            if (signature[pos++] != 0x02) { throw new InvalidOperationException(); }
+            int rLen = signature[pos++];
             byte[] r = new byte[rLen];
-            Buffer.BlockCopy(der, pos, r, 0, rLen);
+            Buffer.BlockCopy(signature, pos, r, 0, rLen);
             pos += rLen;
-            if (der[pos++] != 0x02) { throw new InvalidOperationException(); }
-            int sLen = der[pos++];
+            if (signature[pos++] != 0x02) { throw new InvalidOperationException(); }
+            int sLen = signature[pos++];
             byte[] s = new byte[sLen];
-            Buffer.BlockCopy(der, pos, s, 0, sLen);
+            Buffer.BlockCopy(signature, pos, s, 0, sLen);
 
             r = TrimLeadingZeros(r);
             s = TrimLeadingZeros(s);

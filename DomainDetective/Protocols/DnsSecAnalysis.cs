@@ -431,9 +431,8 @@ namespace DomainDetective {
                 };
 
                 using ECDsa ecdsa = ECDsa.Create(p);
-                byte[] der = P1363ToDer(sig, fieldSize);
                 HashAlgorithmName hash = algorithm == 14 ? HashAlgorithmName.SHA384 : HashAlgorithmName.SHA256;
-                return ecdsa.VerifyData(data, der, hash);
+                return ecdsa.VerifyData(data, sig, hash);
             } catch {
                 return false;
             }
