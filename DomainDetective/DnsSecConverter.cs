@@ -9,12 +9,12 @@ namespace DomainDetective {
     /// </summary>
     public static class DnsSecConverter {
         private static string MapAlgorithmNumber(int number) {
-            if (number == 8) {
-                return "RSASHA256";
-            }
-
-            string name = DNSKeyAnalysis.AlgorithmName(number);
-            return string.IsNullOrEmpty(name) ? string.Empty : name;
+            return number switch {
+                8 => "RSASHA256",
+                13 => "ECDSAP256SHA256",
+                14 => "ECDSAP384SHA384",
+                _ => DNSKeyAnalysis.AlgorithmName(number) ?? string.Empty,
+            };
         }
 
         /// <summary>

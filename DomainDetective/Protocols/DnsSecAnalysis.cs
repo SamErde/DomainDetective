@@ -409,6 +409,89 @@ namespace DomainDetective {
             };
         }
 
+        private static bool VerifyEcdsaSignature(string key, string signature, byte[] data, int algorithm) {
+            if (string.IsNullOrWhiteSpace(key) || string.IsNullOrWhiteSpace(signature) || data == null) {
+                return false;
+            }
+
+            try {
+                byte[] pub = Convert.FromBase64String(key);
+                byte[] sig = Convert.FromBase64String(signature);
+                int fieldSize = algorithm == 14 ? 48 : 32;
+                if (pub.Length != fieldSize * 2 || sig.Length != fieldSize * 2) {
+                    return false;
+                }
+
+                ECParameters p = new() {
+                    Curve = algorithm == 14 ? ECCurve.NamedCurves.nistP384 : ECCurve.NamedCurves.nistP256,
+                    Q = new ECPoint {
+                        X = pub.AsSpan(0, fieldSize).ToArray(),
+                        Y = pub.AsSpan(fieldSize, fieldSize).ToArray(),
+                    }
+                };
+
+                using ECDsa ecdsa = ECDsa.Create(p);
+                byte[] der = P1363ToDer(sig, fieldSize);
+                HashAlgorithmName hash = algorithm == 14 ? HashAlgorithmName.SHA384 : HashAlgorithmName.SHA256;
+                return ecdsa.VerifyData(data, der, hash);
+            } catch {
+                return false;
+            }
+        }
+
+        private static byte[] P1363ToDer(byte[] signature, int size) {
+            int half = signature.Length / 2;
+            byte[] r = new byte[half];
+            byte[] s = new byte[half];
+            Array.Copy(signature, 0, r, 0, half);
+            Array.Copy(signature, half, s, 0, half);
+
+            r = TrimLeadingZeros(r);
+            s = TrimLeadingZeros(s);
+
+            if (r[0] >= 0x80) {
+                r = PrependZero(r);
+            }
+            if (s[0] >= 0x80) {
+                s = PrependZero(s);
+            }
+
+            int len = 2 + r.Length + 2 + s.Length;
+            byte[] der = new byte[len + 2];
+            int pos = 0;
+            der[pos++] = 0x30;
+            der[pos++] = (byte)len;
+            der[pos++] = 0x02;
+            der[pos++] = (byte)r.Length;
+            Array.Copy(r, 0, der, pos, r.Length);
+            pos += r.Length;
+            der[pos++] = 0x02;
+            der[pos++] = (byte)s.Length;
+            Array.Copy(s, 0, der, pos, s.Length);
+            return der;
+        }
+
+        private static byte[] TrimLeadingZeros(byte[] value) {
+            int i = 0;
+            while (i < value.Length - 1 && value[i] == 0) {
+                i++;
+            }
+            if (i == 0) {
+                return value;
+            }
+
+            byte[] output = new byte[value.Length - i];
+            Array.Copy(value, i, output, 0, output.Length);
+            return output;
+        }
+
+        private static byte[] PrependZero(byte[] value) {
+            byte[] output = new byte[value.Length + 1];
+            output[0] = 0;
+            Array.Copy(value, 0, output, 1, value.Length);
+            return output;
+        }
+
         private static RrsigInfo ParseRrsig(string record) {
             if (string.IsNullOrWhiteSpace(record)) {
                 return new RrsigInfo();
