@@ -1,6 +1,9 @@
 using DnsClientX;
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -24,14 +27,42 @@ public class TakeoverCnameAnalysis
     /// <summary>True when the CNAME points to a known takeover risk provider.</summary>
     public bool IsTakeoverRisk { get; private set; }
 
-    private static readonly string[] _providerDomains = new[]
-    {
-        "azurewebsites.net",
-        "cloudfront.net",
-        "herokudns.com",
-        "github.io",
-        "amazonaws.com"
-    };
+    private static HashSet<string> _providerDomains = LoadDefaultProviders();
+
+    private static HashSet<string> LoadDefaultProviders() {
+        try {
+            using var stream = typeof(TakeoverCnameAnalysis).Assembly.GetManifestResourceStream("DomainDetective.takeover.json");
+            if (stream != null) {
+                using var reader = new StreamReader(stream);
+                    var json = reader.ReadToEnd();
+                    var entries = JsonSerializer.Deserialize<string[]>(json)
+                        ?.Where(s => !string.IsNullOrWhiteSpace(s))
+                        ?? Enumerable.Empty<string>();
+                    return new HashSet<string>(entries, StringComparer.OrdinalIgnoreCase);
+            }
+        } catch {
+            // ignore malformed resource
+        }
+        return new HashSet<string>(Array.Empty<string>(), StringComparer.OrdinalIgnoreCase);
+    }
+
+    /// <summary>Loads takeover provider list from a JSON file.</summary>
+    /// <param name="filePath">JSON array file path.</param>
+    public static void LoadTakeoverList(string filePath) {
+        if (!File.Exists(filePath)) {
+            return;
+        }
+        try {
+            using var stream = File.OpenRead(filePath);
+            var entries = JsonSerializer.DeserializeAsync<string[]>(stream)
+                .GetAwaiter().GetResult()
+                ?.Where(s => !string.IsNullOrWhiteSpace(s))
+                ?? Enumerable.Empty<string>();
+            _providerDomains = new HashSet<string>(entries, StringComparer.OrdinalIgnoreCase);
+        } catch {
+            // ignore malformed list
+        }
+    }
 
     private async Task<DnsAnswer[]> QueryDns(string name, DnsRecordType type)
     {

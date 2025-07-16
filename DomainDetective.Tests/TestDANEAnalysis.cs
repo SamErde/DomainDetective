@@ -12,6 +12,22 @@ namespace DomainDetective.Tests {
             var healthCheck = new DomainHealthCheck {
                 Verbose = false
             };
+            healthCheck.DnsConfiguration.QueryDnsOverride = (name, type) => {
+                if (type == DnsRecordType.MX && name == "ietf.org") {
+                    return Task.FromResult(new[] { new DnsAnswer { DataRaw = "10 mail2.ietf.org." } });
+                }
+                if (type == DnsRecordType.TLSA && name == "_25._tcp.mail2.ietf.org") {
+                    return Task.FromResult(new[] {
+                        new DnsAnswer {
+                            Name = "_25._tcp.mail2.ietf.org",
+                            DataRaw = "3 1 1 " + new string('A', 64),
+                            Type = DnsRecordType.TLSA
+                        }
+                    });
+                }
+                return Task.FromResult(Array.Empty<DnsAnswer>());
+            };
+            healthCheck.DaneDnsOverride = healthCheck.DnsConfiguration.QueryDnsOverride;
             await healthCheck.Verify("ietf.org", new[] { HealthCheckType.DANE });
 
             Assert.False(healthCheck.DaneAnalysis.HasDuplicateRecords);
@@ -84,6 +100,8 @@ namespace DomainDetective.Tests {
             var healthCheck = new DomainHealthCheck(internalLogger: logger) {
                 Verbose = false
             };
+            healthCheck.DaneDnsOverride = (_, _) => Task.FromResult(Array.Empty<DnsAnswer>());
+            healthCheck.DnsConfiguration.QueryDnsOverride = healthCheck.DaneDnsOverride;
             await healthCheck.VerifyDANE("ipv6.google.com", [ServiceType.HTTPS]);
 
             Assert.False(healthCheck.DaneAnalysis.HasDuplicateRecords);
@@ -101,6 +119,8 @@ namespace DomainDetective.Tests {
                 Verbose = false,
                 DnsEndpoint = DnsEndpoint.System
             };
+            healthCheck.DaneDnsOverride = (_, _) => Task.FromResult(Array.Empty<DnsAnswer>());
+            healthCheck.DnsConfiguration.QueryDnsOverride = healthCheck.DaneDnsOverride;
             await healthCheck.VerifyDANE("ipv6.google.com", [ServiceType.HTTPS]);
 
             Assert.False(healthCheck.DaneAnalysis.HasDuplicateRecords);
@@ -114,6 +134,7 @@ namespace DomainDetective.Tests {
             var healthCheck = new DomainHealthCheck {
                 Verbose = false
             };
+            healthCheck.DaneDnsOverride = (_, _) => Task.FromResult(Array.Empty<DnsAnswer>());
 
             await healthCheck.VerifyDANE([new ServiceDefinition("example.com", 443)]);
 
@@ -125,6 +146,22 @@ namespace DomainDetective.Tests {
             var healthCheck = new DomainHealthCheck {
                 Verbose = false
             };
+            healthCheck.DnsConfiguration.QueryDnsOverride = (name, type) => {
+                if (type == DnsRecordType.MX && name == "ietf.org") {
+                    return Task.FromResult(new[] { new DnsAnswer { DataRaw = "10 mail2.ietf.org." } });
+                }
+                if (type == DnsRecordType.TLSA && name == "_25._tcp.mail2.ietf.org") {
+                    return Task.FromResult(new[] {
+                        new DnsAnswer {
+                            Name = "_25._tcp.mail2.ietf.org",
+                            DataRaw = "3 1 1 " + new string('A', 64),
+                            Type = DnsRecordType.TLSA
+                        }
+                    });
+                }
+                return Task.FromResult(Array.Empty<DnsAnswer>());
+            };
+            healthCheck.DaneDnsOverride = healthCheck.DnsConfiguration.QueryDnsOverride;
 
             await healthCheck.VerifyDANE("ietf.org", Array.Empty<ServiceType>());
 
