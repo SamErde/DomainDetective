@@ -79,6 +79,7 @@ public static partial class Program {
 
         await ExampleCheckDomainAvailability();
         await ExampleCheckLabelAcrossTlds();
+        await ExampleSuggestDomain();
 
         //await ExampleQueryDNS();
         //await ExampleAnalyseByStringWHOIS();
