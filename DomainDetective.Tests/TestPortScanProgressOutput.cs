@@ -16,7 +16,7 @@ public class TestPortScanProgressOutput
         var tcpPort = ((IPEndPoint)tcpListener.LocalEndpoint).Port;
         var tcpAccept = tcpListener.AcceptTcpClientAsync();
 
-        var udpServer = new UdpClient(new IPEndPoint(IPAddress.Loopback, 0));
+        using var udpServer = new UdpClient(new IPEndPoint(IPAddress.Loopback, 0));
         var udpPort = ((IPEndPoint)udpServer.Client.LocalEndPoint!).Port;
         var udpTask = Task.Run(async () =>
         {
@@ -38,7 +38,6 @@ public class TestPortScanProgressOutput
         {
             Console.SetOut(original);
             tcpListener.Stop();
-            udpServer.Close();
             await udpTask;
         }
 
