@@ -1,0 +1,10 @@
+[
+    ".git/",
+    ".svn/",
+    "config/",
+    "backup/",
+    "admin/",
+    "logs/",
+    "tmp/",
+    ".env"
+]

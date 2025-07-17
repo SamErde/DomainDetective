@@ -233,7 +233,11 @@ public static class CheckDescriptions {
             [HealthCheckType.RDAP] = new(
                 "Query RDAP registration data.",
                 null,
-                "Inspect RDAP for registration details.")
+                "Inspect RDAP for registration details."),
+            [HealthCheckType.DIRECTORYEXPOSURE] = new(
+                "Check for exposed directories on HTTP servers.",
+                null,
+                "Remove or secure publicly accessible directories.")
         };
 
     /// <summary>Gets the description for the specified check type.</summary>
