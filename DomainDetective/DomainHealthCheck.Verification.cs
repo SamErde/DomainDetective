@@ -333,6 +333,9 @@ namespace DomainDetective {
                     case HealthCheckType.THREATINTEL:
                         await VerifyThreatIntel(domainName, cancellationToken);
                         break;
+                    case HealthCheckType.DIRECTORYEXPOSURE:
+                        await VerifyDirectoryExposure(domainName, cancellationToken);
+                        break;
                 default:
                     _logger.WriteError("Unknown health check type: {0}", healthCheckType);
                     throw new NotSupportedException("Health check type not implemented.");
@@ -1021,6 +1024,16 @@ namespace DomainDetective {
             await TakeoverCnameAnalysis.Analyze(domainName, _logger, cancellationToken);
         }
 
+        /// <summary>
+        /// Scans common directories for public exposure.
+        /// </summary>
+        public async Task VerifyDirectoryExposure(string domainName, CancellationToken cancellationToken = default) {
+            domainName = ValidateHostName(domainName);
+            UpdateIsPublicSuffix(domainName);
+            DirectoryExposureAnalysis = new DirectoryExposureAnalysis();
+            await DirectoryExposureAnalysis.Analyze($"http://{domainName}", _logger, cancellationToken);
+        }
+
         /// Queries Autodiscover related records for a domain.
         /// </summary>
         /// <param name="domainName">Domain to verify.</param>
@@ -1515,6 +1528,7 @@ namespace DomainDetective {
             filtered.WildcardDnsAnalysis = active.Contains(HealthCheckType.WILDCARDDNS) ? CloneAnalysis(WildcardDnsAnalysis) : null;
             filtered.EdnsSupportAnalysis = active.Contains(HealthCheckType.EDNSSUPPORT) ? CloneAnalysis(EdnsSupportAnalysis) : null;
             filtered.FlatteningServiceAnalysis = active.Contains(HealthCheckType.FLATTENINGSERVICE) ? CloneAnalysis(FlatteningServiceAnalysis) : null;
+            filtered.DirectoryExposureAnalysis = active.Contains(HealthCheckType.DIRECTORYEXPOSURE) ? CloneAnalysis(DirectoryExposureAnalysis) : null;
 
             return filtered;
         }

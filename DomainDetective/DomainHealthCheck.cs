@@ -341,6 +341,12 @@ namespace DomainDetective {
         /// <summary>Alias used by <see cref="GetAnalysisMap"/>.</summary>
         public TakeoverCnameAnalysis TAKEOVERCNAMEAnalysis => TakeoverCnameAnalysis;
 
+        /// <summary>Gets the directory exposure analysis.</summary>
+        /// <value>Results of exposed directory checks.</value>
+        public DirectoryExposureAnalysis DirectoryExposureAnalysis { get; private set; } = new DirectoryExposureAnalysis();
+        /// <summary>Alias used by <see cref="GetAnalysisMap"/>.</summary>
+        public DirectoryExposureAnalysis DIRECTORYEXPOSUREAnalysis => DirectoryExposureAnalysis;
+
         // Settings properties moved to DomainHealthCheck.Settings.cs
 
         /// <summary>
