@@ -17,8 +17,10 @@ public class ThreatIntelAnalysis
     public Func<string, Task<string>>? GoogleSafeBrowsingOverride { private get; set; }
     /// <summary>Override PhishTank query.</summary>
     public Func<string, Task<string>>? PhishTankOverride { private get; set; }
-    /// <summary>Override VirusTotal query.</summary>
+    /// <summary>Override VirusTotal query returning JSON.</summary>
     public Func<string, Task<string>>? VirusTotalOverride { private get; set; }
+    /// <summary>Override VirusTotal query returning a model.</summary>
+    public Func<string, Task<VirusTotalObject?>>? VirusTotalObjectOverride { private get; set; }
 
     /// <summary>True when Google Safe Browsing lists the entry.</summary>
     public bool ListedByGoogle { get; private set; }
@@ -33,6 +35,7 @@ public class ThreatIntelAnalysis
 
     private static readonly HttpClient _staticClient = new();
     private readonly HttpClient _client;
+    private VirusTotalClient? _virusTotalClient;
 
     internal HttpClient Client => _client;
 
@@ -88,21 +91,30 @@ public class ThreatIntelAnalysis
         return await ReadAsStringAsync(resp);
     }
 
-    private async Task<string> QueryVirusTotal(string domainName, string apiKey, CancellationToken ct)
+    private async Task<VirusTotalObject?> QueryVirusTotal(string domainName, string apiKey, CancellationToken ct)
     {
+        if (VirusTotalObjectOverride != null)
+        {
+            return await VirusTotalObjectOverride(domainName);
+        }
+
         if (VirusTotalOverride != null)
         {
-            return await VirusTotalOverride(domainName);
+            var json = await VirusTotalOverride(domainName);
+            return JsonSerializer.Deserialize<VirusTotalResponse>(json, VirusTotalJson.Options)?.Data;
+        }
+
+        _virusTotalClient ??= new VirusTotalClient(apiKey);
+        if (string.IsNullOrEmpty(_virusTotalClient.ApiKey))
+        {
+            _virusTotalClient.ApiKey = apiKey;
         }
 
         var isIp = System.Net.IPAddress.TryParse(domainName, out _);
-        var url = isIp
-            ? $"https://www.virustotal.com/api/v3/ip_addresses/{domainName}"
-            : $"https://www.virustotal.com/api/v3/domains/{domainName}";
-        var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add("x-apikey", apiKey);
-        using var resp = await _client.SendAsync(request, ct);
-        return await ReadAsStringAsync(resp);
+        var result = isIp
+            ? await _virusTotalClient.GetIpAddress(domainName, ct).ConfigureAwait(false)
+            : await _virusTotalClient.GetDomain(domainName, ct).ConfigureAwait(false);
+        return result?.Data;
     }
 
     private static bool ParseGoogle(string json)
@@ -123,27 +135,6 @@ public class ThreatIntelAnalysis
         return valid && inDb;
     }
 
-    private bool ParseVirusTotal(string json)
-    {
-        using var doc = JsonDocument.Parse(json);
-        if (!doc.RootElement.TryGetProperty("data", out var data))
-        {
-            return false;
-        }
-        if (!data.TryGetProperty("attributes", out var attr))
-        {
-            return false;
-        }
-        if (attr.TryGetProperty("reputation", out var rep))
-        {
-            RiskScore = rep.GetInt32();
-        }
-        if (!attr.TryGetProperty("last_analysis_stats", out var stats))
-        {
-            return false;
-        }
-        return stats.TryGetProperty("malicious", out var mal) && mal.GetInt32() > 0;
-    }
 
     /// <summary>
     /// Queries all enabled reputation services.
@@ -188,8 +179,9 @@ public class ThreatIntelAnalysis
         {
             try
             {
-                var json = await QueryVirusTotal(domainName, virusTotalApiKey, ct);
-                ListedByVirusTotal = ParseVirusTotal(json);
+                var result = await QueryVirusTotal(domainName, virusTotalApiKey, ct).ConfigureAwait(false);
+                ListedByVirusTotal = result?.Attributes?.LastAnalysisStats?.Malicious > 0;
+                RiskScore = result?.Attributes?.Reputation;
                 if (RiskScore.HasValue && RiskScore.Value >= 70)
                 {
                     logger?.WriteWarning("VirusTotal risk score {0} for {1} is high.", RiskScore.Value, domainName);

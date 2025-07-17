@@ -11,8 +11,10 @@ namespace DomainDetective;
 /// </summary>
 /// <para>Part of the DomainDetective project.</para>
 public class ThreatFeedAnalysis {
-    /// <summary>Override VirusTotal query.</summary>
+    /// <summary>Override VirusTotal query returning JSON.</summary>
     public Func<string, Task<string>>? VirusTotalOverride { private get; set; }
+    /// <summary>Override VirusTotal query returning a model.</summary>
+    public Func<string, Task<VirusTotalObject?>>? VirusTotalObjectOverride { private get; set; }
     /// <summary>Override AbuseIPDB query.</summary>
     public Func<string, Task<string>>? AbuseIpDbOverride { private get; set; }
 
@@ -25,6 +27,7 @@ public class ThreatFeedAnalysis {
 
     private static readonly HttpClient _staticClient = new();
     private readonly HttpClient _client;
+    private VirusTotalClient? _virusTotalClient;
 
     internal HttpClient Client => _client;
 
@@ -41,16 +44,23 @@ public class ThreatFeedAnalysis {
         return await resp.Content.ReadAsStringAsync();
     }
 
-    private async Task<string> QueryVirusTotal(string ip, string apiKey, CancellationToken ct) {
-        if (VirusTotalOverride != null) {
-            return await VirusTotalOverride(ip);
+    private async Task<VirusTotalObject?> QueryVirusTotal(string ip, string apiKey, CancellationToken ct) {
+        if (VirusTotalObjectOverride != null) {
+            return await VirusTotalObjectOverride(ip);
         }
 
-        var url = $"https://www.virustotal.com/api/v3/ip_addresses/{ip}";
-        var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add("x-apikey", apiKey);
-        using var resp = await _client.SendAsync(request, ct);
-        return await ReadAsStringAsync(resp);
+        if (VirusTotalOverride != null) {
+            var json = await VirusTotalOverride(ip);
+            return JsonSerializer.Deserialize<VirusTotalResponse>(json, VirusTotalJson.Options)?.Data;
+        }
+
+        _virusTotalClient ??= new VirusTotalClient(apiKey);
+        if (string.IsNullOrEmpty(_virusTotalClient.ApiKey)) {
+            _virusTotalClient.ApiKey = apiKey;
+        }
+
+        var result = await _virusTotalClient.GetIpAddress(ip, ct).ConfigureAwait(false);
+        return result?.Data;
     }
 
     private async Task<string> QueryAbuseIpDb(string ip, string apiKey, CancellationToken ct) {
@@ -66,19 +76,6 @@ public class ThreatFeedAnalysis {
         return await ReadAsStringAsync(resp);
     }
 
-    private static bool ParseVirusTotal(string json) {
-        using var doc = JsonDocument.Parse(json);
-        if (!doc.RootElement.TryGetProperty("data", out var data)) {
-            return false;
-        }
-        if (!data.TryGetProperty("attributes", out var attr)) {
-            return false;
-        }
-        if (!attr.TryGetProperty("last_analysis_stats", out var stats)) {
-            return false;
-        }
-        return stats.TryGetProperty("malicious", out var mal) && mal.GetInt32() > 0;
-    }
 
     private static bool ParseAbuseIpDb(string json) {
         using var doc = JsonDocument.Parse(json);
@@ -96,8 +93,8 @@ public class ThreatFeedAnalysis {
 
         if (!string.IsNullOrWhiteSpace(virusTotalApiKey)) {
             try {
-                var json = await QueryVirusTotal(ip, virusTotalApiKey, ct);
-                ListedByVirusTotal = ParseVirusTotal(json);
+                var result = await QueryVirusTotal(ip, virusTotalApiKey, ct).ConfigureAwait(false);
+                ListedByVirusTotal = result?.Attributes?.LastAnalysisStats?.Malicious > 0;
             } catch (Exception ex) {
                 logger?.WriteError("VirusTotal query failed: {0}", ex.Message);
                 FailureReason = $"VirusTotal query failed: {ex.Message}";
