@@ -226,6 +226,26 @@ namespace DomainDetective.Tests {
         }
 
         [Fact]
+        public async Task UnknownCriticalTagFailsCheck() {
+            var healthCheck = new DomainHealthCheck();
+
+            await healthCheck.CheckCAA("128 foo \"bar\"");
+
+            Assert.True(healthCheck.CAAAnalysis.AnalysisResults[0].InvalidTag);
+            Assert.False(healthCheck.CAAAnalysis.Valid);
+        }
+
+        [Fact]
+        public async Task UnknownNonCriticalTagIsIgnored() {
+            var healthCheck = new DomainHealthCheck();
+
+            await healthCheck.CheckCAA("0 foo \"bar\"");
+
+            Assert.False(healthCheck.CAAAnalysis.AnalysisResults[0].InvalidTag);
+            Assert.True(healthCheck.CAAAnalysis.Valid);
+        }
+
+        [Fact]
         public async Task ReservedFlagBitsTriggerWarning() {
             var logger = new InternalLogger();
             var warnings = new List<LogEventArgs>();
