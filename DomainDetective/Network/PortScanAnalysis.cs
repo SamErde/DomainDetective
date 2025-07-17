@@ -184,8 +184,9 @@ public class PortScanAnalysis
                     cts.CancelAfter(Timeout);
                     var result = await udp.ReceiveAsync(cts.Token).ConfigureAwait(false);
                     udpOpen = result.Buffer.Length > 0;
-                    if (udpOpen && port == 161)
+                    if (await SnmpAnalysis.ProbeAsync(address.ToString(), port, Timeout, logger, cts.Token).ConfigureAwait(false))
                     {
+                        udpOpen = true;
                         banner = "SNMP";
                     }
                 }
@@ -196,7 +197,7 @@ public class PortScanAnalysis
                     var receiveTask = udp.ReceiveAsync();
                     await receiveTask.WaitWithCancellation(cts.Token).ConfigureAwait(false);
                     udpOpen = true;
-                    if (port == 161)
+                    if (await SnmpAnalysis.ProbeAsync(address.ToString(), port, Timeout, logger, cts.Token).ConfigureAwait(false))
                     {
                         banner = "SNMP";
                     }
