@@ -10,7 +10,7 @@ public class TestWildcardDnsAnalysis
     {
         var analysis = new WildcardDnsAnalysis
         {
-            QueryDnsOverride = (_, _) => Task.FromResult(new[] { new DnsAnswer { Type = DnsRecordType.A } })
+            QueryDnsOverride = (_, _) => Task.FromResult(new[] { new DnsAnswer { Type = DnsRecordType.A, DataRaw = "192.0.2.1" } })
         };
 
         await analysis.Analyze("example.com", new InternalLogger(), sampleCount: 2);
@@ -62,7 +62,7 @@ public class TestWildcardDnsAnalysis
                 // respond only when two random labels are present
                 var labels = name.Split('.');
                 return Task.FromResult(labels.Length == 4
-                    ? new[] { new DnsAnswer { Type = DnsRecordType.A } }
+                    ? new[] { new DnsAnswer { Type = DnsRecordType.A, DataRaw = "192.0.2.1" } }
                     : System.Array.Empty<DnsAnswer>());
             }
         };
@@ -92,5 +92,57 @@ public class TestWildcardDnsAnalysis
 
         Assert.False(analysis.SoaExists);
         Assert.True(analysis.NsExists);
+    }
+
+    [Fact]
+    public async Task NoCatchAllWhenAddressesVary()
+    {
+        var map = new Dictionary<string, string>();
+        var analysis = new WildcardDnsAnalysis
+        {
+            QueryDnsOverride = (name, type) =>
+            {
+                if (type == DnsRecordType.SOA || type == DnsRecordType.NS)
+                {
+                    return Task.FromResult(Array.Empty<DnsAnswer>());
+                }
+
+                if (!map.TryGetValue(name, out var ip))
+                {
+                    ip = map.Count == 0 ? "192.0.2.1" : "192.0.2.2";
+                    map[name] = ip;
+                }
+                return Task.FromResult(new[] { new DnsAnswer { Type = DnsRecordType.A, DataRaw = ip } });
+            }
+        };
+
+        await analysis.Analyze("example.com", new InternalLogger(), sampleCount: 1);
+
+        Assert.False(analysis.CatchAll);
+    }
+
+    [Fact]
+    public async Task RetryUntilSuccess()
+    {
+        var counts = new Dictionary<string, int>();
+        var analysis = new WildcardDnsAnalysis
+        {
+            RetryCount = 2,
+            QueryDnsOverride = (name, _) =>
+            {
+                if (!counts.ContainsKey(name))
+                {
+                    counts[name] = 0;
+                }
+                counts[name]++;
+                return counts[name] == 1
+                    ? Task.FromResult(Array.Empty<DnsAnswer>())
+                    : Task.FromResult(new[] { new DnsAnswer { Type = DnsRecordType.A, DataRaw = "192.0.2.1" } });
+            }
+        };
+
+        await analysis.Analyze("example.com", new InternalLogger(), sampleCount: 1);
+
+        Assert.True(analysis.CatchAll);
     }
 }
