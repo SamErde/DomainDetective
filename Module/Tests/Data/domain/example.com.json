@@ -1,0 +1,1 @@
+{"ldhName":"EXAMPLE.COM","nameservers":[{"ldhName":"A.IANA-SERVERS.NET"},{"ldhName":"B.IANA-SERVERS.NET"}],"events":[{"eventAction":"registration","eventDate":"2000-01-01T00:00:00Z"}],"entities":[{"handle":"111","roles":["registrar"],"vcardArray":["vcard",[["fn",{},"text","Registrar Inc"]]]}]}
