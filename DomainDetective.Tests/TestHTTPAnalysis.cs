@@ -221,16 +221,18 @@ namespace DomainDetective.Tests {
             listener.Prefixes.Add(prefix);
             listener.Start();
 
+            using var cts = new CancellationTokenSource();
             var serverTask = Task.Run(async () => {
-                while (true) {
+                while (!cts.IsCancellationRequested) {
                     HttpListenerContext ctx;
                     try {
                         ctx = await listener.GetContextAsync();
-                    } catch (HttpListenerException) {
+                    } catch (HttpListenerException) when (cts.IsCancellationRequested) {
                         break;
                     } catch (ObjectDisposedException) {
                         break;
                     }
+
                     ctx.Response.StatusCode = 302;
                     ctx.Response.RedirectLocation = prefix;
                     ctx.Response.Close();
@@ -241,7 +243,8 @@ namespace DomainDetective.Tests {
                 var analysis = new HttpAnalysis { MaxRedirects = 2 };
                 await Assert.ThrowsAsync<InvalidOperationException>(() => analysis.AnalyzeUrl(prefix, false, new InternalLogger()));
             } finally {
-                listener.Stop();
+                cts.Cancel();
+                listener.Close();
                 await serverTask;
             }
         }
