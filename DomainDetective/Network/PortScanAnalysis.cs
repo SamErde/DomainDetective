@@ -177,32 +177,36 @@ public class PortScanAnalysis
                 udp.Client.SendTimeout = (int)Timeout.TotalMilliseconds;
                 udp.Client.ReceiveTimeout = (int)Timeout.TotalMilliseconds;
                 udp.Connect(address, port);
+                using var cts = CancellationTokenSource.CreateLinkedTokenSource(token);
+                cts.CancelAfter(Timeout);
                 await udp.SendAsync(Array.Empty<byte>(), 0).ConfigureAwait(false);
 #if NET8_0_OR_GREATER
-                using (var cts = CancellationTokenSource.CreateLinkedTokenSource(token))
+                try
                 {
-                    cts.CancelAfter(Timeout);
                     var result = await udp.ReceiveAsync(cts.Token).ConfigureAwait(false);
                     udpOpen = result.Buffer.Length > 0;
-                    if (await SnmpAnalysis.ProbeAsync(address.ToString(), port, Timeout, logger, cts.Token).ConfigureAwait(false))
-                    {
-                        udpOpen = true;
-                        banner = "SNMP";
-                    }
+                }
+                catch
+                {
+                    // ignore UDP receive failures
                 }
 #else
-                using (var cts = CancellationTokenSource.CreateLinkedTokenSource(token))
+                var receiveTask = udp.ReceiveAsync();
+                try
                 {
-                    cts.CancelAfter(Timeout);
-                    var receiveTask = udp.ReceiveAsync();
                     await receiveTask.WaitWithCancellation(cts.Token).ConfigureAwait(false);
                     udpOpen = true;
-                    if (await SnmpAnalysis.ProbeAsync(address.ToString(), port, Timeout, logger, cts.Token).ConfigureAwait(false))
-                    {
-                        banner = "SNMP";
-                    }
+                }
+                catch
+                {
+                    // ignore UDP receive failures
                 }
 #endif
+                if (await SnmpAnalysis.ProbeAsync(address.ToString(), port, Timeout, logger, cts.Token).ConfigureAwait(false))
+                {
+                    udpOpen = true;
+                    banner = "SNMP";
+                }
             }
             catch (Exception ex) when (ex is SocketException || ex is OperationCanceledException)
             {
