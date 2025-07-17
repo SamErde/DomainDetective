@@ -78,7 +78,7 @@ internal static class Program {
                 .WithExample(new[] { "TestOpenResolver", "8.8.8.8" });
             config.AddCommand<TestNtpServerCommand>("TestNtpServer")
                 .WithDescription("Query NTP server for clock offset")
-                .WithExample(new[] { "TestNtpServer", "pool.ntp.org" });
+                .WithExample(new[] { "TestNtpServer", "--builtin", "Pool" });
         });
         try {
             return await app.RunAsync(args).WaitAsync(cts.Token);

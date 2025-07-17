@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -32,6 +33,10 @@ public class NtpAnalysis {
         ServerResults[$"{host}:{port}"] = await QueryServer(host, port, logger, cancellationToken);
     }
 
+    /// <summary>Queries a predefined NTP server.</summary>
+    public Task AnalyzeServer(NtpServer server, int port, InternalLogger? logger, CancellationToken cancellationToken = default) =>
+        AnalyzeServer(server.ToHost(), port, logger, cancellationToken);
+
     /// <summary>Queries multiple NTP servers.</summary>
     public async Task AnalyzeServers(IEnumerable<string> hosts, int port, InternalLogger? logger, CancellationToken cancellationToken = default) {
         ServerResults.Clear();
@@ -40,6 +45,10 @@ public class NtpAnalysis {
             ServerResults[$"{host}:{port}"] = await QueryServer(host, port, logger, cancellationToken);
         }
     }
+
+    /// <summary>Queries multiple predefined NTP servers.</summary>
+    public Task AnalyzeServers(IEnumerable<NtpServer> servers, int port, InternalLogger? logger, CancellationToken cancellationToken = default) =>
+        AnalyzeServers(servers.Select(s => s.ToHost()), port, logger, cancellationToken);
 
     private static ulong ReadUInt32(byte[] data, int offset) => ((ulong)data[offset] << 24) | ((ulong)data[offset + 1] << 16) | ((ulong)data[offset + 2] << 8) | data[offset + 3];
 

@@ -666,6 +666,13 @@ namespace DomainDetective {
             await NtpAnalysis.AnalyzeServer(host, port, _logger, cancellationToken);
         }
 
+        /// <summary>Queries a predefined NTP server.</summary>
+        /// <param name="server">Built-in server enumeration.</param>
+        /// <param name="port">NTP port number.</param>
+        /// <param name="cancellationToken">Token to cancel the operation.</param>
+        public Task TestNtpServer(NtpServer server, int port = 123, CancellationToken cancellationToken = default) =>
+            TestNtpServer(server.ToHost(), port, cancellationToken);
+
         /// <summary>
         /// Generates typosquatting variants and checks if they resolve.
         /// </summary>
