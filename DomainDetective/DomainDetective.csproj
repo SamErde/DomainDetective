@@ -31,6 +31,7 @@
     <ItemGroup>
         <EmbeddedResource Include="..\Data\public_suffix_list.dat" />
         <EmbeddedResource Include="..\Data\takeover.json" />
+        <EmbeddedResource Include="..\Data\directory_paths.json" />
         <None Include="..\Data\hsts_preload.json">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>

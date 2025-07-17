@@ -98,5 +98,7 @@ public enum HealthCheckType {
     /// <summary>Detect CNAMEs pointing to flattening services.</summary>
     FLATTENINGSERVICE,
     /// <summary>Query RDAP registration information.</summary>
-    RDAP
+    RDAP,
+    /// <summary>Check for exposed directories.</summary>
+    DIRECTORYEXPOSURE
 }
