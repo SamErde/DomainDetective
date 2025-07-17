@@ -26,7 +26,7 @@ namespace DomainDetective.PowerShell {
         private DomainHealthCheck _healthCheck;
 
         /// <summary>Initializes logging and helper classes.</summary>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        /// <returns>A <see cref="System.Threading.Tasks.Task"/> representing the asynchronous operation.</returns>
         protected override Task BeginProcessingAsync() {
             _logger = new InternalLogger(false);
             var internalLoggerPowerShell = new InternalLoggerPowerShell(_logger, this.WriteVerbose, this.WriteWarning, this.WriteDebug, this.WriteError, this.WriteProgress, this.WriteInformation);
@@ -36,7 +36,7 @@ namespace DomainDetective.PowerShell {
         }
 
         /// <summary>Executes the cmdlet operation.</summary>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        /// <returns>A <see cref="System.Threading.Tasks.Task"/> representing the asynchronous operation.</returns>
         protected override async Task ProcessRecordAsync() {
             _logger.WriteVerbose("Checking IMAP TLS for {0}:{1}", HostName, Port);
             await _healthCheck.CheckImapTlsHost(HostName, Port);
