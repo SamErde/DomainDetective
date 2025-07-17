@@ -174,8 +174,8 @@ namespace DomainDetective.Tests {
             Assert.Empty(healthCheck.DmarcAnalysis.MailtoRuf);
             Assert.Equal(new[] { "https://reports.example.com" }, healthCheck.DmarcAnalysis.HttpRuf);
 
-            Assert.Contains(warnings, w => w.Contains("HTTP instead of HTTPS", StringComparison.OrdinalIgnoreCase));
-            Assert.Contains(warnings, w => w.Contains("not a valid email", StringComparison.OrdinalIgnoreCase));
+            Assert.Contains(warnings, w => w.IndexOf("HTTP instead of HTTPS", StringComparison.OrdinalIgnoreCase) >= 0);
+            Assert.Contains(warnings, w => w.IndexOf("not a valid email", StringComparison.OrdinalIgnoreCase) >= 0);
         }
 
         [Fact]
