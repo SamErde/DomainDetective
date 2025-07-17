@@ -11,16 +11,16 @@ namespace DomainDetective.PowerShell {
     /// </example>
     [Cmdlet(VerbsCommon.Get, "CertificateInfo")]
     public sealed class CmdletGetCertificateInfo : AsyncPSCmdlet {
-        /// <param name="Path">Path to a PEM or DER encoded certificate.</param>
+        /// <para>Path to a PEM or DER encoded certificate.</para>
         [Parameter(Mandatory = true, Position = 0)]
         [ValidateNotNullOrEmpty]
         public string Path;
 
-        /// <param name="ShowChain">Include certificate chain in the output.</param>
+        /// <para>Include certificate chain in the output.</para>
         [Parameter(Mandatory = false)]
         public SwitchParameter ShowChain;
 
-        /// <param name="SkipRevocation">Do not check certificate revocation status.</param>
+        /// <para>Do not check certificate revocation status.</para>
         [Parameter(Mandatory = false)]
         public SwitchParameter SkipRevocation;
 

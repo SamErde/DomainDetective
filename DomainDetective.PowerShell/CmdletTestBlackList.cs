@@ -13,16 +13,16 @@ namespace DomainDetective.PowerShell {
 [Cmdlet(VerbsDiagnostic.Test, "DDDnsDomainBlacklist", DefaultParameterSetName = "ServerName")]
 [Alias("Test-DnsDomainBlacklist")]
     public sealed class CmdletTestBlackList : AsyncPSCmdlet {
-        /// <param name="NameOrIpAddress">Domain names or IP addresses to check.</param>
+        /// <para>Domain names or IP addresses to check.</para>
         [Parameter(Mandatory = true, Position = 0, ParameterSetName = "ServerName")]
         [ValidateNotNullOrEmpty]
         public string[] NameOrIpAddress;
 
-        /// <param name="DnsEndpoint">DNS server used for queries.</param>
+        /// <para>DNS server used for queries.</para>
         [Parameter(Mandatory = false, Position = 1, ParameterSetName = "ServerName")]
         public DnsEndpoint DnsEndpoint = DnsEndpoint.System;
 
-        /// <param name="FullResponse">Return full analysis result.</param>
+        /// <para>Return full analysis result.</para>
         [Parameter(Mandatory = false, ParameterSetName = "ServerName")]
         public SwitchParameter FullResponse;
 
