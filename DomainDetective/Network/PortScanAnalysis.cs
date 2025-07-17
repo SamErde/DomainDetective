@@ -173,7 +173,19 @@ public class PortScanAnalysis
         }
         sw.Stop();
 
-        using var udp = UdpClientFactory(address.AddressFamily);
+        UdpClient? udp = null;
+        try
+        {
+            udp = UdpClientFactory(address.AddressFamily);
+        }
+        catch (SocketException ex)
+        {
+            logger?.WriteVerbose("UDP {0}:{1} closed - {2}", address, port, ex.Message);
+            error = ex.Message;
+            return new ScanResult { TcpOpen = tcpOpen, UdpOpen = udpOpen, TcpLatency = sw.Elapsed, Error = error, Banner = banner };
+        }
+
+        using (udp)
         {
             try
             {
