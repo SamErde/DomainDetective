@@ -1,10 +1,9 @@
+using DomainDetective;
 using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using Xunit;
-
-using DomainDetective;
 namespace DomainDetective.Tests {
     public class TestPortScanAnalysis {
         [Fact]
@@ -165,7 +164,7 @@ namespace DomainDetective.Tests {
                 using var stream = client.GetStream();
                 var data = System.Text.Encoding.ASCII.GetBytes("SSH-2.0-Test\r\n");
                 await stream.WriteAsync(data, 0, data.Length);
-                await Task.Delay(10);
+                await stream.FlushAsync();
             });
 
             try {
@@ -173,8 +172,8 @@ namespace DomainDetective.Tests {
                 await analysis.Scan("127.0.0.1", new[] { port }, new InternalLogger());
                 Assert.Equal("SSH-2.0-Test", analysis.Results[port].Banner);
             } finally {
-                listener.Stop();
                 await serverTask;
+                listener.Stop();
             }
         }
 
@@ -183,4 +182,3 @@ namespace DomainDetective.Tests {
         }
     }
 }
-
