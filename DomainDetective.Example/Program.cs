@@ -76,10 +76,13 @@ public static partial class Program {
         await ExampleAnalyseGeoIp();
         await ExamplePortScan();
         await ExampleAnalyseNtp();
+        await ExampleAnalyseSNMP();
         await ExampleCtLogAggregator();
+        await ExampleVirusTotalClient();
 
         await ExampleCheckDomainAvailability();
         await ExampleCheckLabelAcrossTlds();
+        await ExampleSuggestDomain();
 
         //await ExampleQueryDNS();
         //await ExampleAnalyseByStringWHOIS();
