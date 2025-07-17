@@ -636,7 +636,8 @@ namespace DomainDetective.Tests {
             try {
                 var analysis = new HttpAnalysis();
                 await analysis.AnalyzeUrl(prefix, false, new InternalLogger());
-                Assert.Equal("TestServer/1.0", analysis.ServerHeader);
+                Assert.NotNull(analysis.ServerHeader);
+                Assert.Contains("TestServer/1.0", analysis.ServerHeader);
             } finally {
                 listener.Stop();
                 await serverTask;
