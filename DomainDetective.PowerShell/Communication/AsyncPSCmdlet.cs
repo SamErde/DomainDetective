@@ -42,7 +42,7 @@ namespace DomainDetective.PowerShell {
         /// <summary>
         /// Performs initialization logic for the cmdlet.
         /// </summary>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        /// <returns>A <see cref="System.Threading.Tasks.Task"/> representing the asynchronous operation.</returns>
         protected virtual Task BeginProcessingAsync()
             => Task.CompletedTask;
 
@@ -55,7 +55,7 @@ namespace DomainDetective.PowerShell {
         /// <summary>
         /// Executes the main cmdlet logic.
         /// </summary>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        /// <returns>A <see cref="System.Threading.Tasks.Task"/> representing the asynchronous operation.</returns>
         protected virtual Task ProcessRecordAsync()
             => Task.CompletedTask;
 
@@ -69,7 +69,7 @@ namespace DomainDetective.PowerShell {
         /// <summary>
         /// Performs cleanup logic for the cmdlet.
         /// </summary>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        /// <returns>A <see cref="System.Threading.Tasks.Task"/> representing the asynchronous operation.</returns>
         protected virtual Task EndProcessingAsync()
             => Task.CompletedTask;
 

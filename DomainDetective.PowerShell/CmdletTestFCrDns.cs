@@ -26,7 +26,7 @@ public sealed class CmdletTestFCrDns : AsyncPSCmdlet
     private DomainHealthCheck _healthCheck;
 
         /// <summary>Initializes logging and helper classes.</summary>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        /// <returns>A <see cref="System.Threading.Tasks.Task"/> representing the asynchronous operation.</returns>
     protected override Task BeginProcessingAsync()
     {
         _logger = new InternalLogger(false);
@@ -44,7 +44,7 @@ public sealed class CmdletTestFCrDns : AsyncPSCmdlet
     }
 
         /// <summary>Executes the cmdlet operation.</summary>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        /// <returns>A <see cref="System.Threading.Tasks.Task"/> representing the asynchronous operation.</returns>
     protected override async Task ProcessRecordAsync()
     {
         _logger.WriteVerbose("Querying FCrDNS for domain: {0}", DomainName);
