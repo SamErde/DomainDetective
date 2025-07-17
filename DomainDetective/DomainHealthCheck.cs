@@ -168,6 +168,12 @@ namespace DomainDetective {
         public OpenRelayAnalysis OpenRelayAnalysis { get; private set; } = new OpenRelayAnalysis();
 
         /// <summary>
+        /// Gets the open resolver analysis.
+        /// </summary>
+        /// <value>Recursive query test results.</value>
+        public OpenResolverAnalysis OpenResolverAnalysis { get; private set; } = new OpenResolverAnalysis();
+
+        /// <summary>
         /// Gets the STARTTLS analysis.
         /// </summary>
         /// <value>Information from STARTTLS negotiations.</value>

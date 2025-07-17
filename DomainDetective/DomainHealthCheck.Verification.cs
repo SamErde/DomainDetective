@@ -248,6 +248,9 @@ namespace DomainDetective {
                             await OpenRelayAnalysis.AnalyzeServer(host, 25, _logger, cancellationToken);
                         }
                         break;
+                    case HealthCheckType.OPENRESOLVER:
+                        await VerifyOpenResolver(domainName, cancellationToken);
+                        break;
                     case HealthCheckType.STARTTLS:
                         var mxRecordsForTls = await DnsConfiguration.QueryDNS(domainName, DnsRecordType.MX, cancellationToken: cancellationToken);
                         IEnumerable<string> tlsHosts = CertificateAnalysis.ExtractMxHosts(mxRecordsForTls);
@@ -517,6 +520,17 @@ namespace DomainDetective {
         public async Task CheckOpenRelayHost(string host, int port = 25, CancellationToken cancellationToken = default) {
             ValidatePort(port);
             await OpenRelayAnalysis.AnalyzeServer(host, port, _logger, cancellationToken);
+        }
+
+        /// <summary>
+        /// Checks if a DNS server allows recursive queries.
+        /// </summary>
+        /// <param name="host">Target server host name or IP.</param>
+        /// <param name="port">DNS port number. Must be between 1 and 65535.</param>
+        /// <param name="cancellationToken">Token to cancel the operation.</param>
+        public async Task CheckOpenResolverHost(string host, int port = 53, CancellationToken cancellationToken = default) {
+            ValidatePort(port);
+            await OpenResolverAnalysis.AnalyzeServer(host, port, _logger, cancellationToken);
         }
 
         /// <summary>
@@ -1478,6 +1492,7 @@ namespace DomainDetective {
             filtered.SecurityTXTAnalysis = active.Contains(HealthCheckType.SECURITYTXT) ? CloneAnalysis(SecurityTXTAnalysis) : null;
             filtered.SOAAnalysis = active.Contains(HealthCheckType.SOA) ? CloneAnalysis(SOAAnalysis) : null;
             filtered.OpenRelayAnalysis = active.Contains(HealthCheckType.OPENRELAY) ? CloneAnalysis(OpenRelayAnalysis) : null;
+            filtered.OpenResolverAnalysis = active.Contains(HealthCheckType.OPENRESOLVER) ? CloneAnalysis(OpenResolverAnalysis) : null;
             filtered.StartTlsAnalysis = active.Contains(HealthCheckType.STARTTLS) ? CloneAnalysis(StartTlsAnalysis) : null;
             filtered.SmtpTlsAnalysis = active.Contains(HealthCheckType.SMTPTLS) ? CloneAnalysis(SmtpTlsAnalysis) : null;
             filtered.ImapTlsAnalysis = active.Contains(HealthCheckType.IMAPTLS) ? CloneAnalysis(ImapTlsAnalysis) : null;

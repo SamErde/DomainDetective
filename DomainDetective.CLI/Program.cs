@@ -73,6 +73,9 @@ internal static class Program {
             config.AddCommand<TestRdapNameserverCommand>("TestRDAP-NS")
                 .WithDescription("Query RDAP information for a nameserver")
                 .WithExample(new[] { "TestRDAP-NS", "ns1.example.com" });
+            config.AddCommand<TestOpenResolverCommand>("TestOpenResolver")
+                .WithDescription("Check DNS server for recursion")
+                .WithExample(new[] { "TestOpenResolver", "8.8.8.8" });
         });
         try {
             return await app.RunAsync(args).WaitAsync(cts.Token);
