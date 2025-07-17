@@ -149,9 +149,9 @@ As an illustration, a CAA record that is set on example.com is also applicable t
                         analysis.Tag = tagType;
                     } else {
                         analysis.Tag = CAATagType.Unknown;
-                        analysis.InvalidTag = true;
                         if (analysis.Critical) {
-                            logger?.WriteWarning("Unknown CAA property tag '{0}' flagged as critical", tag);
+                            analysis.InvalidTag = true;
+                            logger?.WriteWarning($"Unknown CAA property tag '{tag}' flagged as critical");
                         }
                     }
 
