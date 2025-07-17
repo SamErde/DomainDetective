@@ -78,5 +78,8 @@ namespace DomainDetective {
 
         /// <summary>Enable detection of homoglyph characters.</summary>
         public bool EnableHomoglyphDetection { get; set; } = true;
+
+        /// <summary>Protected brand keywords for typosquatting detection.</summary>
+        public List<string> TyposquattingBrandKeywords { get; } = new();
     }
 }

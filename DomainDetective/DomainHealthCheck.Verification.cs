@@ -651,6 +651,8 @@ namespace DomainDetective {
             TyposquattingAnalysis.DnsConfiguration = DnsConfiguration;
             TyposquattingAnalysis.LevenshteinThreshold = TyposquattingLevenshteinThreshold;
             TyposquattingAnalysis.DetectHomoglyphs = EnableHomoglyphDetection;
+            TyposquattingAnalysis.BrandKeywords.Clear();
+            TyposquattingAnalysis.BrandKeywords.AddRange(TyposquattingBrandKeywords);
             await TyposquattingAnalysis.Analyze(domainName, _logger, cancellationToken);
         }
 

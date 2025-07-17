@@ -2,7 +2,7 @@
 
 Import-Module $PSScriptRoot\..\DomainDetective.psd1 -Force
 
-$Health = Test-DomainHealth -DomainName 'evotec.pl' -Verbose
+$Health = Test-DomainHealth -DomainName 'evotec.pl' -Verbose -BrandKeyword 'paypal','google'
 $Health | Format-Table
 $Health | Format-List
 
