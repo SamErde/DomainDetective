@@ -178,6 +178,23 @@ namespace DomainDetective.Tests {
             }
         }
 
+        [Fact]
+        public async Task DetectsSnmpUdpBanner() {
+            var udp = new UdpClient(new IPEndPoint(IPAddress.Loopback, 161));
+            var task = Task.Run(async () => {
+                var r = await udp.ReceiveAsync();
+                await udp.SendAsync(new byte[] { 1 }, 1, r.RemoteEndPoint);
+            });
+            try {
+                var analysis = new PortScanAnalysis { Timeout = TimeSpan.FromMilliseconds(200) };
+                await analysis.Scan("127.0.0.1", new[] { 161 }, new InternalLogger());
+                Assert.Equal("SNMP", analysis.Results[161].Banner);
+            } finally {
+                udp.Close();
+                await task;
+            }
+        }
+
         private static int GetFreePort() {
             return PortHelper.GetFreePort();
         }
