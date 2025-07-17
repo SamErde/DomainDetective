@@ -50,4 +50,20 @@ public class TestThreatFeedAnalysis {
         Assert.False(string.IsNullOrEmpty(analysis.FailureReason));
         Assert.False(analysis.ListedByVirusTotal);
     }
+
+    [Fact]
+    public async Task UsesObjectOverride() {
+        var obj = new VirusTotalObject {
+            Attributes = new VirusTotalAttributes {
+                LastAnalysisStats = new VirusTotalStats { Malicious = 1 }
+            }
+        };
+        var analysis = new ThreatFeedAnalysis {
+            VirusTotalObjectOverride = _ => Task.FromResult<VirusTotalObject?>(obj)
+        };
+
+        await analysis.Analyze("8.8.8.8", "v", null, new InternalLogger());
+
+        Assert.True(analysis.ListedByVirusTotal);
+    }
 }

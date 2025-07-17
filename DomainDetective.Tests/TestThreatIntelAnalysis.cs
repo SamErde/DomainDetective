@@ -81,4 +81,26 @@ public class TestThreatIntelAnalysis
         Assert.Equal(90, analysis.RiskScore);
         Assert.Contains(warnings, w => w.FullMessage.Contains("risk score"));
     }
+
+    [Fact]
+    public async Task UsesObjectOverride()
+    {
+        var obj = new VirusTotalObject
+        {
+            Attributes = new VirusTotalAttributes
+            {
+                LastAnalysisStats = new VirusTotalStats { Malicious = 1 },
+                Reputation = 42
+            }
+        };
+        var analysis = new ThreatIntelAnalysis
+        {
+            VirusTotalObjectOverride = _ => Task.FromResult<VirusTotalObject?>(obj)
+        };
+
+        await analysis.Analyze("example.com", null, null, "v", new InternalLogger());
+
+        Assert.True(analysis.ListedByVirusTotal);
+        Assert.Equal(42, analysis.RiskScore);
+    }
 }
