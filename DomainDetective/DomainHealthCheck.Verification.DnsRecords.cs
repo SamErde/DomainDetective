@@ -174,5 +174,25 @@ namespace DomainDetective {
                 await OpenRelayAnalysis.AnalyzeServer(host, port, _logger, cancellationToken);
             }
         }
+
+        /// <summary>
+        /// Tests name servers for open recursion.
+        /// </summary>
+        public async Task VerifyOpenResolver(string domainName, CancellationToken cancellationToken = default) {
+            if (string.IsNullOrWhiteSpace(domainName)) {
+                throw new ArgumentNullException(nameof(domainName));
+            }
+            domainName = NormalizeDomain(domainName);
+            UpdateIsPublicSuffix(domainName);
+            if (IsPublicSuffix) {
+                return;
+            }
+            var nsRecords = await DnsConfiguration.QueryDNS(domainName, DnsRecordType.NS, cancellationToken: cancellationToken);
+            foreach (var record in nsRecords) {
+                var host = record.Data.Trim('.');
+                cancellationToken.ThrowIfCancellationRequested();
+                await OpenResolverAnalysis.AnalyzeServer(host, 53, _logger, cancellationToken);
+            }
+        }
     }
 }

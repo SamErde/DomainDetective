@@ -49,6 +49,8 @@ public enum HealthCheckType {
     SOA,
     /// <summary>Detect open SMTP relay.</summary>
     OPENRELAY,
+    /// <summary>Test DNS servers for open recursion.</summary>
+    OPENRESOLVER,
     /// <summary>Validate STARTTLS support.</summary>
     STARTTLS,
     /// <summary>Verify SMTP TLS configuration.</summary>

@@ -117,6 +117,11 @@ public static class CheckDescriptions {
                 "Verify open relay (SMTP).",
                 null,
                 "Disable unauthenticated relaying."),
+            // Verify Open Resolver
+            [HealthCheckType.OPENRESOLVER] = new(
+                "Verify open resolver configuration.",
+                null,
+                "Disable recursion on authoritative servers."),
             // Verify STARTTLS (detect advertisement downgrades)
             [HealthCheckType.STARTTLS] = new(
                 "Verify STARTTLS and detect downgrades.",
