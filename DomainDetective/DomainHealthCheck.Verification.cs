@@ -657,6 +657,15 @@ namespace DomainDetective {
             await Task.Run(() => DnsTunnelingAnalysis.Analyze(domainName, lines), ct);
         }
 
+        /// <summary>Queries an NTP server for clock information.</summary>
+        /// <param name="host">Target server host name or IP.</param>
+        /// <param name="port">NTP port number.</param>
+        /// <param name="cancellationToken">Token to cancel the operation.</param>
+        public async Task TestNtpServer(string host, int port = 123, CancellationToken cancellationToken = default) {
+            ValidatePort(port);
+            await NtpAnalysis.AnalyzeServer(host, port, _logger, cancellationToken);
+        }
+
         /// <summary>
         /// Generates typosquatting variants and checks if they resolve.
         /// </summary>
@@ -1544,6 +1553,7 @@ namespace DomainDetective {
             filtered.EdnsSupportAnalysis = active.Contains(HealthCheckType.EDNSSUPPORT) ? CloneAnalysis(EdnsSupportAnalysis) : null;
             filtered.FlatteningServiceAnalysis = active.Contains(HealthCheckType.FLATTENINGSERVICE) ? CloneAnalysis(FlatteningServiceAnalysis) : null;
             filtered.DirectoryExposureAnalysis = active.Contains(HealthCheckType.DIRECTORYEXPOSURE) ? CloneAnalysis(DirectoryExposureAnalysis) : null;
+            filtered.NtpAnalysis = active.Contains(HealthCheckType.NTP) ? CloneAnalysis(NtpAnalysis) : null;
 
             return filtered;
         }

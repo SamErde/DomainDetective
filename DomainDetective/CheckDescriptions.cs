@@ -246,7 +246,11 @@ public static class CheckDescriptions {
             [HealthCheckType.DIRECTORYEXPOSURE] = new(
                 "Check for exposed directories on HTTP servers.",
                 null,
-                "Remove or secure publicly accessible directories.")
+                "Remove or secure publicly accessible directories."),
+            [HealthCheckType.NTP] = new(
+                "Query NTP server for clock offset.",
+                "https://datatracker.ietf.org/doc/html/rfc5905",
+                "Ensure NTP responds with valid time data.")
         };
 
     /// <summary>Gets the description for the specified check type.</summary>

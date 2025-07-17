@@ -353,6 +353,10 @@ namespace DomainDetective {
         /// <summary>Alias used by <see cref="GetAnalysisMap"/>.</summary>
         public DirectoryExposureAnalysis DIRECTORYEXPOSUREAnalysis => DirectoryExposureAnalysis;
 
+        /// <summary>Gets the NTP analysis.</summary>
+        /// <value>Clock information from NTP servers.</value>
+        public NtpAnalysis NtpAnalysis { get; private set; } = new NtpAnalysis();
+
         // Settings properties moved to DomainHealthCheck.Settings.cs
 
         /// <summary>

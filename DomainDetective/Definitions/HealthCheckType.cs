@@ -104,5 +104,7 @@ public enum HealthCheckType {
     /// <summary>Query RDAP registration information.</summary>
     RDAP,
     /// <summary>Check for exposed directories.</summary>
-    DIRECTORYEXPOSURE
+    DIRECTORYEXPOSURE,
+    /// <summary>Query NTP servers for clock information.</summary>
+    NTP
 }
