@@ -1,6 +1,8 @@
 namespace DomainDetective;
 
+using System;
 using System.Net.Http;
+using System.IO;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -24,10 +26,26 @@ public sealed class RdapClient
 
     private async Task<T?> QueryAsync<T>(string path, CancellationToken ct)
     {
-        var json = await SharedHttpClient
+        if (!BaseUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+        {
+            string basePath = BaseUrl.StartsWith("file://", StringComparison.OrdinalIgnoreCase)
+                ? new Uri(BaseUrl).LocalPath
+                : BaseUrl;
+            string file = Path.Combine(basePath, path + ".json");
+            string json;
+#if NET8_0_OR_GREATER
+            json = await File.ReadAllTextAsync(file, ct).ConfigureAwait(false);
+#else
+            json = File.ReadAllText(file);
+            await Task.Yield();
+#endif
+            return JsonSerializer.Deserialize<T>(json, RdapJson.Options);
+        }
+
+        string networkJson = await SharedHttpClient
             .GetStringWithRetryAsync($"{BaseUrl}/{path}", ct)
             .ConfigureAwait(false);
-        return JsonSerializer.Deserialize<T>(json, RdapJson.Options);
+        return JsonSerializer.Deserialize<T>(networkJson, RdapJson.Options);
     }
 
     /// <summary>Queries domain information.</summary>
