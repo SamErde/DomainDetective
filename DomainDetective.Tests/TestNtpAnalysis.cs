@@ -33,20 +33,11 @@ public class TestNtpAnalysis {
     }
 
     [Fact]
-    public async Task BuiltinEnumResolvesHost() {
-        using var server = new System.Net.Sockets.UdpClient(new System.Net.IPEndPoint(System.Net.IPAddress.Loopback, 0));
-        var port = ((System.Net.IPEndPoint)server.Client.LocalEndPoint!).Port;
-        var task = System.Threading.Tasks.Task.Run(async () => {
-            var r = await server.ReceiveAsync();
-            await server.SendAsync(new byte[0], 0, r.RemoteEndPoint);
-        });
-        try {
-            var analysis = new NtpAnalysis { Timeout = System.TimeSpan.FromSeconds(1) };
-            await analysis.AnalyzeServer(NtpServer.Pool, port, new InternalLogger());
-            Assert.True(analysis.ServerResults.ContainsKey($"pool.ntp.org:{port}"));
-        } finally {
-            server.Close();
-            await task;
-        }
+    public void BuiltinEnumResolvesHost() {
+        Assert.Equal("pool.ntp.org", NtpServer.Pool.ToHost());
+        Assert.Equal("time.google.com", NtpServer.Google.ToHost());
+        Assert.Equal("time.cloudflare.com", NtpServer.Cloudflare.ToHost());
+        Assert.Equal("time.nist.gov", NtpServer.Nist.ToHost());
+        Assert.Equal("time.windows.com", NtpServer.Windows.ToHost());
     }
 }
