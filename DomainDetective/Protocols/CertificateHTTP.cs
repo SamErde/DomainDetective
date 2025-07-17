@@ -104,11 +104,19 @@ namespace DomainDetective {
         /// <summary>Gets a value indicating whether the certificate is present in public CT logs.</summary>
         public bool PresentInCtLogs { get; private set; }
 
+        /// <summary>Collection of CT log entries retrieved for the certificate.</summary>
+        public IReadOnlyList<JsonElement> CtLogEntries => _ctLogEntries;
+
         /// <summary>Optional override to retrieve CT log data for testing.</summary>
         public Func<string, Task<string>>? CtLogQueryOverride { private get; set; }
 
         /// <summary>CT log API templates. Each entry should contain a {0} placeholder for the SHA-256 fingerprint.</summary>
-        public List<string> CtLogApiTemplates { get; } = new() { "https://crt.sh/?sha256={0}&output=json" };
+        public List<string> CtLogApiTemplates => _ctLogAggregator.ApiTemplates;
+
+        private readonly List<JsonElement> _ctLogEntries = new();
+        private readonly CtLogAggregator _ctLogAggregator = new();
+
+        internal CtLogAggregator CtLogs => _ctLogAggregator;
 
         internal static IEnumerable<string> ExtractMxHosts(IEnumerable<DnsAnswer> records)
         {
@@ -323,9 +331,12 @@ namespace DomainDetective {
             }
         }
 
-        private async Task QueryCtLogs(CancellationToken cancellationToken) {
+        private async Task QueryCtLogs(CancellationToken cancellationToken)
+        {
             PresentInCtLogs = false;
-            if (Certificate == null) {
+            _ctLogEntries.Clear();
+            if (Certificate == null)
+            {
                 return;
             }
             byte[] hashBytes;
@@ -337,32 +348,14 @@ namespace DomainDetective {
             }
 #endif
             var fingerprint = BitConverter.ToString(hashBytes).Replace("-", string.Empty).ToLowerInvariant();
-            string json = string.Empty;
-            if (CtLogQueryOverride != null) {
-                json = await CtLogQueryOverride(fingerprint);
-            } else {
-                var client = SharedHttpClient.Instance;
-                foreach (var template in CtLogApiTemplates) {
-                    var url = string.Format(template, fingerprint);
-                    using var resp = await client.GetAsync(url, cancellationToken);
-                    if (!resp.IsSuccessStatusCode) {
-                        continue;
-                    }
-                    json = await resp.Content.ReadAsStringAsync();
-                    if (!string.IsNullOrEmpty(json)) {
-                        break;
-                    }
-                }
-                if (string.IsNullOrEmpty(json)) {
-                    return;
-                }
-            }
-            try {
-                using var doc = JsonDocument.Parse(json);
-                PresentInCtLogs = doc.RootElement.ValueKind == JsonValueKind.Array && doc.RootElement.GetArrayLength() > 0;
-            } catch {
-                // ignore parse errors
-            }
+
+            _ctLogAggregator.ApiTemplates.Clear();
+            _ctLogAggregator.ApiTemplates.AddRange(CtLogApiTemplates);
+            _ctLogAggregator.QueryOverride = CtLogQueryOverride;
+
+            var entries = await _ctLogAggregator.QueryAsync(fingerprint, cancellationToken).ConfigureAwait(false);
+            _ctLogEntries.AddRange(entries);
+            PresentInCtLogs = _ctLogEntries.Count > 0;
         }
 
         /// <summary>
