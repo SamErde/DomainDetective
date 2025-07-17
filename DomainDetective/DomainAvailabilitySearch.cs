@@ -7,6 +7,7 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using DomainDetective.Helpers;
 
 namespace DomainDetective;
 
@@ -196,6 +197,70 @@ public class DomainAvailabilitySearch
     }
 
     /// <summary>
+    /// Checks RDAP availability for a single domain.
+    /// </summary>
+    /// <param name="domain">Domain name to query.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>Availability result for <paramref name="domain"/>.</returns>
+    public async Task<DomainAvailabilityResult> CheckAsync(string domain, CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(domain))
+        {
+            throw new ArgumentNullException(nameof(domain));
+        }
+
+        var normalized = DomainHelper.ValidateIdn(domain.Trim());
+        var available = await IsAvailableAsync(normalized, ct).ConfigureAwait(false);
+        return new DomainAvailabilityResult(normalized, available);
+    }
+
+    /// <summary>
+    /// Checks RDAP availability for the current <see cref="Tlds"/> list.
+    /// </summary>
+    /// <param name="label">Domain label without the TLD.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>Stream of availability results.</returns>
+    public async IAsyncEnumerable<DomainAvailabilityResult> CheckTldsAsync(
+        string label,
+        [EnumeratorCancellation] CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(label))
+        {
+            throw new ArgumentNullException(nameof(label));
+        }
+
+        var normalized = label.Trim().ToLowerInvariant();
+        var domains = new Queue<string>(Tlds
+            .Where(t => !string.IsNullOrWhiteSpace(t))
+            .Select(t => $"{normalized}.{t.Trim()}"));
+
+        var tasks = new List<Task<DomainAvailabilityResult>>();
+
+        async Task<DomainAvailabilityResult> Check(string dom)
+        {
+            var normalizedDomain = DomainHelper.ValidateIdn(dom);
+            var available = await IsAvailableAsync(normalizedDomain, ct).ConfigureAwait(false);
+            return new DomainAvailabilityResult(normalizedDomain, available);
+        }
+
+        for (var i = 0; i < Concurrency && domains.Count > 0; i++)
+        {
+            tasks.Add(Check(domains.Dequeue()));
+        }
+
+        while (tasks.Count > 0)
+        {
+            var finished = await Task.WhenAny(tasks).ConfigureAwait(false);
+            tasks.Remove(finished);
+            yield return await finished.ConfigureAwait(false);
+            if (domains.Count > 0)
+            {
+                tasks.Add(Check(domains.Dequeue()));
+            }
+        }
+    }
+
+    /// <summary>
     /// Asynchronously checks availability for generated domain names.
     /// </summary>
     /// <param name="keywords">Keywords used to generate domains.</param>
@@ -218,8 +283,9 @@ public class DomainAvailabilitySearch
 
         async Task<DomainAvailabilityResult> Check(string dom)
         {
-            var available = await IsAvailableAsync(dom, ct).ConfigureAwait(false);
-            return new DomainAvailabilityResult(dom, available);
+            var normalizedDomain = DomainHelper.ValidateIdn(dom);
+            var available = await IsAvailableAsync(normalizedDomain, ct).ConfigureAwait(false);
+            return new DomainAvailabilityResult(normalizedDomain, available);
         }
 
         for (var i = 0; i < Concurrency && domains.Count > 0; i++)

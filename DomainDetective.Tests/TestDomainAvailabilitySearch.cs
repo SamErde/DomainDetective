@@ -68,4 +68,37 @@ public class TestDomainAvailabilitySearch
         Assert.Contains("com", search.Tlds);
         Assert.True(search.Tlds.Count > 100);
     }
+
+    [Fact]
+    public async Task CheckAsyncReturnsExpectedResult()
+    {
+        var search = new DomainAvailabilitySearch
+        {
+            AvailabilityOverride = (d, _) => Task.FromResult(d == "free.com")
+        };
+
+        var result = await search.CheckAsync("free.com");
+        Assert.True(result.Available);
+        Assert.Equal("free.com", result.Domain);
+    }
+
+    [Fact]
+    public async Task CheckTldsAsyncEnumeratesAcrossTlds()
+    {
+        var search = new DomainAvailabilitySearch
+        {
+            Tlds = new[] { "com", "net" },
+            AvailabilityOverride = (d, _) => Task.FromResult(d.EndsWith(".com"))
+        };
+
+        var results = new List<DomainAvailabilityResult>();
+        await foreach (var r in search.CheckTldsAsync("example"))
+        {
+            results.Add(r);
+        }
+
+        Assert.Contains(results, r => r.Domain == "example.com" && r.Available);
+        Assert.Contains(results, r => r.Domain == "example.net" && !r.Available);
+    }
+
 }

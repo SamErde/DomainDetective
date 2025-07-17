@@ -3,7 +3,6 @@ using System;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
-using DomainDetective;
 using DomainDetective.Helpers;
 
 namespace DomainDetective.Example;
@@ -76,6 +75,9 @@ public static partial class Program {
         await ExampleAnalyseGeoIp();
         await ExamplePortScan();
         await ExampleCtLogAggregator();
+
+        await ExampleCheckDomainAvailability();
+        await ExampleCheckLabelAcrossTlds();
 
         //await ExampleQueryDNS();
         //await ExampleAnalyseByStringWHOIS();
