@@ -24,13 +24,9 @@ public sealed class RdapClient
 
     private async Task<T?> QueryAsync<T>(string path, CancellationToken ct)
     {
-        var client = SharedHttpClient.Instance;
-#if NETSTANDARD2_0 || NET472
-        using var response = await client.GetAsync($"{BaseUrl}/{path}", ct).ConfigureAwait(false);
-        var json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-#else
-        var json = await client.GetStringAsync($"{BaseUrl}/{path}", ct).ConfigureAwait(false);
-#endif
+        var json = await SharedHttpClient
+            .GetStringWithRetryAsync($"{BaseUrl}/{path}", ct)
+            .ConfigureAwait(false);
         return JsonSerializer.Deserialize<T>(json, RdapJson.Options);
     }
 
