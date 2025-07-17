@@ -71,6 +71,7 @@ public static partial class Program {
         await ExampleAnalyseDnsTtl();
         await ExampleDomainSummary();
         await ExampleAnalyseThreatIntel();
+        await ExampleAnalyseThreatFeed();
         await ExampleAnalyseTyposquatting();
         await ExampleAnalyseEdnsSupport();
         await ExampleAnalyseGeoIp();

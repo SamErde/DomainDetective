@@ -317,6 +317,12 @@ namespace DomainDetective {
         /// <summary>Alias used by <see cref="GetAnalysisMap"/>.</summary>
         public ThreatIntelAnalysis THREATINTELAnalysis => ThreatIntelAnalysis;
 
+        /// <summary>Gets the threat feed analysis.</summary>
+        /// <value>Results from external threat feeds.</value>
+        public ThreatFeedAnalysis ThreatFeedAnalysis { get; private set; } = new ThreatFeedAnalysis();
+        /// <summary>Alias used by <see cref="GetAnalysisMap"/>.</summary>
+        public ThreatFeedAnalysis THREATFEEDAnalysis => ThreatFeedAnalysis;
+
         /// <summary>Gets the wildcard DNS analysis.</summary>
         /// <value>Results of wildcard detection.</value>
         public WildcardDnsAnalysis WildcardDnsAnalysis { get; private set; } = new WildcardDnsAnalysis();
