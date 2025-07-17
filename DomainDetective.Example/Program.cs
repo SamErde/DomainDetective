@@ -77,9 +77,11 @@ public static partial class Program {
         await ExamplePortScan();
         await ExampleAnalyseSNMP();
         await ExampleCtLogAggregator();
+        await ExampleVirusTotalClient();
 
         await ExampleCheckDomainAvailability();
         await ExampleCheckLabelAcrossTlds();
+        await ExampleSuggestDomain();
 
         //await ExampleQueryDNS();
         //await ExampleAnalyseByStringWHOIS();

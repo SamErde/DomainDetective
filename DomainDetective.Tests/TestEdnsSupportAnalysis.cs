@@ -71,7 +71,7 @@ public class TestEdnsSupportAnalysis
         using var udpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
         udpSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
         udpSocket.Bind(new IPEndPoint(IPAddress.Loopback, port));
-        var udpServer = new UdpClient { Client = udpSocket };
+        using var udpServer = new UdpClient { Client = udpSocket };
 
         var tcpListener = new TcpListener(IPAddress.Loopback, port);
         tcpListener.Server.ExclusiveAddressUse = false;
@@ -146,7 +146,6 @@ public class TestEdnsSupportAnalysis
         }
         finally
         {
-            udpServer.Close();
             tcpListener.Stop();
             await udpTask;
             await tcpTask;

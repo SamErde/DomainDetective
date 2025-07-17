@@ -19,6 +19,9 @@ public static class DomainAvailabilityPresets
     /// <summary>Mapping of preset names to TLD arrays.</summary>
     public static readonly IReadOnlyDictionary<string, string[]> TldPresets;
 
+    /// <summary>Common TLD alternatives.</summary>
+    public static readonly IReadOnlyDictionary<string, string[]> TldAlternatives;
+
     /// <summary>Complete list of TLDs from the embedded public suffix list.</summary>
     public static readonly string[] All;
 
@@ -31,6 +34,15 @@ public static class DomainAvailabilityPresets
             ["tech"] = new[] { "dev", "io", "app", "ai", "tech" },
             ["fun"] = new[] { "lol", "fun", "xyz", "site" },
             ["all"] = All
+        };
+
+        TldAlternatives = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["com"] = new[] { "net", "org", "co", "io" },
+            ["net"] = new[] { "com", "org" },
+            ["org"] = new[] { "com", "net" },
+            ["io"] = new[] { "app", "dev" },
+            ["co"] = new[] { "com" }
         };
     }
 
@@ -140,6 +152,35 @@ public class DomainAvailabilitySearch
         }
     }
 
+    /// <summary>
+    /// Generates alternative domains for a given name using <see cref="DomainAvailabilityPresets.TldAlternatives"/>.
+    /// </summary>
+    /// <param name="domain">Domain with TLD.</param>
+    /// <returns>Enumeration of alternative domains.</returns>
+    public IEnumerable<string> GenerateTldAlternatives(string domain)
+    {
+        if (string.IsNullOrWhiteSpace(domain))
+        {
+            throw new ArgumentNullException(nameof(domain));
+        }
+
+        var idx = domain.LastIndexOf('.');
+        if (idx < 0)
+        {
+            yield break;
+        }
+
+        var label = domain.Substring(0, idx);
+        var tld = domain.Substring(idx + 1);
+        if (DomainAvailabilityPresets.TldAlternatives.TryGetValue(tld, out var alternatives))
+        {
+            foreach (var alt in alternatives)
+            {
+                yield return $"{label}.{alt}";
+            }
+        }
+    }
+
     private IEnumerable<string> EnumerateForKeyword(string keyword, string tld)
     {
         var baseLabel = keyword;
@@ -224,13 +265,24 @@ public class DomainAvailabilitySearch
         string label,
         [EnumeratorCancellation] CancellationToken ct = default)
     {
+        await foreach (var r in CheckTldsAsync(label, Tlds, ct))
+        {
+            yield return r;
+        }
+    }
+
+    private async IAsyncEnumerable<DomainAvailabilityResult> CheckTldsAsync(
+        string label,
+        IEnumerable<string> tlds,
+        [EnumeratorCancellation] CancellationToken ct)
+    {
         if (string.IsNullOrWhiteSpace(label))
         {
             throw new ArgumentNullException(nameof(label));
         }
 
         var normalized = label.Trim().ToLowerInvariant();
-        var domains = new Queue<string>(Tlds
+        var domains = new Queue<string>(tlds
             .Where(t => !string.IsNullOrWhiteSpace(t))
             .Select(t => $"{normalized}.{t.Trim()}"));
 
@@ -257,6 +309,40 @@ public class DomainAvailabilitySearch
             {
                 tasks.Add(Check(domains.Dequeue()));
             }
+        }
+    }
+
+    /// <summary>
+    /// Checks alternative TLDs for the provided domain name.
+    /// </summary>
+    /// <param name="domain">Domain with TLD.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>Stream of availability results.</returns>
+    public async IAsyncEnumerable<DomainAvailabilityResult> CheckTldAlternativesAsync(
+        string domain,
+        [EnumeratorCancellation] CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(domain))
+        {
+            throw new ArgumentNullException(nameof(domain));
+        }
+
+        var idx = domain.LastIndexOf('.');
+        if (idx < 0)
+        {
+            yield break;
+        }
+
+        var label = domain.Substring(0, idx);
+        var tld = domain.Substring(idx + 1);
+        if (!DomainAvailabilityPresets.TldAlternatives.TryGetValue(tld, out var alternatives))
+        {
+            yield break;
+        }
+
+        await foreach (var r in CheckTldsAsync(label, alternatives, ct))
+        {
+            yield return r;
         }
     }
 

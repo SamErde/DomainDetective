@@ -52,6 +52,9 @@ internal static class Program {
             config.AddCommand<SearchDomainCommand>("SearchDomain")
                 .WithDescription("Search for available domains")
                 .WithExample(new[] { "SearchDomain", "mykeyword" });
+            config.AddCommand<SuggestDomainCommand>("SuggestDomain")
+                .WithDescription("Suggest available domains")
+                .WithExample(new[] { "SuggestDomain", "example.com" });
             config.AddCommand<TestSmimeaCommand>("TestSMIMEA")
                 .WithDescription("Query SMIMEA record for an email address")
                 .WithExample(new[] { "TestSMIMEA", "user@example.com" });
