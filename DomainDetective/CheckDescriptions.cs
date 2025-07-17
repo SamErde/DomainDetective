@@ -220,6 +220,10 @@ public static class CheckDescriptions {
                 "Query reputation services for threats.",
                 null,
                 "Review listed threats and request delisting"),
+            [HealthCheckType.THREATFEED] = new(
+                "Query threat feeds for IP reputation.",
+                null,
+                "Investigate malicious activity for listed IPs."),
             // Detect wildcard DNS catch-all
             [HealthCheckType.WILDCARDDNS] = new(
                 "Detect wildcard DNS catch-all.",

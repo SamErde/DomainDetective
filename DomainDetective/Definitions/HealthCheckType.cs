@@ -91,6 +91,8 @@ public enum HealthCheckType {
     TYPOSQUATTING,
     /// <summary>Query reputation services for threats.</summary>
     THREATINTEL,
+    /// <summary>Query threat feeds for IP reputation.</summary>
+    THREATFEED,
     /// <summary>Detect wildcard DNS responses.</summary>
     WILDCARDDNS,
     /// <summary>Test EDNS support on name servers.</summary>

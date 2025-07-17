@@ -333,6 +333,9 @@ namespace DomainDetective {
                     case HealthCheckType.THREATINTEL:
                         await VerifyThreatIntel(domainName, cancellationToken);
                         break;
+                    case HealthCheckType.THREATFEED:
+                        await VerifyThreatFeed(domainName, cancellationToken);
+                        break;
                     case HealthCheckType.DIRECTORYEXPOSURE:
                         await VerifyDirectoryExposure(domainName, cancellationToken);
                         break;
@@ -683,6 +686,17 @@ namespace DomainDetective {
             domainName = NormalizeDomain(domainName);
             UpdateIsPublicSuffix(domainName);
             await ThreatIntelAnalysis.Analyze(domainName, GoogleSafeBrowsingApiKey, PhishTankApiKey, VirusTotalApiKey, _logger, cancellationToken);
+        }
+
+        /// <summary>Queries threat feeds for IP reputation.</summary>
+        /// <param name="ipAddress">IP address to check.</param>
+        /// <param name="cancellationToken">Token to cancel the operation.</param>
+        public async Task VerifyThreatFeed(string ipAddress, CancellationToken cancellationToken = default) {
+            if (string.IsNullOrWhiteSpace(ipAddress)) {
+                throw new ArgumentNullException(nameof(ipAddress));
+            }
+
+            await ThreatFeedAnalysis.Analyze(ipAddress, VirusTotalApiKey, AbuseIpDbApiKey, _logger, cancellationToken);
         }
 
         /// <summary>
@@ -1525,6 +1539,7 @@ namespace DomainDetective {
             filtered.DnsTunnelingAnalysis = active.Contains(HealthCheckType.DNSTUNNELING) ? CloneAnalysis(DnsTunnelingAnalysis) : null;
             filtered.TyposquattingAnalysis = active.Contains(HealthCheckType.TYPOSQUATTING) ? CloneAnalysis(TyposquattingAnalysis) : null;
             filtered.ThreatIntelAnalysis = active.Contains(HealthCheckType.THREATINTEL) ? CloneAnalysis(ThreatIntelAnalysis) : null;
+            filtered.ThreatFeedAnalysis = active.Contains(HealthCheckType.THREATFEED) ? CloneAnalysis(ThreatFeedAnalysis) : null;
             filtered.WildcardDnsAnalysis = active.Contains(HealthCheckType.WILDCARDDNS) ? CloneAnalysis(WildcardDnsAnalysis) : null;
             filtered.EdnsSupportAnalysis = active.Contains(HealthCheckType.EDNSSUPPORT) ? CloneAnalysis(EdnsSupportAnalysis) : null;
             filtered.FlatteningServiceAnalysis = active.Contains(HealthCheckType.FLATTENINGSERVICE) ? CloneAnalysis(FlatteningServiceAnalysis) : null;

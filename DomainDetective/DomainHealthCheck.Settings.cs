@@ -50,6 +50,9 @@ namespace DomainDetective {
         /// <summary>API key for VirusTotal.</summary>
         public string? VirusTotalApiKey { get; set; }
 
+        /// <summary>API key for AbuseIPDB.</summary>
+        public string? AbuseIpDbApiKey { get; set; }
+
         /// <summary>Log lines used for DNS tunneling analysis.</summary>
         public IEnumerable<string>? DnsTunnelingLogs { get; set; }
 
