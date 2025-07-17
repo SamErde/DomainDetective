@@ -76,6 +76,7 @@ public static partial class Program {
         await ExampleAnalyseGeoIp();
         await ExamplePortScan();
         await ExampleCtLogAggregator();
+        await ExampleVirusTotalClient();
 
         await ExampleCheckDomainAvailability();
         await ExampleCheckLabelAcrossTlds();
