@@ -1,4 +1,5 @@
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace DomainDetective.Tests;
@@ -6,8 +7,15 @@ namespace DomainDetective.Tests;
 public class TestThreatFeedAnalysis {
     [Fact]
     public async Task FlagsListings() {
+        var vt = new VirusTotalResponse {
+            Data = new VirusTotalObject {
+                Attributes = new VirusTotalAttributes {
+                    LastAnalysisStats = new VirusTotalStats { Malicious = 1 }
+                }
+            }
+        };
         var analysis = new ThreatFeedAnalysis {
-            VirusTotalOverride = _ => Task.FromResult("{\"data\":{\"attributes\":{\"last_analysis_stats\":{\"malicious\":1}}}}"),
+            VirusTotalOverride = _ => Task.FromResult(JsonSerializer.Serialize(vt, VirusTotalJson.Options)),
             AbuseIpDbOverride = _ => Task.FromResult("{\"data\":{\"abuseConfidenceScore\":20}}")
         };
 
@@ -22,7 +30,14 @@ public class TestThreatFeedAnalysis {
         var health = new DomainHealthCheck();
         health.VirusTotalApiKey = "v";
         health.AbuseIpDbApiKey = "a";
-        health.ThreatFeedAnalysis.VirusTotalOverride = _ => Task.FromResult("{\"data\":{\"attributes\":{\"last_analysis_stats\":{\"malicious\":1}}}}");
+        var vt = new VirusTotalResponse {
+            Data = new VirusTotalObject {
+                Attributes = new VirusTotalAttributes {
+                    LastAnalysisStats = new VirusTotalStats { Malicious = 1 }
+                }
+            }
+        };
+        health.ThreatFeedAnalysis.VirusTotalOverride = _ => Task.FromResult(JsonSerializer.Serialize(vt, VirusTotalJson.Options));
         health.ThreatFeedAnalysis.AbuseIpDbOverride = _ => Task.FromResult("{\"data\":{\"abuseConfidenceScore\":20}}");
 
         await health.VerifyThreatFeed("8.8.8.8");
