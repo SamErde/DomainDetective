@@ -79,6 +79,9 @@ internal static class Program {
             config.AddCommand<TestOpenResolverCommand>("TestOpenResolver")
                 .WithDescription("Check DNS server for recursion")
                 .WithExample(new[] { "TestOpenResolver", "8.8.8.8" });
+            config.AddCommand<TestNtpServerCommand>("TestNtpServer")
+                .WithDescription("Query NTP server for clock offset")
+                .WithExample(new[] { "TestNtpServer", "--builtin", "Pool" });
         });
         try {
             return await app.RunAsync(args).WaitAsync(cts.Token);
