@@ -13,7 +13,7 @@ namespace DomainDetective.Tests {
             var tcpPort = ((IPEndPoint)tcpListener.LocalEndpoint).Port;
             var tcpAccept = tcpListener.AcceptTcpClientAsync();
 
-            var udpServer = new UdpClient(new IPEndPoint(IPAddress.Loopback, 0));
+            using var udpServer = new UdpClient(new IPEndPoint(IPAddress.Loopback, 0));
             var udpPort = ((IPEndPoint)udpServer.Client.LocalEndPoint!).Port;
             var udpTask = Task.Run(async () => {
                 var r = await udpServer.ReceiveAsync();
@@ -29,7 +29,6 @@ namespace DomainDetective.Tests {
                 Assert.True(analysis.Results[udpPort].UdpOpen);
             } finally {
                 tcpListener.Stop();
-                udpServer.Close();
                 await udpTask;
             }
         }
@@ -41,7 +40,7 @@ namespace DomainDetective.Tests {
             var tcpPort = ((IPEndPoint)tcpListener.LocalEndpoint).Port;
             var tcpAccept = tcpListener.AcceptTcpClientAsync();
 
-            var udpServer = new UdpClient(new IPEndPoint(IPAddress.IPv6Loopback, 0));
+            using var udpServer = new UdpClient(new IPEndPoint(IPAddress.IPv6Loopback, 0));
             var udpPort = ((IPEndPoint)udpServer.Client.LocalEndPoint!).Port;
             var udpTask = Task.Run(async () => {
                 var r = await udpServer.ReceiveAsync();
@@ -57,7 +56,6 @@ namespace DomainDetective.Tests {
                 Assert.True(analysis.Results[udpPort].UdpOpen);
             } finally {
                 tcpListener.Stop();
-                udpServer.Close();
                 await udpTask;
             }
         }
@@ -80,7 +78,7 @@ namespace DomainDetective.Tests {
 
         [Fact]
         public async Task UdpPortClosedWhenNoResponseData() {
-            var udpServer = new UdpClient(new IPEndPoint(IPAddress.Loopback, 0));
+            using var udpServer = new UdpClient(new IPEndPoint(IPAddress.Loopback, 0));
             var udpPort = ((IPEndPoint)udpServer.Client.LocalEndPoint!).Port;
             var udpTask = Task.Run(async () => {
                 var r = await udpServer.ReceiveAsync();
@@ -94,7 +92,6 @@ namespace DomainDetective.Tests {
                 Assert.False(analysis.Results[udpPort].UdpOpen);
                 Assert.False(string.IsNullOrEmpty(analysis.Results[udpPort].Error));
             } finally {
-                udpServer.Close();
                 await udpTask;
             }
         }
@@ -136,7 +133,7 @@ namespace DomainDetective.Tests {
 
         [Fact]
         public async Task ScansUsingNtpProfile() {
-            var server = new UdpClient(new IPEndPoint(IPAddress.Loopback, 0));
+            using var server = new UdpClient(new IPEndPoint(IPAddress.Loopback, 0));
             var port = ((IPEndPoint)server.Client.LocalEndPoint!).Port;
             var task = Task.Run(async () => {
                 var r = await server.ReceiveAsync();
@@ -148,7 +145,6 @@ namespace DomainDetective.Tests {
                 await analysis.Scan("127.0.0.1", PortScanProfile.NTP, new InternalLogger());
                 Assert.True(analysis.Results[port].UdpOpen);
             } finally {
-                server.Close();
                 await task;
                 PortScanAnalysis.OverrideProfilePorts(PortScanProfile.NTP, new[] { 123 });
             }
