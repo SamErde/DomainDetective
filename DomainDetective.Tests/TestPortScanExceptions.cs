@@ -12,7 +12,7 @@ public class TestPortScanExceptions
         var analysis = new PortScanAnalysis();
         using var cts = new CancellationTokenSource();
         cts.Cancel();
-        await Assert.ThrowsAsync<OperationCanceledException>(async () =>
+        await Assert.ThrowsAsync<TaskCanceledException>(async () =>
             await analysis.Scan("127.0.0.1", new[] { 80 }, new InternalLogger(), cts.Token));
     }
 }
