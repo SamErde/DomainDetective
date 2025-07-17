@@ -13,25 +13,25 @@ namespace DomainDetective.PowerShell {
 [Cmdlet(VerbsDiagnostic.Test, "DDEmailDkimRecord", DefaultParameterSetName = "ServerName")]
 [Alias("Test-EmailDkim")]
     public sealed class CmdletTestDkimRecord : AsyncPSCmdlet {
-        /// <param name="DomainName">Domain to query.</param>
+        /// <para>Domain to query.</para>
         [Parameter(Mandatory = true, Position = 0, ParameterSetName = "ServerName")]
         [ValidateNotNullOrEmpty]
         public string DomainName;
 
-        /// <param name="Selectors">Selectors to validate.</param>
+        /// <para>Selectors to validate.</para>
         [Parameter(Mandatory = true, Position = 1, ParameterSetName = "ServerName")]
         [ValidateNotNullOrEmpty]
         public string[] Selectors;
 
-        /// <param name="DnsEndpoint">DNS server used for queries.</param>
+        /// <para>DNS server used for queries.</para>
         [Parameter(Mandatory = false, Position = 2, ParameterSetName = "ServerName")]
         public DnsEndpoint DnsEndpoint = DnsEndpoint.System;
 
-        /// <param name="FullResponse">Return full analysis result.</param>
+        /// <para>Return full analysis result.</para>
         [Parameter(Mandatory = false, ParameterSetName = "ServerName")]
         public SwitchParameter FullResponse;
 
-        /// <param name="Raw">Return raw response objects.</param>
+        /// <para>Return raw response objects.</para>
         [Parameter(Mandatory = false)]
         public SwitchParameter Raw;
 

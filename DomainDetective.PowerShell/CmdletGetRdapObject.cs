@@ -15,37 +15,37 @@ namespace DomainDetective.PowerShell {
 [OutputType(typeof(object))]
 public sealed class CmdletGetRdapObject : AsyncPSCmdlet
 {
-    /// <param name="Domain">Domain name to query.</param>
+    /// <para>Domain name to query.</para>
     [Parameter(Mandatory = true, ParameterSetName = "Domain", Position = 0)]
     [ValidateNotNullOrEmpty]
     public string Domain { get; set; } = string.Empty;
 
-    /// <param name="Tld">Top-level domain to query.</param>
+    /// <para>Top-level domain to query.</para>
     [Parameter(Mandatory = true, ParameterSetName = "Tld", Position = 0)]
     [ValidateNotNullOrEmpty]
     public string Tld { get; set; } = string.Empty;
 
-    /// <param name="Ip">IP address or CIDR to query.</param>
+    /// <para>IP address or CIDR to query.</para>
     [Parameter(Mandatory = true, ParameterSetName = "Ip", Position = 0)]
     [ValidateNotNullOrEmpty]
     public string Ip { get; set; } = string.Empty;
 
-    /// <param name="AsNumber">Autonomous system number to query.</param>
+    /// <para>Autonomous system number to query.</para>
     [Parameter(Mandatory = true, ParameterSetName = "As", Position = 0)]
     [ValidateNotNullOrEmpty]
     public string AsNumber { get; set; } = string.Empty;
 
-    /// <param name="Entity">Entity handle to query.</param>
+    /// <para>Entity handle to query.</para>
     [Parameter(Mandatory = true, ParameterSetName = "Entity", Position = 0)]
     [ValidateNotNullOrEmpty]
     public string Entity { get; set; } = string.Empty;
 
-    /// <param name="Registrar">Registrar handle to query.</param>
+    /// <para>Registrar handle to query.</para>
     [Parameter(Mandatory = true, ParameterSetName = "Registrar", Position = 0)]
     [ValidateNotNullOrEmpty]
     public string Registrar { get; set; } = string.Empty;
 
-    /// <param name="Nameserver">Nameserver host to query.</param>
+    /// <para>Nameserver host to query.</para>
     [Parameter(Mandatory = true, ParameterSetName = "Nameserver", Position = 0)]
     [ValidateNotNullOrEmpty]
     public string Nameserver { get; set; } = string.Empty;

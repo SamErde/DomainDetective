@@ -12,12 +12,12 @@ namespace DomainDetective.PowerShell {
 [Cmdlet(VerbsDiagnostic.Test, "DDDnsBlacklistRecord", DefaultParameterSetName = "ServerName")]
 [Alias("Test-DnsBlacklist")]
     public sealed class CmdletTestDNSBLRecord : AsyncPSCmdlet {
-        /// <param name="NameOrIpAddress">Domain or IP to query.</param>
+        /// <para>Domain or IP to query.</para>
         [Parameter(Mandatory = true, Position = 0, ParameterSetName = "ServerName")]
         [ValidateNotNullOrEmpty]
         public string NameOrIpAddress;
 
-        /// <param name="DnsEndpoint">DNS server used for queries.</param>
+        /// <para>DNS server used for queries.</para>
         [Parameter(Mandatory = false, Position = 1, ParameterSetName = "ServerName")]
         public DnsEndpoint DnsEndpoint = DnsEndpoint.System;
 

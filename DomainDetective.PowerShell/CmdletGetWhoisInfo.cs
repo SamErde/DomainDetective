@@ -13,20 +13,20 @@ namespace DomainDetective.PowerShell {
 [Cmdlet(VerbsCommon.Get, "DDDomainWhois", DefaultParameterSetName = "ServerName")]
 [Alias("Get-DomainWhois")]
     public sealed class CmdletGetWhoisInfo : AsyncPSCmdlet {
-        /// <param name="DomainName">Domain to retrieve WHOIS information for.</param>
+        /// <para>Domain to retrieve WHOIS information for.</para>
         [Parameter(Mandatory = true, Position = 0, ParameterSetName = "ServerName")]
         [ValidateNotNullOrEmpty]
         public string DomainName;
 
-        /// <param name="DnsEndpoint">DNS server used for queries.</param>
+        /// <para>DNS server used for queries.</para>
         [Parameter(Mandatory = false, Position = 1, ParameterSetName = "ServerName")]
         public DnsEndpoint DnsEndpoint = DnsEndpoint.System;
 
-        /// <param name="SnapshotPath">Directory used to store WHOIS snapshots.</param>
+        /// <para>Directory used to store WHOIS snapshots.</para>
         [Parameter(Mandatory = false)]
         public string SnapshotPath;
 
-        /// <param name="Diff">Return changes since last snapshot.</param>
+        /// <para>Return changes since last snapshot.</para>
         [Parameter(Mandatory = false)]
         public SwitchParameter Diff;
 

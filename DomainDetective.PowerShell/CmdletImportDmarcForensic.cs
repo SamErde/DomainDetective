@@ -12,7 +12,7 @@ namespace DomainDetective.PowerShell {
     [Alias("Import-DmarcForensic")]
     [OutputType(typeof(DmarcForensicReport))]
     public sealed class CmdletImportDmarcForensic : PSCmdlet {
-        /// <param name="Path">Path to the zipped report.</param>
+        /// <para>Path to the zipped report.</para>
         [Parameter(Mandatory = true, Position = 0, ValueFromPipeline = true, ValueFromPipelineByPropertyName = true)]
         [ValidateNotNullOrEmpty]
         public string Path { get; set; }

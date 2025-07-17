@@ -17,12 +17,12 @@ namespace DomainDetective.PowerShell {
 [Cmdlet(VerbsDiagnostic.Test, "DDEmailArcRecord", DefaultParameterSetName = "Text")]
 [Alias("Test-EmailArc")]
     public sealed class CmdletTestArc : AsyncPSCmdlet {
-        /// <param name="HeaderText">Raw header text.</param>
+        /// <para>Raw header text.</para>
         [Parameter(Mandatory = true, Position = 0, ParameterSetName = "Text", ValueFromPipeline = true, ValueFromPipelineByPropertyName = true)]
         [ValidateNotNullOrEmpty]
         public string HeaderText { get; set; } = string.Empty;
 
-        /// <param name="File">Path to a file containing ARC headers.</param>
+        /// <para>Path to a file containing ARC headers.</para>
         [Parameter(Mandatory = true, Position = 0, ParameterSetName = "File")]
         [ValidateNotNullOrEmpty]
         public string File { get; set; } = string.Empty;

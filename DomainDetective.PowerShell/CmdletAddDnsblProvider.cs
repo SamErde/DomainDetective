@@ -10,20 +10,20 @@ namespace DomainDetective.PowerShell {
 [Cmdlet(VerbsCommon.Add, "DDDnsblProvider")]
 [Alias("Add-DnsblProvider")]
     public sealed class CmdletAddDnsblProvider : PSCmdlet {
-        /// <param name="Domain">Domain name of the DNSBL provider.</param>
+        /// <para>Domain name of the DNSBL provider.</para>
         [Parameter(Mandatory = true, Position = 0)]
         [ValidateNotNullOrEmpty]
         public string Domain { get; set; }
 
-        /// <param name="Enabled">Sets the provider as enabled.</param>
+        /// <para>Sets the provider as enabled.</para>
         [Parameter(Mandatory = false)]
         public bool Enabled { get; set; } = true;
 
-        /// <param name="Comment">Optional descriptive comment.</param>
+        /// <para>Optional descriptive comment.</para>
         [Parameter(Mandatory = false)]
         public string Comment { get; set; }
 
-        /// <param name="InputObject">Analysis object to add the provider to.</param>
+        /// <para>Analysis object to add the provider to.</para>
         [Parameter(ValueFromPipeline = true)]
         public DNSBLAnalysis InputObject { get; set; }
 

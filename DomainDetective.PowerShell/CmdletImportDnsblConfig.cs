@@ -10,20 +10,20 @@ namespace DomainDetective.PowerShell {
 [Cmdlet(VerbsData.Import, "DDDnsblConfig")]
 [Alias("Import-DnsblConfig")]
     public sealed class CmdletImportDnsblConfig : PSCmdlet {
-        /// <param name="Path">Path to the configuration file.</param>
+        /// <para>Path to the configuration file.</para>
         [Parameter(Mandatory = true, Position = 0)]
         [ValidateNotNullOrEmpty]
         public string Path { get; set; }
 
-        /// <param name="OverwriteExisting">Replace existing providers.</param>
+        /// <para>Replace existing providers.</para>
         [Parameter(Mandatory = false)]
         public SwitchParameter OverwriteExisting { get; set; }
 
-        /// <param name="ClearExisting">Remove current providers before import.</param>
+        /// <para>Remove current providers before import.</para>
         [Parameter(Mandatory = false)]
         public SwitchParameter ClearExisting { get; set; }
 
-        /// <param name="InputObject">Analysis object to modify.</param>
+        /// <para>Analysis object to modify.</para>
         [Parameter(ValueFromPipeline = true)]
         public DNSBLAnalysis InputObject { get; set; }
 

@@ -14,12 +14,12 @@ namespace DomainDetective.PowerShell {
 [Alias("Get-DomainSummary")]
     [OutputType(typeof(DomainSummary))]
     public sealed class CmdletGetDomainSummary : AsyncPSCmdlet {
-        /// <param name="DomainName">Domain to analyze.</param>
+        /// <para>Domain to analyze.</para>
         [Parameter(Mandatory = true, Position = 0, ParameterSetName = "ServerName")]
         [ValidateNotNullOrEmpty]
         public string DomainName;
 
-        /// <param name="DnsEndpoint">DNS server used for queries.</param>
+        /// <para>DNS server used for queries.</para>
         [Parameter(Mandatory = false, Position = 1, ParameterSetName = "ServerName")]
         public DnsEndpoint DnsEndpoint = DnsEndpoint.System;
 

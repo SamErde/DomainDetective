@@ -18,7 +18,7 @@ namespace DomainDetective.PowerShell {
     /// </example>
     [Cmdlet(VerbsDiagnostic.Test, "DmarcAggregate")]
     public sealed class CmdletTestDmarcAggregate : AsyncPSCmdlet {
-        /// <param name="Path">Path to the aggregate report.</param>
+        /// <para>Path to the aggregate report.</para>
         [Parameter(Mandatory = true, Position = 0, ValueFromPipeline = true, ValueFromPipelineByPropertyName = true)]
         [ValidateNotNullOrEmpty]
         public string Path { get; set; }

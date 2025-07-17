@@ -11,7 +11,7 @@ namespace DomainDetective.PowerShell {
 [Cmdlet(VerbsData.Import, "DDDmarcReport")]
 [Alias("Import-DmarcReport")]
     public sealed class CmdletImportDmarcReport : PSCmdlet {
-        /// <param name="Path">Path to the zipped XML file.</param>
+        /// <para>Path to the zipped XML file.</para>
         [Parameter(Mandatory = true, Position = 0, ValueFromPipeline = true, ValueFromPipelineByPropertyName = true)]
         [ValidateNotNullOrEmpty]
         public string Path { get; set; }
