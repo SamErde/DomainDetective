@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
 using System.Linq;
 using System.Text.Json;
@@ -33,6 +34,8 @@ public class RdapAnalysis
 
     internal Func<string, Task<string>>? QueryOverride { get; set; }
 
+    private static readonly RdapClient _rdapClient = new();
+
     /// <summary>
     /// Retrieves RDAP information for <paramref name="domain"/>.
     /// </summary>
@@ -54,23 +57,43 @@ public class RdapAnalysis
         NameServers = new List<string>();
         Status = new List<string>();
 
-        string json;
+        RdapDomain? rdapResult;
         if (QueryOverride != null)
         {
-            json = await QueryOverride(domain).ConfigureAwait(false);
+            var json = await QueryOverride(domain).ConfigureAwait(false);
+            rdapResult = JsonSerializer.Deserialize<RdapDomain>(json, RdapJson.Options);
         }
         else
         {
-            HttpClient client = SharedHttpClient.Instance;
-#if NETSTANDARD2_0 || NET472
-            using var response = await client.GetAsync($"https://rdap.org/domain/{domain}", cancellationToken).ConfigureAwait(false);
-            json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            try
+            {
+                rdapResult = await _rdapClient.GetDomain(domain, cancellationToken).ConfigureAwait(false);
+            }
+            catch (HttpRequestException ex)
+            {
+#if NET6_0_OR_GREATER
+                if (ex.StatusCode == HttpStatusCode.NotFound)
+                {
+                    rdapResult = null;
+                }
+                else
+                {
+                    throw;
+                }
 #else
-            json = await client.GetStringAsync($"https://rdap.org/domain/{domain}", cancellationToken).ConfigureAwait(false);
+                if (ex.Message.Contains("404"))
+                {
+                    rdapResult = null;
+                }
+                else
+                {
+                    throw;
+                }
 #endif
+            }
         }
 
-        DomainData = JsonSerializer.Deserialize<RdapDomain>(json, RdapJson.Options);
+        DomainData = rdapResult;
         if (DomainData == null)
         {
             return;

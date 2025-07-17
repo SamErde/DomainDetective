@@ -163,6 +163,8 @@ public class DomainAvailabilitySearch
         }
     }
 
+    private static readonly RdapClient _rdapClient = new();
+
     private async Task<bool> IsAvailableAsync(string domain, CancellationToken ct)
     {
         if (AvailabilityOverride != null)
@@ -170,10 +172,27 @@ public class DomainAvailabilitySearch
             return await AvailabilityOverride(domain, ct).ConfigureAwait(false);
         }
 
-        using var response = await SharedHttpClient.Instance
-            .GetAsync($"https://rdap.org/domain/{domain}", ct)
-            .ConfigureAwait(false);
-        return response.StatusCode == HttpStatusCode.NotFound;
+        try
+        {
+            var result = await _rdapClient.GetDomain(domain, ct).ConfigureAwait(false);
+            return result == null;
+        }
+        catch (HttpRequestException ex)
+        {
+#if NET6_0_OR_GREATER
+            if (ex.StatusCode == HttpStatusCode.NotFound)
+            {
+                return true;
+            }
+            throw;
+#else
+            if (ex.Message.Contains("404"))
+            {
+                return true;
+            }
+            throw;
+#endif
+        }
     }
 
     /// <summary>
