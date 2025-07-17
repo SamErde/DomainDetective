@@ -1,4 +1,5 @@
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using DomainDetective;
@@ -10,11 +11,18 @@ public class TestThreatIntelAnalysis
     [Fact]
     public async Task FlagsListings()
     {
+        var vt = new VirusTotalResponse {
+            Data = new VirusTotalObject {
+                Attributes = new VirusTotalAttributes {
+                    LastAnalysisStats = new VirusTotalStats { Malicious = 1 }
+                }
+            }
+        };
         var analysis = new ThreatIntelAnalysis
         {
             GoogleSafeBrowsingOverride = _ => Task.FromResult("{\"matches\":[{}] }"),
             PhishTankOverride = _ => Task.FromResult("{\"results\":{\"valid\":\"true\",\"in_database\":\"true\"}}"),
-            VirusTotalOverride = _ => Task.FromResult("{\"data\":{\"attributes\":{\"last_analysis_stats\":{\"malicious\":1}}}}")
+            VirusTotalOverride = _ => Task.FromResult(JsonSerializer.Serialize(vt, VirusTotalJson.Options))
         };
 
         await analysis.Analyze("example.com", "g", "p", "v", new InternalLogger());
@@ -31,9 +39,16 @@ public class TestThreatIntelAnalysis
         health.GoogleSafeBrowsingApiKey = "g";
         health.PhishTankApiKey = "p";
         health.VirusTotalApiKey = "v";
+        var vtHealth = new VirusTotalResponse {
+            Data = new VirusTotalObject {
+                Attributes = new VirusTotalAttributes {
+                    LastAnalysisStats = new VirusTotalStats { Malicious = 1 }
+                }
+            }
+        };
         health.ThreatIntelAnalysis.GoogleSafeBrowsingOverride = _ => Task.FromResult("{\"matches\":[{}]}");
         health.ThreatIntelAnalysis.PhishTankOverride = _ => Task.FromResult("{\"results\":{\"valid\":\"true\",\"in_database\":\"true\"}}");
-        health.ThreatIntelAnalysis.VirusTotalOverride = _ => Task.FromResult("{\"data\":{\"attributes\":{\"last_analysis_stats\":{\"malicious\":1}}}}");
+        health.ThreatIntelAnalysis.VirusTotalOverride = _ => Task.FromResult(JsonSerializer.Serialize(vtHealth, VirusTotalJson.Options));
 
         await health.VerifyThreatIntel("example.com");
 
@@ -71,9 +86,17 @@ public class TestThreatIntelAnalysis
         var logger = new InternalLogger();
         var warnings = new List<LogEventArgs>();
         logger.OnWarningMessage += (_, e) => warnings.Add(e);
+        var vtWarn = new VirusTotalResponse {
+            Data = new VirusTotalObject {
+                Attributes = new VirusTotalAttributes {
+                    LastAnalysisStats = new VirusTotalStats { Malicious = 1 },
+                    Reputation = 90
+                }
+            }
+        };
         var analysis = new ThreatIntelAnalysis
         {
-            VirusTotalOverride = _ => Task.FromResult("{\"data\":{\"attributes\":{\"last_analysis_stats\":{\"malicious\":1},\"reputation\":90}}}")
+            VirusTotalOverride = _ => Task.FromResult(JsonSerializer.Serialize(vtWarn, VirusTotalJson.Options))
         };
 
         await analysis.Analyze("example.com", null, null, "v", logger);

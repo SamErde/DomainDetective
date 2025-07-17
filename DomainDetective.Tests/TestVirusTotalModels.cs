@@ -31,6 +31,26 @@ public class TestVirusTotalModels
     }
 
     [Fact]
+    public void DeserializesIpAddress()
+    {
+        const string json = "{\"data\":{\"id\":\"1.2.3.4\",\"type\":\"ip_address\",\"attributes\":{\"last_analysis_stats\":{\"malicious\":0}}}}";
+        var resp = JsonSerializer.Deserialize<VirusTotalResponse>(json, VirusTotalJson.Options)!;
+        Assert.Equal("1.2.3.4", resp.Data?.Id);
+        Assert.Equal(VirusTotalObjectType.IpAddress, resp.Data?.Type);
+        Assert.Equal(0, resp.Data?.Attributes?.LastAnalysisStats?.Malicious);
+    }
+
+    [Fact]
+    public void DeserializesUrl()
+    {
+        const string json = "{\"data\":{\"id\":\"http://example.com\",\"type\":\"url\",\"attributes\":{\"last_analysis_stats\":{\"malicious\":0}}}}";
+        var resp = JsonSerializer.Deserialize<VirusTotalResponse>(json, VirusTotalJson.Options)!;
+        Assert.Equal("http://example.com", resp.Data?.Id);
+        Assert.Equal(VirusTotalObjectType.Url, resp.Data?.Type);
+        Assert.Equal(0, resp.Data?.Attributes?.LastAnalysisStats?.Malicious);
+    }
+    
+    [Fact]
     public async Task ClientQueriesDomainIpAndUrl()
     {
         var handler = new MockHttpMessageHandler();
