@@ -22,6 +22,11 @@ public class WildcardDnsAnalysis
     /// <summary>Whether all random names resolved.</summary>
     public bool CatchAll { get; private set; }
 
+    /// <summary>Minimum fraction of matching results required.</summary>
+    public double ConsistencyThreshold { get; set; } = 1.0;
+    /// <summary>Number of attempts for each query.</summary>
+    public int RetryCount { get; set; } = 1;
+
     /// <summary>Whether the domain has an SOA record.</summary>
     public bool SoaExists { get; private set; }
     /// <summary>Whether the domain has NS records.</summary>
@@ -68,6 +73,7 @@ public class WildcardDnsAnalysis
             NsExists = ns.Length > 0;
         }
 
+        var addressCount = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
         const int depthToCheck = 2;
         for (int i = 0; i < sampleCount; i++)
         {
@@ -80,15 +86,14 @@ public class WildcardDnsAnalysis
                 }
 
                 TestedNames.Add(name);
-                var records = await QueryDns(name, DnsRecordType.A);
-                if (records.Length == 0)
+                var addresses = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                for (int attempt = 0; attempt < RetryCount; attempt++)
                 {
-                    records = await QueryDns(name, DnsRecordType.AAAA);
-                }
-
-                if (records.Length > 0)
-                {
-                    ResolvedNames.Add(name);
+                    var records = await QueryDns(name, DnsRecordType.A);
+                    if (records.Length == 0)
+                    {
+                        records = await QueryDns(name, DnsRecordType.AAAA);
+                    }
 
                     foreach (var rec in records)
                     {
@@ -98,16 +103,38 @@ public class WildcardDnsAnalysis
                             data = ip.ToString();
                         }
 
-                        if (!string.IsNullOrEmpty(data) && !ResolvedAddresses.Contains(data, StringComparer.OrdinalIgnoreCase))
+                        if (!string.IsNullOrEmpty(data))
                         {
-                            ResolvedAddresses.Add(data);
+                            addresses.Add(data);
+                        }
+                    }
+                }
+
+                if (addresses.Count > 0)
+                {
+                    ResolvedNames.Add(name);
+                    foreach (var addr in addresses)
+                    {
+                        if (!ResolvedAddresses.Contains(addr, StringComparer.OrdinalIgnoreCase))
+                        {
+                            ResolvedAddresses.Add(addr);
+                        }
+
+                        if (addressCount.ContainsKey(addr))
+                        {
+                            addressCount[addr]++;
+                        }
+                        else
+                        {
+                            addressCount[addr] = 1;
                         }
                     }
                 }
             }
         }
 
-        CatchAll = ResolvedNames.Count == TestedNames.Count;
+        int required = (int)Math.Ceiling(TestedNames.Count * ConsistencyThreshold);
+        CatchAll = ResolvedNames.Count >= required && addressCount.Values.Any(c => c >= required);
         logger?.WriteVerbose("Wildcard DNS for {0}: {1}", domainName, CatchAll);
     }
 }
