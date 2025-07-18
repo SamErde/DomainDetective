@@ -7,10 +7,7 @@ namespace DomainDetective.Tests {
     public class TestSecurityTXTAnalysis {
         [Fact]
         public async Task ValidSecurityTxtIsParsed() {
-            using var listener = new HttpListener();
-            var prefix = $"http://127.0.0.1:{GetFreePort()}/";
-            listener.Prefixes.Add(prefix);
-            listener.Start();
+            using var listener = StartListener(out var prefix);
             var expires = DateTime.UtcNow.AddDays(30).ToString("yyyy-MM-ddTHH:mm:ssZ");
             var content = $"Contact: mailto:admin@example.com\nExpires: {expires}";
             var serverTask = Task.Run(async () => {
@@ -37,10 +34,7 @@ namespace DomainDetective.Tests {
 
         [Fact]
         public async Task MissingContactMakesRecordInvalid() {
-            using var listener = new HttpListener();
-            var prefix = $"http://localhost:{GetFreePort()}/";
-            listener.Prefixes.Add(prefix);
-            listener.Start();
+            using var listener = StartListener(out var prefix);
             var expires = DateTime.UtcNow.AddDays(30).ToString("yyyy-MM-ddTHH:mm:ssZ");
             var content = $"Expires: {expires}";
             var serverTask = Task.Run(async () => {
@@ -65,10 +59,7 @@ namespace DomainDetective.Tests {
 
         [Fact]
         public async Task DuplicateTagsMakeRecordInvalid() {
-            using var listener = new HttpListener();
-            var prefix = $"http://localhost:{GetFreePort()}/";
-            listener.Prefixes.Add(prefix);
-            listener.Start();
+            using var listener = StartListener(out var prefix);
             var expires = DateTime.UtcNow.AddDays(30).ToString("yyyy-MM-ddTHH:mm:ssZ");
             var content = $"Contact: mailto:admin@example.com\nExpires: {expires}\nExpires: {expires}";
             var serverTask = Task.Run(async () => {
@@ -94,24 +85,21 @@ namespace DomainDetective.Tests {
 
         [Fact]
         public async Task ExpiredDateMakesRecordInvalid() {
-            using var listener = new HttpListener();
-            var prefix = $"http://localhost:{GetFreePort()}/";
-            listener.Prefixes.Add(prefix);
-            listener.Start();
+            using var listener = StartListener(out var prefix);
             var expires = DateTime.UtcNow.AddDays(-1).ToString("yyyy-MM-ddTHH:mm:ssZ");
             var content = $"Contact: mailto:admin@example.com\nExpires: {expires}";
-              var serverTask = Task.Run(async () => {
-                  try {
-                      var ctx = await listener.GetContextAsync();
-                      ctx.Response.StatusCode = 200;
-                      ctx.Response.ContentType = "text/plain";
-                      var buffer = Encoding.UTF8.GetBytes(content);
-                      await ctx.Response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
-                      ctx.Response.Close();
-                  } catch (ObjectDisposedException) {
-                      // HttpListener was stopped before GetContextAsync completed
-                  }
-              });
+            var serverTask = Task.Run(async () => {
+                try {
+                    var ctx = await listener.GetContextAsync();
+                    ctx.Response.StatusCode = 200;
+                    ctx.Response.ContentType = "text/plain";
+                    var buffer = Encoding.UTF8.GetBytes(content);
+                    await ctx.Response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
+                    ctx.Response.Close();
+                } catch (ObjectDisposedException) {
+                    // HttpListener was stopped before GetContextAsync completed
+                }
+            });
 
             try {
                 var healthCheck = new DomainHealthCheck();
@@ -126,10 +114,7 @@ namespace DomainDetective.Tests {
 
         [Fact]
         public async Task MalformedFileIsInvalid() {
-            using var listener = new HttpListener();
-            var prefix = $"http://localhost:{GetFreePort()}/";
-            listener.Prefixes.Add(prefix);
-            listener.Start();
+            using var listener = StartListener(out var prefix);
             var content = "Contact: not-a-valid-contact";
             var serverTask = Task.Run(async () => {
                 var ctx = await listener.GetContextAsync();
@@ -154,10 +139,7 @@ namespace DomainDetective.Tests {
         [Fact]
         public async Task CachedSecurityTxtReusedUntilExpiration() {
             SecurityTXTAnalysis.ClearCache();
-            using var listener = new HttpListener();
-            var prefix = $"http://localhost:{GetFreePort()}/";
-            listener.Prefixes.Add(prefix);
-            listener.Start();
+            using var listener = StartListener(out var prefix);
 
             var expires = DateTime.UtcNow.AddSeconds(2).ToString("yyyy-MM-ddTHH:mm:ssZ");
             var content = $"Contact: mailto:admin@example.com\nExpires: {expires}";
@@ -194,10 +176,7 @@ namespace DomainDetective.Tests {
 
         [Fact]
         public async Task NoContentTypeHeaderDoesNotThrow() {
-            using var listener = new HttpListener();
-            var prefix = $"http://localhost:{GetFreePort()}/";
-            listener.Prefixes.Add(prefix);
-            listener.Start();
+            using var listener = StartListener(out var prefix);
             var content = "Contact: mailto:admin@example.com";
             var serverTask = Task.Run(async () => {
                 var ctx = await listener.GetContextAsync();
@@ -222,6 +201,19 @@ namespace DomainDetective.Tests {
         private static int GetFreePort() {
             return PortHelper.GetFreePort();
         }
+
+        private static HttpListener StartListener(out string prefix) {
+            while (true) {
+                prefix = $"http://127.0.0.1:{GetFreePort()}/";
+                var l = new HttpListener();
+                l.Prefixes.Add(prefix);
+                try {
+                    l.Start();
+                    return l;
+                } catch (HttpListenerException) {
+                    l.Close();
+                }
+            }
+        }
     }
 }
-
