@@ -38,6 +38,11 @@
         <ProjectReference Include="..\DomainDetective.Reports\DomainDetective.Reports.csproj" />
     </ItemGroup>
 
+    <ItemGroup Condition=" '$(TargetFramework)' == 'net472' ">
+        <Reference Include="System.IO.Compression" />
+        <Reference Include="System.IO.Compression.FileSystem" />
+    </ItemGroup>
+
     <ItemGroup>
         <None Include="..\Data\public_suffix_list.dat">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
