@@ -309,13 +309,7 @@ namespace DomainDetective {
                     using var resp = await client.PostAsync(OcspUrls[0], content, cancellationToken);
                     if (resp.IsSuccessStatusCode) {
                         var bytes = await resp.Content.ReadAsByteArrayAsync();
-                        var ocspResp = new OcspResp(bytes);
-                        if (ocspResp.Status == OcspRespStatus.Successful) {
-                            var basic = (BasicOcspResp)ocspResp.GetResponseObject();
-                            if (basic.Responses.Length > 0) {
-                                OcspRevoked = basic.Responses[0].GetCertStatus() is RevokedStatus;
-                            }
-                        }
+                        OcspRevoked = ParseOcspResponse(bytes);
                     }
                 }
 
@@ -331,6 +325,28 @@ namespace DomainDetective {
             } catch {
                 // ignore revocation failures
             }
+        }
+
+        /// <summary>Parses an OCSP response and returns the revocation status.</summary>
+        /// <param name="response">OCSP response bytes.</param>
+        /// <returns><c>true</c> if revoked, <c>false</c> if valid, <c>null</c> if inconclusive.</returns>
+        internal static bool? ParseOcspResponse(byte[] response) {
+            var ocspResp = new OcspResp(response);
+            if (ocspResp.Status != OcspRespStatus.Successful) {
+                return null;
+            }
+
+            var basic = (BasicOcspResp)ocspResp.GetResponseObject();
+            if (basic.Responses.Length == 0) {
+                return null;
+            }
+
+            var status = basic.Responses[0].GetCertStatus();
+            return status switch {
+                RevokedStatus => true,
+                UnknownStatus => null,
+                _ => false
+            };
         }
 
         private async Task QueryCtLogs(CancellationToken cancellationToken)
