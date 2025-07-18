@@ -369,7 +369,7 @@ namespace DomainDetective {
         /// Initializes a new instance of the <see cref="DomainHealthCheck"/> class.
         /// </summary>
         /// <param name="dnsEndpoint">
-        /// <para>DNS server to use for queries. Defaults to System.</para>
+        /// <para>DNS server to use for queries. Defaults to the system DNS endpoint.</para>
         /// </param>
         /// <param name="internalLogger">
         /// <para>Optional logger for diagnostic output.</para>

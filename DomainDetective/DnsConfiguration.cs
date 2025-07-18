@@ -32,7 +32,7 @@ namespace DomainDetective {
         public DnsSelectionStrategy DnsSelectionStrategy { get; set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DnsConfiguration"/> class with default values.
+        /// Initializes a new instance of the <see cref="DnsConfiguration"/> class with default values using the system DNS endpoint.
         /// </summary>
         public DnsConfiguration() {
             DnsEndpoint = DnsEndpoint.System;
