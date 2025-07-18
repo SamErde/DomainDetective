@@ -35,6 +35,12 @@
     <ItemGroup>
         <ProjectReference Include="..\DomainDetective\DomainDetective.csproj" />
         <ProjectReference Include="..\DomainDetective.PowerShell\DomainDetective.PowerShell.csproj" />
+        <ProjectReference Include="..\DomainDetective.Reports\DomainDetective.Reports.csproj" />
+    </ItemGroup>
+
+    <ItemGroup Condition=" '$(TargetFramework)' == 'net472' ">
+        <Reference Include="System.IO.Compression" />
+        <Reference Include="System.IO.Compression.FileSystem" />
     </ItemGroup>
 
     <ItemGroup>
