@@ -32,4 +32,11 @@ public class TestIdnValidation
         var ex = Assert.Throws<TargetInvocationException>(() => method.Invoke(null, new object[] { "example.123" }));
         Assert.IsType<ArgumentException>(ex.InnerException);
     }
+
+    [Fact]
+    public void IsValidTldRequiresLetter()
+    {
+        Assert.False(DomainDetective.Helpers.DomainHelper.IsValidTld("123"));
+        Assert.True(DomainDetective.Helpers.DomainHelper.IsValidTld("com"));
+    }
 }

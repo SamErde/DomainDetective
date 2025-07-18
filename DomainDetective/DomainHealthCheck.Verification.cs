@@ -1498,9 +1498,14 @@ namespace DomainDetective {
             }
 
             var host = uri.IdnHost;
-            var labels = host.Split('.');
-            if (labels.Length == 0 || !Helpers.DomainHelper.IsValidTld(labels[labels.Length - 1])) {
-                throw new ArgumentException("Invalid host name.", nameof(domainName));
+            if (uri.HostNameType == UriHostNameType.Dns) {
+                var labels = host.Split('.');
+                if (labels.Length == 0 ||
+                    !Helpers.DomainHelper.IsValidTld(labels[labels.Length - 1])) {
+                    throw new ArgumentException(
+                        "Invalid host name.",
+                        nameof(domainName));
+                }
             }
 
             if (!uri.IsDefaultPort) {
