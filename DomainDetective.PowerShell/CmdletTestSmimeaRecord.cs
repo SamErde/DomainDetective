@@ -12,12 +12,12 @@ namespace DomainDetective.PowerShell {
 [Cmdlet(VerbsDiagnostic.Test, "DDSmimeaRecord", DefaultParameterSetName = "Email")]
 [Alias("Test-DnsSmimea")]
     public sealed class CmdletTestSmimeaRecord : AsyncPSCmdlet {
-        /// <param name="EmailAddress">Email address to query.</param>
+        /// <summary>Email address to query.</summary>
         [Parameter(Mandatory = true, Position = 0, ParameterSetName = "Email")]
         [ValidateNotNullOrEmpty]
         public string EmailAddress;
 
-        /// <param name="DnsEndpoint">DNS server used for queries.</param>
+        /// <summary>DNS server used for queries.</summary>
         [Parameter(Mandatory = false, Position = 1, ParameterSetName = "Email")]
         public DnsEndpoint DnsEndpoint = DnsEndpoint.System;
 

@@ -11,12 +11,12 @@ namespace DomainDetective.PowerShell {
     /// </example>
     [Cmdlet(VerbsDiagnostic.Test, "ZoneTransfer", DefaultParameterSetName = "ServerName")]
     public sealed class CmdletTestZoneTransfer : AsyncPSCmdlet {
-        /// <param name="DomainName">Domain to query.</param>
+        /// <summary>Domain to query.</summary>
         [Parameter(Mandatory = true, Position = 0, ParameterSetName = "ServerName")]
         [ValidateNotNullOrEmpty]
         public string DomainName;
 
-        /// <param name="DnsEndpoint">DNS server used for queries.</param>
+        /// <summary>DNS server used for queries.</summary>
         [Parameter(Mandatory = false, Position = 1, ParameterSetName = "ServerName")]
         public DnsEndpoint DnsEndpoint = DnsEndpoint.System;
 

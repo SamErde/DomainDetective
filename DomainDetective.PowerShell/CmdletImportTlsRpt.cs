@@ -10,7 +10,7 @@ namespace DomainDetective.PowerShell {
     [Cmdlet(VerbsData.Import, "TlsRpt")]
     [OutputType(typeof(TlsRptSummary))]
     public sealed class CmdletImportTlsRpt : PSCmdlet {
-        /// <param name="Path">Path to the JSON report.</param>
+        /// <summary>Path to the JSON report.</summary>
         [Parameter(Mandatory = true, Position = 0, ValueFromPipeline = true, ValueFromPipelineByPropertyName = true)]
         [ValidateNotNullOrEmpty]
         public string Path { get; set; }

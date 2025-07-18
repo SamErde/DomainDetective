@@ -12,20 +12,20 @@ namespace DomainDetective.PowerShell;
 [Cmdlet(VerbsDiagnostic.Test, "DDThreatIntel")]
 [Alias("Test-DomainThreatIntel")]
 public sealed class CmdletTestThreatIntel : AsyncPSCmdlet {
-    /// <param name="NameOrIpAddress">Domain or IP address to query.</param>
+    /// <summary>Domain or IP address to query.</summary>
     [Parameter(Mandatory = true, Position = 0)]
     [ValidateNotNullOrEmpty]
     public string NameOrIpAddress;
 
-    /// <param name="GoogleApiKey">Google Safe Browsing API key.</param>
+    /// <summary>Google Safe Browsing API key.</summary>
     [Parameter(Mandatory = false)]
     public string? GoogleApiKey;
 
-    /// <param name="PhishTankApiKey">PhishTank API key.</param>
+    /// <summary>PhishTank API key.</summary>
     [Parameter(Mandatory = false)]
     public string? PhishTankApiKey;
 
-    /// <param name="VirusTotalApiKey">VirusTotal API key.</param>
+    /// <summary>VirusTotal API key.</summary>
     [Parameter(Mandatory = false)]
     public string? VirusTotalApiKey;
 

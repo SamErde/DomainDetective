@@ -26,46 +26,46 @@ namespace DomainDetective.PowerShell {
         DefaultParameterSetName = "Builtin")]
 [Alias("Test-DnsPropagation")]
     public sealed class CmdletTestDnsPropagation : AsyncPSCmdlet {
-        /// <param name="DomainName">Domain to query.</param>
+        /// <summary>Domain to query.</summary>
         [Parameter(Mandatory = true, Position = 0, ParameterSetName = "Builtin")]
         [Parameter(Mandatory = true, Position = 0, ParameterSetName = "ServersFile")]
         [ValidateNotNullOrEmpty]
         public string DomainName;
 
-        /// <param name="RecordType">DNS record type to test.</param>
+        /// <summary>DNS record type to test.</summary>
         [Parameter(Mandatory = true, Position = 1, ParameterSetName = "Builtin")]
         [Parameter(Mandatory = true, Position = 1, ParameterSetName = "ServersFile")]
         public DnsRecordType RecordType;
 
-        /// <param name="ServersFile">Path to JSON file with DNS servers.</param>
+        /// <summary>Path to JSON file with DNS servers.</summary>
         [Parameter(Mandatory = true, Position = 2, ParameterSetName = "ServersFile")]
         public string ServersFile;
 
-        /// <param name="Country">Filter servers by country.</param>
+        /// <summary>Filter servers by country.</summary>
         [Parameter(Mandatory = false)]
         public CountryId? Country;
 
-        /// <param name="Location">Filter servers by location.</param>
+        /// <summary>Filter servers by location.</summary>
         [Parameter(Mandatory = false)]
         public LocationId? Location;
 
-        /// <param name="Take">Limit the number of servers queried.</param>
+        /// <summary>Limit the number of servers queried.</summary>
         [Parameter(Mandatory = false)]
         public int? Take;
 
-        /// <param name="CountryCount">Select number of servers per country.</param>
+        /// <summary>Select number of servers per country.</summary>
         [Parameter(Mandatory = false)]
         public Hashtable? CountryCount;
 
-        /// <param name="CompareResults">Return aggregated comparison of results.</param>
+        /// <summary>Return aggregated comparison of results.</summary>
         [Parameter(Mandatory = false)]
         public SwitchParameter CompareResults;
 
-        /// <param name="SnapshotPath">Directory used to store DNS snapshots.</param>
+        /// <summary>Directory used to store DNS snapshots.</summary>
         [Parameter(Mandatory = false)]
         public string SnapshotPath;
 
-        /// <param name="Diff">Return changes since last snapshot.</param>
+        /// <summary>Return changes since last snapshot.</summary>
         [Parameter(Mandatory = false)]
         public SwitchParameter Diff;
 

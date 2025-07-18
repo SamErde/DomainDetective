@@ -11,20 +11,20 @@ namespace DomainDetective.PowerShell {
 [Cmdlet(VerbsDiagnostic.Test, "DDDomainCertificate", DefaultParameterSetName = "Url")]
 [Alias("Test-DomainCertificate")]
     public sealed class CmdletTestWebsiteCertificate : AsyncPSCmdlet {
-        /// <param name="Url">Website URL.</param>
+        /// <summary>Website URL.</summary>
         [Parameter(Mandatory = true, Position = 0, ParameterSetName = "Url")]
         [ValidateNotNullOrEmpty]
         public string Url;
 
-        /// <param name="Port">TCP port used for connection.</param>
+        /// <summary>TCP port used for connection.</summary>
         [Parameter(Mandatory = false, Position = 1, ParameterSetName = "Url")]
         public int Port = 443;
 
-        /// <param name="ShowChain">Output certificate chain information.</param>
+        /// <summary>Output certificate chain information.</summary>
         [Parameter(Mandatory = false)]
         public SwitchParameter ShowChain;
 
-        /// <param name="SkipRevocation">Do not check certificate revocation status.</param>
+        /// <summary>Do not check certificate revocation status.</summary>
         [Parameter(Mandatory = false)]
         public SwitchParameter SkipRevocation;
 

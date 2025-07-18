@@ -10,19 +10,19 @@ namespace DomainDetective.PowerShell {
     /// </example>
     [Cmdlet(VerbsDiagnostic.Test, "SmtpBanner", DefaultParameterSetName = "ServerName")]
     public sealed class CmdletTestSmtpBanner : AsyncPSCmdlet {
-        /// <param name="HostName">SMTP host to check.</param>
+        /// <summary>SMTP host to check.</summary>
         [Parameter(Mandatory = true, Position = 0, ParameterSetName = "ServerName")]
         public string HostName;
 
-        /// <param name="Port">SMTP port number.</param>
+        /// <summary>SMTP port number.</summary>
         [Parameter(Mandatory = false, Position = 1, ParameterSetName = "ServerName")]
         public int Port = 25;
 
-        /// <param name="ExpectedHostname">Hostname expected in the banner.</param>
+        /// <summary>Hostname expected in the banner.</summary>
         [Parameter(Mandatory = false)]
         public string ExpectedHostname;
 
-        /// <param name="ExpectedSoftware">Software string expected in the banner.</param>
+        /// <summary>Software string expected in the banner.</summary>
         [Parameter(Mandatory = false)]
         public string ExpectedSoftware;
 

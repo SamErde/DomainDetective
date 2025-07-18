@@ -12,16 +12,16 @@ namespace DomainDetective.PowerShell {
 [Cmdlet(VerbsDiagnostic.Test, "DDEmailStartTls", DefaultParameterSetName = "ServerName")]
 [Alias("Test-EmailStartTls")]
     public sealed class CmdletTestStartTls : AsyncPSCmdlet {
-        /// <param name="DomainName">Domain to test.</param>
+        /// <summary>Domain to test.</summary>
         [Parameter(Mandatory = true, Position = 0, ParameterSetName = "ServerName")]
         [ValidateNotNullOrEmpty]
         public string DomainName;
 
-        /// <param name="DnsEndpoint">DNS server used for queries.</param>
+        /// <summary>DNS server used for queries.</summary>
         [Parameter(Mandatory = false, Position = 1, ParameterSetName = "ServerName")]
         public DnsEndpoint DnsEndpoint = DnsEndpoint.System;
 
-        /// <param name="Port">SMTP port number.</param>
+        /// <summary>SMTP port number.</summary>
         [Parameter(Mandatory = false)]
         public int Port = 25;
 

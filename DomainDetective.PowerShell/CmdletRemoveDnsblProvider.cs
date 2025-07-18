@@ -10,12 +10,12 @@ namespace DomainDetective.PowerShell {
 [Cmdlet(VerbsCommon.Remove, "DDDnsblProvider")]
 [Alias("Remove-DnsblProvider")]
     public sealed class CmdletRemoveDnsblProvider : PSCmdlet {
-        /// <param name="Domain">Domain name of the provider to remove.</param>
+        /// <summary>Domain name of the provider to remove.</summary>
         [Parameter(Mandatory = true, Position = 0)]
         [ValidateNotNullOrEmpty]
         public string Domain { get; set; }
 
-        /// <param name="InputObject">Analysis object to modify.</param>
+        /// <summary>Analysis object to modify.</summary>
         [Parameter(ValueFromPipeline = true)]
         public DNSBLAnalysis InputObject { get; set; }
 

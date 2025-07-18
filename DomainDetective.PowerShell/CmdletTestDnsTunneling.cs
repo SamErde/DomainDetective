@@ -12,12 +12,12 @@ namespace DomainDetective.PowerShell {
 [Cmdlet(VerbsDiagnostic.Test, "DDDnsTunneling", DefaultParameterSetName = "File")]
 [Alias("Test-DnsTunneling")]
     public sealed class CmdletTestDnsTunneling : AsyncPSCmdlet {
-        /// <param name="DomainName">Domain to inspect.</param>
+        /// <summary>Domain to inspect.</summary>
         [Parameter(Mandatory = true, Position = 0)]
         [ValidateNotNullOrEmpty]
         public string DomainName;
 
-        /// <param name="Path">Log file path.</param>
+        /// <summary>Log file path.</summary>
         [Parameter(Mandatory = true, Position = 1)]
         public string Path;
 

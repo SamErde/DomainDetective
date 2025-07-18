@@ -12,7 +12,7 @@ namespace DomainDetective.PowerShell {
 [Cmdlet(VerbsCommon.Get, "DDEmailMessageHeaderInfo")]
 [Alias("Get-EmailHeaderInfo")]
     public sealed class CmdletTestMessageHeader : AsyncPSCmdlet {
-        /// <param name="HeaderText">Raw header text.</param>
+        /// <summary>Raw header text.</summary>
         [Parameter(Mandatory = true, Position = 0)]
         [ValidateNotNullOrEmpty]
         public string HeaderText;

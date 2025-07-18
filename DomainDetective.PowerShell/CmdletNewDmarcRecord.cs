@@ -15,60 +15,60 @@ namespace DomainDetective.PowerShell {
     [Cmdlet(VerbsCommon.New, "DmarcRecord")]
     [OutputType(typeof(string))]
     public sealed class CmdletNewDmarcRecord : PSCmdlet {
-        /// <param name="Policy">Main DMARC policy.</param>
+        /// <summary>Main DMARC policy.</summary>
         [Parameter(Position = 0)]
         [ValidateSet("none", "quarantine", "reject")]
         public string Policy { get; set; }
 
-        /// <param name="SubPolicy">Policy applied to subdomains.</param>
+        /// <summary>Policy applied to subdomains.</summary>
         [Parameter]
         [ValidateSet("none", "quarantine", "reject")]
         public string SubPolicy { get; set; }
 
-        /// <param name="AggregateUri">Aggregate report URI(s).</param>
+        /// <summary>Aggregate report URI(s).</summary>
         [Parameter]
         public string AggregateUri { get; set; }
 
-        /// <param name="ForensicUri">Forensic report URI(s).</param>
+        /// <summary>Forensic report URI(s).</summary>
         [Parameter]
         public string ForensicUri { get; set; }
 
-        /// <param name="Percent">Percentage of mail subjected to the policy.</param>
+        /// <summary>Percentage of mail subjected to the policy.</summary>
         [Parameter]
         [ValidateRange(0, 100)]
         public int? Percent { get; set; }
 
-        /// <param name="DkimAlignment">DKIM alignment mode.</param>
+        /// <summary>DKIM alignment mode.</summary>
         [Parameter]
         [ValidateSet("r", "s")]
         public string DkimAlignment { get; set; }
 
-        /// <param name="SpfAlignment">SPF alignment mode.</param>
+        /// <summary>SPF alignment mode.</summary>
         [Parameter]
         [ValidateSet("r", "s")]
         public string SpfAlignment { get; set; }
 
-        /// <param name="FailureOptions">Failure reporting options.</param>
+        /// <summary>Failure reporting options.</summary>
         [Parameter]
         public string FailureOptions { get; set; }
 
-        /// <param name="ReportingInterval">Reporting interval in seconds.</param>
+        /// <summary>Reporting interval in seconds.</summary>
         [Parameter]
         public int? ReportingInterval { get; set; }
 
-        /// <param name="DomainName">Domain name for publishing.</param>
+        /// <summary>Domain name for publishing.</summary>
         [Parameter]
         public string DomainName { get; set; }
 
-        /// <param name="DnsApiUrl">DNS provider API endpoint.</param>
+        /// <summary>DNS provider API endpoint.</summary>
         [Parameter]
         public Uri DnsApiUrl { get; set; }
 
-        /// <param name="Publish">Publish the record via DNS provider.</param>
+        /// <summary>Publish the record via DNS provider.</summary>
         [Parameter]
         public SwitchParameter Publish { get; set; }
 
-        /// <param name="StepByStep">Prompt step by step for all options.</param>
+        /// <summary>Prompt step by step for all options.</summary>
         [Parameter]
         public SwitchParameter StepByStep { get; set; }
 
