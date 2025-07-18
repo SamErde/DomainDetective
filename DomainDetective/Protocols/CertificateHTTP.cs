@@ -85,6 +85,8 @@ namespace DomainDetective {
         public bool WeakKey { get; private set; }
         /// <summary>Indicates if the certificate is signed with SHA-1.</summary>
         public bool Sha1Signature { get; private set; }
+        /// <summary>Indicates if the certificate uses RSA-PSS for its signature.</summary>
+        public bool RsaPssSignature { get; private set; }
         /// <summary>Gets the negotiated TLS protocol when <see cref="CaptureTlsDetails"/> is true.</summary>
         public SslProtocols TlsProtocol { get; private set; }
         /// <summary>Indicates if TLS 1.3 was negotiated.</summary>
@@ -488,7 +490,10 @@ namespace DomainDetective {
             }
             WeakKey = KeySize > 0 && KeySize < 2048;
             string oid = Certificate.SignatureAlgorithm.Value;
-            Sha1Signature = oid == "1.2.840.113549.1.1.5" || oid == "1.2.840.10040.4.3" || oid == "1.3.14.3.2.29";
+            Sha1Signature = oid == "1.2.840.113549.1.1.5" ||
+                            oid == "1.2.840.10040.4.3" ||
+                            oid == "1.3.14.3.2.29";
+            RsaPssSignature = oid == "1.2.840.113549.1.1.10";
         }
 
         private async Task PopulateTlsInfo(Uri uri, int port, CancellationToken token) {
