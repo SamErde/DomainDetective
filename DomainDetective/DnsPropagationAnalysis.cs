@@ -80,14 +80,15 @@ namespace DomainDetective {
             }
 
             foreach (var entry in servers) {
-                var canonical = GetCanonicalIp(entry.IPAddress);
-                if (!string.Equals(canonical, entry.IPAddress.ToString(), StringComparison.OrdinalIgnoreCase)) {
+                var ip = NormalizeIpAddress(entry.IPAddress);
+                var canonical = GetCanonicalIp(ip);
+                if (!string.Equals(canonical, entry.IPAddress.ToString(), StringComparison.OrdinalIgnoreCase) && !entry.IPAddress.IsIPv4MappedToIPv6) {
                     throw new FormatException($"Invalid IP address '{entry.IPAddress}'");
                 }
 
                 var trimmed = new PublicDnsEntry {
                     Country = entry.Country?.Trim(),
-                    IPAddress = entry.IPAddress,
+                    IPAddress = ip,
                     HostName = entry.HostName?.Trim(),
                     Location = entry.Location?.Trim(),
                     ASN = entry.ASN,
@@ -125,14 +126,15 @@ namespace DomainDetective {
             }
 
             foreach (var entry in servers) {
-                var canonical = GetCanonicalIp(entry.IPAddress);
-                if (!string.Equals(canonical, entry.IPAddress.ToString(), StringComparison.OrdinalIgnoreCase)) {
+                var ip = NormalizeIpAddress(entry.IPAddress);
+                var canonical = GetCanonicalIp(ip);
+                if (!string.Equals(canonical, entry.IPAddress.ToString(), StringComparison.OrdinalIgnoreCase) && !entry.IPAddress.IsIPv4MappedToIPv6) {
                     throw new FormatException($"Invalid IP address '{entry.IPAddress}'");
                 }
 
                 var trimmed = new PublicDnsEntry {
                     Country = entry.Country?.Trim(),
-                    IPAddress = entry.IPAddress,
+                    IPAddress = ip,
                     HostName = entry.HostName?.Trim(),
                     Location = entry.Location?.Trim(),
                     ASN = entry.ASN,
@@ -156,13 +158,23 @@ namespace DomainDetective {
                 return;
             }
 
-            var canonical = GetCanonicalIp(entry.IPAddress);
-            if (!string.Equals(canonical, entry.IPAddress.ToString(), StringComparison.OrdinalIgnoreCase)) {
+            var ip = NormalizeIpAddress(entry.IPAddress);
+            var canonical = GetCanonicalIp(ip);
+            if (!string.Equals(canonical, entry.IPAddress.ToString(), StringComparison.OrdinalIgnoreCase) && !entry.IPAddress.IsIPv4MappedToIPv6) {
                 throw new FormatException($"Invalid IP address '{entry.IPAddress}'");
             }
 
-            if (_servers.All(s => !s.IPAddress.Equals(entry.IPAddress))) {
-                _servers.Add(entry);
+            if (_servers.All(s => !s.IPAddress.Equals(ip))) {
+                var trimmed = new PublicDnsEntry {
+                    Country = entry.Country,
+                    IPAddress = ip,
+                    HostName = entry.HostName,
+                    Location = entry.Location,
+                    ASN = entry.ASN,
+                    ASNName = entry.ASNName,
+                    Enabled = entry.Enabled
+                };
+                _servers.Add(trimmed);
             }
         }
 
@@ -171,7 +183,7 @@ namespace DomainDetective {
         /// </summary>
         /// <param name="ipAddress">IP address of the server.</param>
         public void RemoveServer(string ipAddress) {
-            if (!IPAddress.TryParse(ipAddress, out var parsed)) {
+            if (!TryParseNormalized(ipAddress, out var parsed)) {
                 return;
             }
             var existing = _servers.FirstOrDefault(s => s.IPAddress.Equals(parsed));
@@ -185,7 +197,7 @@ namespace DomainDetective {
         /// </summary>
         /// <param name="ipAddress">IP address of the server.</param>
         public void DisableServer(string ipAddress) {
-            if (!IPAddress.TryParse(ipAddress, out var parsed)) {
+            if (!TryParseNormalized(ipAddress, out var parsed)) {
                 return;
             }
             var existing = _servers.FirstOrDefault(s => s.IPAddress.Equals(parsed));
@@ -208,7 +220,7 @@ namespace DomainDetective {
         /// </summary>
         /// <param name="ipAddress">IP address of the server.</param>
         public void EnableServer(string ipAddress) {
-            if (!IPAddress.TryParse(ipAddress, out var parsed)) {
+            if (!TryParseNormalized(ipAddress, out var parsed)) {
                 return;
             }
             var existing = _servers.FirstOrDefault(s => s.IPAddress.Equals(parsed));
@@ -311,10 +323,23 @@ namespace DomainDetective {
             return result;
         }
 
+        private static IPAddress NormalizeIpAddress(IPAddress ipAddress) =>
+            ipAddress.IsIPv4MappedToIPv6 ? ipAddress.MapToIPv4() : ipAddress;
+
+        private static bool TryParseNormalized(string value, out IPAddress result) {
+            if (!IPAddress.TryParse(value, out result)) {
+                return false;
+            }
+
+            result = NormalizeIpAddress(result);
+            return true;
+        }
+
         private static string GetCanonicalIp(IPAddress ipAddress) {
-            return ipAddress.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6
-                ? IPAddress.Parse(ipAddress.ToString()).ToString()
-                : ipAddress.ToString();
+            var normalized = NormalizeIpAddress(ipAddress);
+            return normalized.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6
+                ? IPAddress.Parse(normalized.ToString()).ToString()
+                : normalized.ToString();
         }
 
         internal Task<GeoLocationInfo?> GetGeoLocationAsync(string ip, CancellationToken ct) {
@@ -487,9 +512,7 @@ namespace DomainDetective {
                 var normalizedRecords = res.Records
                     .Select(r =>
                         IPAddress.TryParse(r, out var ip)
-                            ? ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6
-                                ? IPAddress.Parse(r).ToString().ToLowerInvariant()
-                                : ip.ToString()
+                            ? GetCanonicalIp(NormalizeIpAddress(ip)).ToLowerInvariant()
                             : r.ToLowerInvariant())
                     .OrderBy(r => r);
                 var key = string.Join(",", normalizedRecords);
