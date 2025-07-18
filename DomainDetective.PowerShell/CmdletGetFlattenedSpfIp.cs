@@ -21,7 +21,7 @@ namespace DomainDetective.PowerShell {
 
         /// <para>DNS server used for queries.</para>
         [Parameter(Mandatory = false, Position = 1, ParameterSetName = "ServerName")]
-        public DnsEndpoint DnsEndpoint = DnsEndpoint.CloudflareWireFormat;
+        public DnsEndpoint DnsEndpoint = DnsEndpoint.System;
 
         /// <para>Optional SPF record used for testing to avoid DNS lookups.</para>
         [Parameter(Mandatory = false)]
@@ -47,7 +47,7 @@ namespace DomainDetective.PowerShell {
             internalLoggerPowerShell.ResetActivityIdCounter();
 
             if (EqualityComparer<DnsEndpoint>.Default.Equals(DnsEndpoint, default)) {
-                DnsEndpoint = DnsEndpoint.CloudflareWireFormat;
+                DnsEndpoint = DnsEndpoint.System;
             }
 
             _healthCheck = new DomainHealthCheck(DnsEndpoint, _logger);

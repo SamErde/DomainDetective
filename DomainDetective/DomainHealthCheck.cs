@@ -369,15 +369,12 @@ namespace DomainDetective {
         /// Initializes a new instance of the <see cref="DomainHealthCheck"/> class.
         /// </summary>
         /// <param name="dnsEndpoint">
-        /// <para>DNS server to use for queries. Defaults to Cloudflare.</para>
+        /// <para>DNS server to use for queries. Defaults to System.</para>
         /// </param>
         /// <param name="internalLogger">
         /// <para>Optional logger for diagnostic output.</para>
         /// </param>
-        public DomainHealthCheck(DnsEndpoint dnsEndpoint = DnsEndpoint.CloudflareWireFormat, InternalLogger internalLogger = null) {
-            if (EqualityComparer<DnsEndpoint>.Default.Equals(dnsEndpoint, default)) {
-                throw new ArgumentNullException(nameof(dnsEndpoint));
-            }
+        public DomainHealthCheck(DnsEndpoint dnsEndpoint = DnsEndpoint.System, InternalLogger internalLogger = null) {
 
             if (internalLogger != null) {
                 _logger = internalLogger;
