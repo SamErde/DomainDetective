@@ -525,10 +525,10 @@ namespace DomainDetective {
                 throw new FileNotFoundException($"DNSBL config file not found: {filePath}");
             }
 
-            using var stream = File.OpenRead(filePath);
+            var lines = File.ReadAllLines(filePath);
+            var json = string.Join("\n", lines);
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            var config = JsonSerializer.DeserializeAsync<DnsblConfiguration>(stream, options)
-                .GetAwaiter().GetResult();
+            var config = JsonSerializer.Deserialize<DnsblConfiguration>(json, options);
             if (config != null) {
                 ApplyDnsblConfiguration(config, overwriteExisting, clearExisting);
             }

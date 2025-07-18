@@ -105,4 +105,30 @@ namespace DomainDetective.Tests {
                 File.Delete(file);
             }
         }
-    }}
+
+        [Fact]
+        public void LoadConfigUnixLineEndings() {
+            var lines = new[] {
+                "{",
+                "  \"providers\": [",
+                "    { \"domain\": \"unix.example\" }",
+                "  ]",
+                "}"
+            };
+            var file = Path.GetTempFileName();
+            try {
+                File.WriteAllText(file, string.Join("\n", lines));
+
+                var analysis = new DNSBLAnalysis();
+                analysis.LoadDnsblConfig(file, clearExisting: true);
+                using (File.Open(file, FileMode.Open, FileAccess.ReadWrite, FileShare.None)) { }
+
+                var entry = Assert.Single(analysis.GetDNSBL());
+                Assert.Equal("unix.example", entry.Domain);
+            }
+            finally {
+                File.Delete(file);
+            }
+        }
+    }
+}
