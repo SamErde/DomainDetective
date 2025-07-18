@@ -97,6 +97,23 @@ namespace DomainDetective.Tests {
         }
 
         [Fact]
+        public async Task UdpPortClosedWhenNoReply() {
+            using var udpServer = new UdpClient(new IPEndPoint(IPAddress.Loopback, 0));
+            var udpPort = ((IPEndPoint)udpServer.Client.LocalEndPoint!).Port;
+            var udpTask = udpServer.ReceiveAsync();
+
+            try {
+                var analysis = new PortScanAnalysis { Timeout = TimeSpan.FromMilliseconds(200) };
+                await analysis.Scan("127.0.0.1", new[] { udpPort }, new InternalLogger());
+
+                Assert.False(analysis.Results[udpPort].UdpOpen);
+            } finally {
+                udpServer.Close();
+                try { await udpTask; } catch { }
+            }
+        }
+
+        [Fact]
         public async Task DetectsTcpClosedPort() {
             var port = GetFreePort();
             var analysis = new PortScanAnalysis { Timeout = TimeSpan.FromMilliseconds(200) };

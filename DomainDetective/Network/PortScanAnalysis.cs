@@ -204,8 +204,8 @@ public class PortScanAnalysis
                     var receiveTask = udp.ReceiveAsync();
                     try
                     {
-                        await receiveTask.WaitWithCancellation(cts.Token).ConfigureAwait(false);
-                        udpOpen = true;
+                        var result = await receiveTask.WaitWithCancellation(cts.Token).ConfigureAwait(false);
+                        udpOpen = result.Buffer.Length > 0;
                     }
                     catch
                     {
