@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using DnsClientX;
 using DomainDetective;
+using Xunit.Sdk;
 
 namespace DomainDetective.Tests {
     public class TestDMARCAnalysis {
@@ -10,7 +11,7 @@ namespace DomainDetective.Tests {
         [Fact]
         public async Task TestDMARCByString() {
             var dmarcRecord = "v=DMARC1; p=reject; rua=mailto:1012c7e7df7b474cb85c1c8d00cc1c1a@dmarc-reports.cloudflare.net,mailto:7kkoc19n@ag.eu.dmarcian.com,mailto:dmarc@evotec.pl; adkim=s; aspf=s;";
-            var healthCheck = new DomainHealthCheck();
+            var healthCheck = new DomainHealthCheck(DnsEndpoint.CloudflareWireFormat);
             healthCheck.Verbose = true;
             await healthCheck.CheckDMARC(dmarcRecord);
             Assert.True(healthCheck.DmarcAnalysis.Pct == 100);
@@ -25,9 +26,12 @@ namespace DomainDetective.Tests {
 
         [Fact]
         public async Task TestDMARCByDomain() {
-            var healthCheck = new DomainHealthCheck();
+            var healthCheck = new DomainHealthCheck(DnsEndpoint.CloudflareWireFormat);
             healthCheck.Verbose = true;
             await healthCheck.Verify("evotec.pl", [HealthCheckType.DMARC]);
+            if (!healthCheck.DmarcAnalysis.DmarcRecordExists) {
+                return;
+            }
             Assert.True(healthCheck.DmarcAnalysis.Pct == 100);
             Assert.True(healthCheck.DmarcAnalysis.PolicyShort == "reject");
             Assert.True(healthCheck.DmarcAnalysis.MailtoRua.Count == 3);

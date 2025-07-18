@@ -3,7 +3,7 @@
 Import-Module $PSScriptRoot\..\DomainDetective.psd1 -Force
 
 Measure-Command {
-    $Blacklists = Test-DomainBlacklist -NameOrIpAddress 'google.com', "89.74.48.96" -Verbose -DnsEndpoint Cloudflare
+    $Blacklists = Test-DomainBlacklist -NameOrIpAddress 'google.com', "89.74.48.96" -Verbose -DnsEndpoint System
     $Blacklists | Sort-Object -Property IsBlackListed, Answer -Descending | Format-Table -AutoSize
 }
 

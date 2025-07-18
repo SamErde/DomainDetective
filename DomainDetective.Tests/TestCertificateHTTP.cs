@@ -3,6 +3,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.IO;
 using System.Net;
+using Xunit.Sdk;
 using System.Net.Sockets;
 using System.Net.Security;
 using System.Security.Authentication;
@@ -42,6 +43,9 @@ namespace DomainDetective.Tests {
             var logger = new InternalLogger();
             var analysis = new CertificateAnalysis { CtLogQueryOverride = _ => Task.FromResult("[]") };
             await analysis.AnalyzeUrl("https://www.google.com", 443, logger);
+            if (!analysis.IsReachable) {
+                throw SkipException.ForSkip("Host not reachable");
+            }
             Assert.True(analysis.ProtocolVersion?.Major >= 1);
             Assert.Equal(analysis.ProtocolVersion >= new Version(2, 0), analysis.Http2Supported);
             if (analysis.ProtocolVersion >= new Version(3, 0)) {
@@ -54,6 +58,9 @@ namespace DomainDetective.Tests {
             var logger = new InternalLogger();
             var analysis = new CertificateAnalysis { CtLogQueryOverride = _ => Task.FromResult("[]") };
             await analysis.AnalyzeUrl("https://www.google.com", 443, logger);
+            if (!analysis.IsReachable) {
+                throw SkipException.ForSkip("Host not reachable");
+            }
             Assert.True(analysis.DaysValid > 0);
             Assert.Equal(analysis.DaysToExpire < 0, analysis.IsExpired);
         }
@@ -90,6 +97,9 @@ namespace DomainDetective.Tests {
             var logger = new InternalLogger();
             var analysis = new CertificateAnalysis { CaptureTlsDetails = true };
             await analysis.AnalyzeUrl("https://www.google.com", 443, logger);
+            if (!analysis.IsReachable) {
+                throw SkipException.ForSkip("Host not reachable");
+            }
             Assert.False(string.IsNullOrEmpty(analysis.CipherSuite));
             if (analysis.DhKeyBits > 0) {
                 Assert.True(analysis.DhKeyBits > 0);

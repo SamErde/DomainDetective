@@ -8,7 +8,7 @@ $Gmail | Format-Table
 $Evotec = Test-StartTls -DomainName 'evotec.pl' -Port 25
 $Evotec | Format-Table
 
-$Example = Test-StartTls -DomainName 'example.com' -DnsEndpoint Cloudflare -Port 587
+$Example = Test-StartTls -DomainName 'example.com' -DnsEndpoint System -Port 587
 $Example | Format-Table
 
 # Test a single host on a custom port

@@ -6,7 +6,7 @@ $Results = Test-NsRecord -DomainName 'google.com' -Verbose
 $Results | Format-Table
 $Results | Format-List
 
-$Cloudflare = Test-NsRecord -DomainName 'example.com' -DnsEndpoint Cloudflare
+$Cloudflare = Test-NsRecord -DomainName 'example.com' -DnsEndpoint System
 $Cloudflare | Format-Table
 
 $Evotec = Test-NsRecord -DomainName 'evotec.pl' -Verbose

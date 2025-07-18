@@ -215,6 +215,9 @@ Test-Autodiscover -DomainName "example.com"
 Test-FCrDns -DomainName "example.com"
 ```
 
+By default, all DNS-related cmdlets use the system DNS resolver. You can specify
+a different endpoint with the **-DnsEndpoint** parameter when needed.
+
 Analyze TTL values:
 
 ```powershell

@@ -32,10 +32,10 @@ namespace DomainDetective {
         public DnsSelectionStrategy DnsSelectionStrategy { get; set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DnsConfiguration"/> class with default values.
+        /// Initializes a new instance of the <see cref="DnsConfiguration"/> class with default values using the system DNS endpoint.
         /// </summary>
         public DnsConfiguration() {
-            DnsEndpoint = DnsEndpoint.CloudflareWireFormat;
+            DnsEndpoint = DnsEndpoint.System;
             DnsSelectionStrategy = DnsSelectionStrategy.First;
         }
 
@@ -58,7 +58,7 @@ namespace DomainDetective {
             if (QueryDnsOverride != null) {
                 return await QueryDnsOverride(name, recordType);
             }
-            ClientX client = new(endpoint: DnsEndpoint, DnsSelectionStrategy);
+            using var client = new ClientX(endpoint: DnsEndpoint, DnsSelectionStrategy);
             client.EndpointConfiguration.UserAgent = UserAgent;
             if (filter != string.Empty) {
                 var data = await client.ResolveFilter(name, recordType, filter);
@@ -86,7 +86,7 @@ namespace DomainDetective {
             }
             List<DnsAnswer> allAnswers = new();
 
-            ClientX client = new(endpoint: DnsEndpoint, DnsSelectionStrategy);
+            using var client = new ClientX(endpoint: DnsEndpoint, DnsSelectionStrategy);
             client.EndpointConfiguration.UserAgent = UserAgent;
             DnsResponse[] data;
             if (filter != string.Empty) {
@@ -110,7 +110,7 @@ namespace DomainDetective {
             if (names == null || names.Length == 0) {
                 throw new ArgumentNullException(nameof(names), $"No domain names provided for querying {recordType} records.");
             }
-            ClientX client = new(endpoint: DnsEndpoint, DnsSelectionStrategy);
+            using var client = new ClientX(endpoint: DnsEndpoint, DnsSelectionStrategy);
             client.EndpointConfiguration.UserAgent = UserAgent;
             DnsResponse[] data = filter != string.Empty
                 ? await client.ResolveFilter(names, recordType, filter)

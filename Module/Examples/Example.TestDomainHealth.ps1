@@ -9,5 +9,5 @@ $Health | Format-List
 $EmailHealth = Test-DomainHealth -DomainName 'gmail.com' -HealthCheckType SPF, DMARC
 $EmailHealth | Format-Table
 
-$DkimHealth = Test-DomainHealth -DomainName 'example.com' -DnsEndpoint Cloudflare -DkimSelectors 'selector1','selector2' -HealthCheckType DKIM
+$DkimHealth = Test-DomainHealth -DomainName 'example.com' -DnsEndpoint System -DkimSelectors 'selector1','selector2' -HealthCheckType DKIM
 $DkimHealth | Format-Table

@@ -448,7 +448,7 @@ namespace DomainDetective {
                 if (DnsQueryOverride != null) {
                     records = await DnsQueryOverride(domain, recordType, server, cancellationToken).ConfigureAwait(false);
                 } else {
-                    var client = new ClientX(server.IPAddress.ToString(), DnsRequestFormat.DnsOverUDP, 53);
+                    using var client = new ClientX(server.IPAddress.ToString(), DnsRequestFormat.DnsOverUDP, 53);
                     client.EndpointConfiguration.UserAgent = DnsConfiguration.DefaultUserAgent;
                     cancellationToken.ThrowIfCancellationRequested();
                     var response = await client.Resolve(domain, recordType);
