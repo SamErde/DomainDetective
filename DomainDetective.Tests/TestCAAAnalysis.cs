@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using DnsClientX;
 using System.Threading.Tasks;
 
 namespace DomainDetective.Tests {
@@ -20,7 +21,7 @@ namespace DomainDetective.Tests {
                 "0 issue \"letsencrypt.org\"",
                 "0 issuemail \";\""
             };
-            var healthCheck = new DomainHealthCheck();
+            var healthCheck = new DomainHealthCheck(DnsEndpoint.CloudflareWireFormat);
             healthCheck.Verbose = false;
             await healthCheck.CheckCAA(caaRecords);
 

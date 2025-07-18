@@ -491,15 +491,46 @@ namespace DomainDetective {
             Sha1Signature = oid == "1.2.840.113549.1.1.5" || oid == "1.2.840.10040.4.3" || oid == "1.3.14.3.2.29";
         }
 
+#pragma warning disable CA2000 // Dispose objects before losing scope - returned TcpClient is disposed by caller
+        private static async Task<TcpClient> ConnectWithProxy(string host, int port, CancellationToken token) {
+            var proxy = Environment.GetEnvironmentVariable("HTTPS_PROXY") ??
+                        Environment.GetEnvironmentVariable("https_proxy") ??
+                        Environment.GetEnvironmentVariable("HTTP_PROXY") ??
+                        Environment.GetEnvironmentVariable("http_proxy");
+            TcpClient tcp = new();
+            if (!string.IsNullOrEmpty(proxy)) {
+                var p = new Uri(proxy);
+#if NET6_0_OR_GREATER
+                await tcp.ConnectAsync(p.Host, p.Port, token);
+#else
+                await tcp.ConnectAsync(p.Host, p.Port).WaitWithCancellation(token);
+#endif
+                var stream = tcp.GetStream();
+                var connectCmd = $"CONNECT {host}:{port} HTTP/1.1\r\nHost: {host}:{port}\r\n\r\n";
+                var buffer = System.Text.Encoding.ASCII.GetBytes(connectCmd);
+                await stream.WriteAsync(buffer, 0, buffer.Length, token);
+                await stream.FlushAsync(token);
+                using var reader = new StreamReader(stream, System.Text.Encoding.ASCII, false, 1024, true);
+                string? line = await reader.ReadLineAsync();
+                if (line == null || (!line.StartsWith("HTTP/1.1 200") && !line.StartsWith("HTTP/1.0 200"))) {
+                    throw new IOException($"Proxy CONNECT failed: {line}");
+                }
+                while (!string.IsNullOrEmpty(await reader.ReadLineAsync())) { }
+            } else {
+#if NET6_0_OR_GREATER
+                await tcp.ConnectAsync(host, port, token);
+#else
+                await tcp.ConnectAsync(host, port).WaitWithCancellation(token);
+#endif
+            }
+            return tcp;
+        }
+#pragma warning restore CA2000
+
         private async Task PopulateTlsInfo(Uri uri, int port, CancellationToken token) {
-            using var tcp = new TcpClient();
+            using var tcp = await ConnectWithProxy(uri.Host, port, token);
             using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(token);
             timeoutCts.CancelAfter(Timeout);
-#if NET6_0_OR_GREATER
-            await tcp.ConnectAsync(uri.Host, port, timeoutCts.Token);
-#else
-            await tcp.ConnectAsync(uri.Host, port).WaitWithCancellation(timeoutCts.Token);
-#endif
             using var ssl = new SslStream(tcp.GetStream(), false, static (_, _, _, _) => true);
 #if NET8_0_OR_GREATER
             await ssl.AuthenticateAsClientAsync(uri.Host, null, SslProtocols.Tls13 | SslProtocols.Tls12, !SkipRevocation)

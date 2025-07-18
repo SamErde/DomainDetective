@@ -1,6 +1,7 @@
 using Xunit;
 using System;
 using System.Threading.Tasks;
+using Xunit.Sdk;
 
 namespace DomainDetective.Tests {
     public class TestCertificateMonitor {
@@ -8,6 +9,9 @@ namespace DomainDetective.Tests {
         public async Task ProducesSummaryCounts() {
             var monitor = new CertificateMonitor();
             await monitor.Analyze(new[] { "https://www.google.com", "https://nonexistent.invalid" });
+            if (monitor.Results.TrueForAll(r => !r.Analysis.IsReachable)) {
+                throw SkipException.ForSkip("Hosts not reachable");
+            }
             Assert.Equal(2, monitor.Results.Count);
             Assert.True(monitor.ValidCount >= 1);
             Assert.True(monitor.FailedCount >= 1);

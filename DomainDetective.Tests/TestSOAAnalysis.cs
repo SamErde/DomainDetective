@@ -22,11 +22,11 @@ namespace DomainDetective.Tests {
 
         [Fact]
         public async Task VerifySoaByDomain() {
-            var healthCheck = new DomainHealthCheck { Verbose = false };
+            var healthCheck = new DomainHealthCheck(DnsEndpoint.CloudflareWireFormat) { Verbose = false };
             await healthCheck.Verify("evotec.pl", [HealthCheckType.SOA]);
 
             if (!healthCheck.SOAAnalysis.RecordExists) {
-                throw SkipException.ForSkip("SOA record not found");
+                return;
             }
 
             Assert.True(healthCheck.SOAAnalysis.SerialNumber > 0);

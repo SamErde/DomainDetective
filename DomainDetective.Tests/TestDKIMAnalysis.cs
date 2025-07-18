@@ -29,7 +29,7 @@ namespace DomainDetective.Tests {
 
         [Fact]
         public async Task TestDKIMByDomain() {
-            var healthCheck = new DomainHealthCheck {
+            var healthCheck = new DomainHealthCheck(DnsEndpoint.CloudflareWireFormat) {
                 Verbose = true
             };
             await healthCheck.Verify("evotec.pl", new[] { HealthCheckType.DKIM }, new[] { "selector1", "selector2" });
