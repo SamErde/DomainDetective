@@ -21,5 +21,17 @@ namespace DomainDetective.Tests {
             monitor.Dispose();
             Assert.False(monitor.IsRunning);
         }
+
+        [Fact]
+        public void CanStartAndStopMultipleTimes() {
+            var monitor = new CertificateMonitor();
+            var timerField = typeof(CertificateMonitor).GetField("_timer", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!;
+            for (int i = 0; i < 3; i++) {
+                monitor.Start(Array.Empty<string>(), TimeSpan.FromMilliseconds(1));
+                Assert.NotNull(timerField.GetValue(monitor));
+                monitor.Stop();
+                Assert.Null(timerField.GetValue(monitor));
+            }
+        }
     }
 }

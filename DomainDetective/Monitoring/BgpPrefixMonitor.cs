@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using PeriodicTimer = System.Threading.PeriodicTimer;
 
 namespace DomainDetective.Monitoring;
 
@@ -32,20 +33,35 @@ public class BgpPrefixMonitor
     public Func<CancellationToken, Task<Dictionary<string, int>>>? QueryOverride { private get; set; }
 
     private readonly Dictionary<string, int> _previous = new(StringComparer.Ordinal);
-    private Timer? _timer;
+    private PeriodicTimer? _timer;
+    private CancellationTokenSource? _cts;
+    private Task? _loopTask;
 
     /// <summary>Starts the monitor.</summary>
     public void Start()
     {
         Stop();
-        _timer = new Timer(async _ => await RunAsync(), null, TimeSpan.Zero, Interval);
+        _cts = new CancellationTokenSource();
+        _timer = new PeriodicTimer(Interval);
+        _loopTask = Task.Run(async () =>
+        {
+            await RunAsync().ConfigureAwait(false);
+            while (_timer != null && await _timer.WaitForNextTickAsync(_cts.Token).ConfigureAwait(false))
+            {
+                await RunAsync().ConfigureAwait(false);
+            }
+        });
     }
 
     /// <summary>Stops the monitor.</summary>
     public void Stop()
     {
+        _cts?.Cancel();
         _timer?.Dispose();
         _timer = null;
+        _cts?.Dispose();
+        _cts = null;
+        _loopTask = null;
     }
 
     /// <summary>Runs a single check.</summary>
