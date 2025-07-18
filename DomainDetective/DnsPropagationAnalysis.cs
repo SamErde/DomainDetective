@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text.Json;
+using System.Text;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -569,7 +570,7 @@ namespace DomainDetective {
             var safe = domain.Replace(Path.DirectorySeparatorChar, '-').Replace(Path.AltDirectorySeparatorChar, '-');
             var file = Path.Combine(SnapshotDirectory, $"{safe}_{recordType}_{DateTime.UtcNow:yyyyMMddHHmmss}.json");
             var json = JsonSerializer.Serialize(results, DomainHealthCheck.JsonOptions);
-            File.WriteAllText(file, json);
+            File.WriteAllText(file, json, Encoding.UTF8);
         }
 
         /// <summary>

@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text.Json;
+using System.Text;
 using System.Globalization;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -551,7 +552,7 @@ namespace DomainDetective {
 
                 Directory.CreateDirectory(cacheDir);
                 var xml = await _client.GetStringAsync(url).ConfigureAwait(false);
-                File.WriteAllText(cacheFile, xml);
+                File.WriteAllText(cacheFile, xml, Encoding.UTF8);
                 return ParseTrustAnchors(xml);
             } catch (Exception ex) {
                 logger?.WriteVerbose("Trust anchor download failed: {0}", ex.Message);

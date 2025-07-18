@@ -1125,7 +1125,7 @@ public class WhoisAnalysis {
         }
         Directory.CreateDirectory(SnapshotDirectory);
         var file = Path.Combine(SnapshotDirectory, $"{DomainName}_{DateTime.UtcNow:yyyyMMddHHmmss}.whois");
-        File.WriteAllText(file, WhoisData);
+        File.WriteAllText(file, WhoisData, Encoding.UTF8);
     }
 
     /// <summary>
