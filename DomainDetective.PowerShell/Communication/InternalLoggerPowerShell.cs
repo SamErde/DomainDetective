@@ -116,7 +116,7 @@ namespace DomainDetective.PowerShell {
                 _currentActivityId = GetNextActivityId();
                 _isCurrentActivityCompleted = false;
             }
-            var progressMessage = e.ProgressCurrentOperation ?? "Processing...: ";
+            var progressMessage = e.ProgressCurrentOperation ?? "Processing...";
             var progressRecord = new ProgressRecord(_currentActivityId, e.ProgressActivity, progressMessage);
             if (e.ProgressPercentage.HasValue) {
                 var percentComplete = e.ProgressPercentage.Value;
