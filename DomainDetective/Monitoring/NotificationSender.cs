@@ -1,5 +1,7 @@
+using System;
 using System.Net.Http;
 using System.Text;
+using MailKit;
 using MailKit.Net.Smtp;
 using MimeKit;
 using System.Threading;
@@ -46,6 +48,7 @@ public class WebhookNotificationSender : INotificationSender
 /// </remarks>
 public class EmailNotificationSender : INotificationSender
 {
+    internal static Func<ISmtpClient> CreateClient { get; set; } = () => new SmtpClient();
     public string SmtpHost { get; set; } = "localhost";
     public int Port { get; set; } = 25;
     public bool UseSsl { get; set; }
@@ -62,7 +65,7 @@ public class EmailNotificationSender : INotificationSender
         email.Subject = "DomainDetective Notification";
         email.Body = new TextPart("plain") { Text = message };
 
-        using var client = new SmtpClient();
+        using var client = CreateClient();
         await client.ConnectAsync(SmtpHost, Port, UseSsl, ct);
         if (!string.IsNullOrEmpty(Username))
         {
