@@ -24,6 +24,15 @@ namespace DomainDetective.Tests {
         }
 
         [Fact]
+        public async Task PssSignatureDetected() {
+            var cert = new X509Certificate2("Data/pss.pem");
+            var analysis = new CertificateAnalysis { CtLogQueryOverride = _ => Task.FromResult("[]") };
+            await analysis.AnalyzeCertificate(cert);
+            Assert.True(analysis.RsaPssSignature);
+            Assert.False(analysis.Sha1Signature);
+        }
+
+        [Fact]
         public async Task SelfSignedFlagSet() {
             var cert = new X509Certificate2("Data/wildcard.pem");
             var analysis = new CertificateAnalysis { CtLogQueryOverride = _ => Task.FromResult("[]") };
