@@ -41,5 +41,17 @@ namespace DomainDetective.Tests {
             Assert.NotNull(eventArgs);
             Assert.Equal("hello", eventArgs!.Message);
         }
+
+        [Fact]
+        public void DuplicateMessagesAreIgnored() {
+            var logger = new InternalLogger();
+            var count = 0;
+            logger.OnWarningMessage += (_, _) => count++;
+
+            logger.WriteWarning("hello");
+            logger.WriteWarning("hello");
+
+            Assert.Equal(1, count);
+        }
     }
 }

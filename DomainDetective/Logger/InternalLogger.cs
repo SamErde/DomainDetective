@@ -13,6 +13,7 @@ namespace DomainDetective {
     public class InternalLogger {
         private readonly object _lock = new object();
         private readonly Dictionary<string, int> _progressSteps = new();
+        private readonly HashSet<string> _loggedMessages = new(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// Define Verbose message event
@@ -113,6 +114,9 @@ namespace DomainDetective {
 
         public void WriteError(string message) {
             lock (_lock) {
+                if (!_loggedMessages.Add(message)) {
+                    return;
+                }
                 OnErrorMessage?.Invoke(this, new LogEventArgs(message));
                 if (IsError) {
                     Console.WriteLine("[error] " + message);
@@ -122,7 +126,11 @@ namespace DomainDetective {
 
         public void WriteError(string message, params object[] args) {
             lock (_lock) {
-                OnErrorMessage?.Invoke(this, new LogEventArgs(string.Format(message, args)));
+                var formatted = string.Format(message, args);
+                if (!_loggedMessages.Add(formatted)) {
+                    return;
+                }
+                OnErrorMessage?.Invoke(this, new LogEventArgs(formatted));
                 if (IsError) {
                     Console.WriteLine("[error] " + message, args);
                 }
@@ -131,6 +139,9 @@ namespace DomainDetective {
 
         public void WriteWarning(string message) {
             lock (_lock) {
+                if (!_loggedMessages.Add(message)) {
+                    return;
+                }
                 OnWarningMessage?.Invoke(this, new LogEventArgs(message));
                 if (IsWarning) {
                     Console.WriteLine("[warning] " + message);
@@ -140,7 +151,11 @@ namespace DomainDetective {
 
         public void WriteWarning(string message, params object[] args) {
             lock (_lock) {
-                OnWarningMessage?.Invoke(this, new LogEventArgs(string.Format(message, args)));
+                var formatted = string.Format(message, args);
+                if (!_loggedMessages.Add(formatted)) {
+                    return;
+                }
+                OnWarningMessage?.Invoke(this, new LogEventArgs(formatted));
                 if (IsWarning) {
                     Console.WriteLine("[warning] " + message, args);
                 }
@@ -149,6 +164,9 @@ namespace DomainDetective {
 
         public void WriteVerbose(string message) {
             lock (_lock) {
+                if (!_loggedMessages.Add(message)) {
+                    return;
+                }
                 OnVerboseMessage?.Invoke(this, new LogEventArgs(message));
                 if (IsVerbose) {
                     Console.WriteLine(message);
@@ -158,7 +176,11 @@ namespace DomainDetective {
 
         public void WriteVerbose(string message, params object[] args) {
             lock (_lock) {
-                OnVerboseMessage?.Invoke(this, new LogEventArgs(message, args));
+                var formatted = string.Format(message, args);
+                if (!_loggedMessages.Add(formatted)) {
+                    return;
+                }
+                OnVerboseMessage?.Invoke(this, new LogEventArgs(formatted));
                 if (IsVerbose) {
                     Console.WriteLine(message, args);
                 }
@@ -167,7 +189,11 @@ namespace DomainDetective {
 
         public void WriteDebug(string message, params object[] args) {
             lock (_lock) {
-                OnDebugMessage?.Invoke(this, new LogEventArgs(message, args));
+                var formatted = string.Format(message, args);
+                if (!_loggedMessages.Add(formatted)) {
+                    return;
+                }
+                OnDebugMessage?.Invoke(this, new LogEventArgs(formatted));
                 if (IsDebug) {
                     Console.WriteLine("[debug] " + message, args);
                 }
@@ -176,7 +202,11 @@ namespace DomainDetective {
 
         public void WriteInformation(string message, params object[] args) {
             lock (_lock) {
-                OnInformationMessage?.Invoke(this, new LogEventArgs(message, args));
+                var formatted = string.Format(message, args);
+                if (!_loggedMessages.Add(formatted)) {
+                    return;
+                }
+                OnInformationMessage?.Invoke(this, new LogEventArgs(formatted));
                 if (IsInformation) {
                     Console.WriteLine("[information] " + message, args);
                 }
