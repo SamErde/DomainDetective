@@ -3,6 +3,7 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
+using Xunit.Sdk;
 using Xunit;
 namespace DomainDetective.Tests {
     public class TestPortScanAnalysis {
@@ -35,6 +36,9 @@ namespace DomainDetective.Tests {
 
         [Fact]
         public async Task DetectsIpv6TcpAndUdpOpenPorts() {
+            if (!Socket.OSSupportsIPv6) {
+                throw SkipException.ForSkip("IPv6 not supported on this platform");
+            }
             var tcpListener = new TcpListener(IPAddress.IPv6Loopback, 0);
             tcpListener.Start();
             var tcpPort = ((IPEndPoint)tcpListener.LocalEndpoint).Port;
@@ -62,6 +66,9 @@ namespace DomainDetective.Tests {
 
         [Fact]
         public async Task ConfirmsIpv6Reachability() {
+            if (!Socket.OSSupportsIPv6) {
+                throw SkipException.ForSkip("IPv6 not supported on this platform");
+            }
             var listener = new TcpListener(IPAddress.IPv6Loopback, 0);
             listener.Start();
             var port = ((IPEndPoint)listener.LocalEndpoint).Port;
