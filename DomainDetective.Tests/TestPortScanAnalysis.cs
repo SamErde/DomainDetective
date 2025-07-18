@@ -42,6 +42,10 @@ namespace DomainDetective.Tests {
             var tcpListener = new TcpListener(IPAddress.IPv6Loopback, 0);
             tcpListener.Start();
             var tcpPort = ((IPEndPoint)tcpListener.LocalEndpoint).Port;
+            if (!await PortScanAnalysis.IsIPv6Reachable("localhost", tcpPort)) {
+                tcpListener.Stop();
+                throw SkipException.ForSkip("IPv6 not reachable on this platform");
+            }
             var tcpAccept = tcpListener.AcceptTcpClientAsync();
 
             using var udpServer = new UdpClient(new IPEndPoint(IPAddress.IPv6Loopback, 0));
@@ -77,6 +81,9 @@ namespace DomainDetective.Tests {
             try {
                 var reachable = await PortScanAnalysis.IsIPv6Reachable("localhost", port);
                 using var _ = await accept;
+                if (!reachable) {
+                    throw SkipException.ForSkip("IPv6 not reachable on this platform");
+                }
                 Assert.True(reachable);
             } finally {
                 listener.Stop();
