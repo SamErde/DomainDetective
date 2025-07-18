@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using DomainDetective;
+using Xunit.Sdk;
 
 namespace DomainDetective.Tests {
     public class TestHTTPAnalysis {
