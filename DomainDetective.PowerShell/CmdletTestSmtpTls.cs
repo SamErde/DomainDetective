@@ -41,8 +41,9 @@ namespace DomainDetective.PowerShell {
         protected override async Task ProcessRecordAsync() {
             _logger.WriteVerbose("Checking SMTP TLS for {0}:{1}", HostName, Port);
             await _healthCheck.CheckSmtpTlsHost(HostName, Port);
-            var result = _healthCheck.SmtpTlsAnalysis.ServerResults[$"{HostName}:{Port}"];
-            WriteObject(result);
+            var analysis = _healthCheck.SmtpTlsAnalysis;
+            var result = analysis.ServerResults[$"{HostName}:{Port}"];
+            WriteObject(analysis);
             if (ShowChain && result.Chain.Count > 0) {
                 WriteObject(result.Chain, true);
             }
