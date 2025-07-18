@@ -2,6 +2,7 @@ using System;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using Xunit.Sdk;
 
 namespace DomainDetective.Tests {
     public class TestSecurityTXTAnalysis {
@@ -203,6 +204,9 @@ namespace DomainDetective.Tests {
         }
 
         private static HttpListener StartListener(out string prefix) {
+            if (!HttpListener.IsSupported) {
+                throw SkipException.ForSkip("HttpListener not supported");
+            }
             while (true) {
                 prefix = $"http://127.0.0.1:{GetFreePort()}/";
                 var l = new HttpListener();

@@ -11,6 +11,9 @@ namespace DomainDetective.Tests {
     public class TestHTTPAnalysis {
         [Fact]
         public async Task DetectStatusCodeAndHsts() {
+            if (!HttpListener.IsSupported) {
+                throw SkipException.ForSkip("HttpListener not supported");
+            }
             using var listener = new HttpListener();
             var prefix = $"http://localhost:{GetFreePort()}/";
             listener.Prefixes.Add(prefix);
@@ -85,6 +88,9 @@ namespace DomainDetective.Tests {
 
         [Fact]
         public async Task NotFoundStatusSetsIsReachableFalse() {
+            if (!HttpListener.IsSupported) {
+                throw SkipException.ForSkip("HttpListener not supported");
+            }
             using var listener = new HttpListener();
             var prefix = $"http://localhost:{GetFreePort()}/";
             listener.Prefixes.Add(prefix);
@@ -119,6 +125,9 @@ namespace DomainDetective.Tests {
 
         [Fact]
         public async Task DoesNotCollectHeadersWhenDisabled() {
+            if (!HttpListener.IsSupported) {
+                throw SkipException.ForSkip("HttpListener not supported");
+            }
             using var listener = new HttpListener();
             var prefix = $"http://localhost:{GetFreePort()}/";
             listener.Prefixes.Add(prefix);
@@ -152,6 +161,9 @@ namespace DomainDetective.Tests {
 
         [Fact]
         public async Task FollowsRedirectsWhenUsingHttp3() {
+            if (!HttpListener.IsSupported) {
+                throw SkipException.ForSkip("HttpListener not supported");
+            }
             using var listener1 = new HttpListener();
             var prefix1 = $"http://localhost:{GetFreePort()}/";
             listener1.Prefixes.Add(prefix1);
@@ -191,6 +203,9 @@ namespace DomainDetective.Tests {
 
         [Fact]
         public async Task LogsWarningWhenHttp3Downgraded() {
+            if (!HttpListener.IsSupported) {
+                throw SkipException.ForSkip("HttpListener not supported");
+            }
             using var listener = new HttpListener();
             var prefix = $"http://localhost:{GetFreePort()}/";
             listener.Prefixes.Add(prefix);
@@ -216,6 +231,9 @@ namespace DomainDetective.Tests {
 
         [Fact]
         public async Task ThrowsWhenMaxRedirectsExceeded() {
+            if (!HttpListener.IsSupported) {
+                throw SkipException.ForSkip("HttpListener not supported");
+            }
             using var listener = new HttpListener();
             var prefix = $"http://localhost:{GetFreePort()}/";
             listener.Prefixes.Add(prefix);
@@ -251,6 +269,9 @@ namespace DomainDetective.Tests {
 
         [Fact]
         public async Task DetectsRedirectLoop() {
+            if (!HttpListener.IsSupported) {
+                throw SkipException.ForSkip("HttpListener not supported");
+            }
             using var listener1 = new HttpListener();
             var prefix1 = $"http://localhost:{GetFreePort()}/";
             listener1.Prefixes.Add(prefix1);
@@ -289,6 +310,9 @@ namespace DomainDetective.Tests {
 
         [Fact]
         public async Task TimeoutSetsFailureReason() {
+            if (!HttpListener.IsSupported) {
+                throw SkipException.ForSkip("HttpListener not supported");
+            }
             using var listener = new HttpListener();
             var prefix = $"http://localhost:{GetFreePort()}/";
             listener.Prefixes.Add(prefix);
@@ -315,6 +339,9 @@ namespace DomainDetective.Tests {
 
         [Fact]
         public async Task DetectsHstsTooShortAndIncludesSubDomains() {
+            if (!HttpListener.IsSupported) {
+                throw SkipException.ForSkip("HttpListener not supported");
+            }
             using var listener = new HttpListener();
             var prefix = $"http://localhost:{GetFreePort()}/";
             listener.Prefixes.Add(prefix);
@@ -345,6 +372,9 @@ namespace DomainDetective.Tests {
 
         [Fact]
         public async Task HstsHeaderFromPreloadSiteIsEligible() {
+            if (!HttpListener.IsSupported) {
+                throw SkipException.ForSkip("HttpListener not supported");
+            }
             using var listener = new HttpListener();
             var prefix = $"http://localhost:{GetFreePort()}/";
             listener.Prefixes.Add(prefix);
@@ -370,6 +400,9 @@ namespace DomainDetective.Tests {
 
         [Fact]
         public async Task HstsHeaderFiveMinutesNotEligibleForPreload() {
+            if (!HttpListener.IsSupported) {
+                throw SkipException.ForSkip("HttpListener not supported");
+            }
             using var listener = new HttpListener();
             var prefix = $"http://localhost:{GetFreePort()}/";
             listener.Prefixes.Add(prefix);
@@ -395,6 +428,9 @@ namespace DomainDetective.Tests {
 
         [Fact]
         public async Task DetectsUnsafeContentSecurityPolicyDirectives() {
+            if (!HttpListener.IsSupported) {
+                throw SkipException.ForSkip("HttpListener not supported");
+            }
             using var listener = new HttpListener();
             var prefix = $"http://localhost:{GetFreePort()}/";
             listener.Prefixes.Add(prefix);
@@ -418,6 +454,9 @@ namespace DomainDetective.Tests {
 
         [Fact]
         public async Task ParsesExpectCtReportUri() {
+            if (!HttpListener.IsSupported) {
+                throw SkipException.ForSkip("HttpListener not supported");
+            }
             using var listener = new HttpListener();
             var prefix = $"http://localhost:{GetFreePort()}/";
             listener.Prefixes.Add(prefix);
@@ -443,6 +482,9 @@ namespace DomainDetective.Tests {
 
         [Fact]
         public async Task ParsesPermissionsPolicyDirectives() {
+            if (!HttpListener.IsSupported) {
+                throw SkipException.ForSkip("HttpListener not supported");
+            }
             using var listener = new HttpListener();
             var prefix = $"http://localhost:{GetFreePort()}/";
             listener.Prefixes.Add(prefix);
@@ -468,6 +510,9 @@ namespace DomainDetective.Tests {
 
         [Fact]
         public async Task ParsesOriginAgentClusterDisabled() {
+            if (!HttpListener.IsSupported) {
+                throw SkipException.ForSkip("HttpListener not supported");
+            }
             using var listener = new HttpListener();
             var prefix = $"http://localhost:{GetFreePort()}/";
             listener.Prefixes.Add(prefix);
@@ -492,6 +537,9 @@ namespace DomainDetective.Tests {
 
         [Fact]
         public async Task DetectsPublicKeyPinsHeaderWithWarning() {
+            if (!HttpListener.IsSupported) {
+                throw SkipException.ForSkip("HttpListener not supported");
+            }
             using var listener = new HttpListener();
             var prefix = $"http://localhost:{GetFreePort()}/";
             listener.Prefixes.Add(prefix);
@@ -519,6 +567,9 @@ namespace DomainDetective.Tests {
 
         [Fact]
         public async Task CollectsUnknownHstsDirectives() {
+            if (!HttpListener.IsSupported) {
+                throw SkipException.ForSkip("HttpListener not supported");
+            }
             using var listener = new HttpListener();
             var prefix = $"http://localhost:{GetFreePort()}/";
             listener.Prefixes.Add(prefix);
@@ -543,6 +594,9 @@ namespace DomainDetective.Tests {
 
         [Fact]
         public async Task InvalidHstsMaxAgeIsCollected() {
+            if (!HttpListener.IsSupported) {
+                throw SkipException.ForSkip("HttpListener not supported");
+            }
             using var listener = new HttpListener();
             var prefix = $"http://localhost:{GetFreePort()}/";
             listener.Prefixes.Add(prefix);
@@ -571,6 +625,9 @@ namespace DomainDetective.Tests {
             File.WriteAllText(preloadPath, "[\"localhost\"]");
             HttpAnalysis.LoadHstsPreloadList(preloadPath);
             using (File.Open(preloadPath, FileMode.Open, FileAccess.ReadWrite, FileShare.None)) { }
+            if (!HttpListener.IsSupported) {
+                throw SkipException.ForSkip("HttpListener not supported");
+            }
             using var listener = new HttpListener();
             var prefix = $"http://localhost:{GetFreePort()}/";
             listener.Prefixes.Add(prefix);
@@ -601,6 +658,9 @@ namespace DomainDetective.Tests {
 
         [Fact]
         public async Task DoesNotDetectMixedContentOnHttpPage() {
+            if (!HttpListener.IsSupported) {
+                throw SkipException.ForSkip("HttpListener not supported");
+            }
             using var listener = new HttpListener();
             var prefix = $"http://localhost:{GetFreePort()}/";
             listener.Prefixes.Add(prefix);
@@ -625,6 +685,9 @@ namespace DomainDetective.Tests {
 
         [Fact]
         public async Task CapturesServerHeader() {
+            if (!HttpListener.IsSupported) {
+                throw SkipException.ForSkip("HttpListener not supported");
+            }
             using var listener = new HttpListener();
             var prefix = $"http://localhost:{GetFreePort()}/";
             listener.Prefixes.Add(prefix);

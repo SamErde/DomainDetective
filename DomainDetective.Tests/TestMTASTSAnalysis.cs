@@ -4,6 +4,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
+using Xunit.Sdk;
 
 namespace DomainDetective.Tests {
     public class TestMTASTSAnalysis {
@@ -71,6 +72,9 @@ namespace DomainDetective.Tests {
 
         [Fact]
         public async Task FetchPolicyFromServer() {
+            if (!HttpListener.IsSupported) {
+                throw SkipException.ForSkip("HttpListener not supported");
+            }
             using var listener = new HttpListener();
             var port = GetFreePort();
             var prefix = $"http://localhost:{port}/";
@@ -118,6 +122,9 @@ namespace DomainDetective.Tests {
         public async Task ParseDnsRecord() {
             const string policy = "version: STSv1\nmode: enforce\nmx: mail.example.com\nmax_age: 86400";
             var answers = new[] { new DnsAnswer { DataRaw = "v=STSv1; id=123" , Type = DnsRecordType.TXT } };
+            if (!HttpListener.IsSupported) {
+                throw SkipException.ForSkip("HttpListener not supported");
+            }
             using var listener = new HttpListener();
             var port = GetFreePort();
             var prefix = $"http://localhost:{port}/";
@@ -267,6 +274,9 @@ namespace DomainDetective.Tests {
         [Fact]
         public async Task CachedPolicyReusedUntilExpiration() {
             MTASTSAnalysis.ClearCache();
+            if (!HttpListener.IsSupported) {
+                throw SkipException.ForSkip("HttpListener not supported");
+            }
             using var listener = new HttpListener();
             var port = GetFreePort();
             var prefix = $"http://localhost:{port}/";
@@ -317,6 +327,9 @@ namespace DomainDetective.Tests {
         [Fact]
         public async Task CachedPolicyRespectsMaxAge() {
             MTASTSAnalysis.ClearCache();
+            if (!HttpListener.IsSupported) {
+                throw SkipException.ForSkip("HttpListener not supported");
+            }
             using var listener = new HttpListener();
             var port = GetFreePort();
             var prefix = $"http://localhost:{port}/";

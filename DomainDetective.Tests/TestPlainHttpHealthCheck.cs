@@ -1,11 +1,15 @@
 using System;
 using System.Net;
 using System.Threading.Tasks;
+using Xunit.Sdk;
 
 namespace DomainDetective.Tests {
     public class TestPlainHttpHealthCheck {
         [Fact]
         public async Task VerifyPlainHttpDetectsStatusWithoutHsts() {
+            if (!HttpListener.IsSupported) {
+                throw SkipException.ForSkip("HttpListener not supported");
+            }
             using var listener = new HttpListener();
             var port = GetFreePort();
             var prefix = $"http://localhost:{port}/";

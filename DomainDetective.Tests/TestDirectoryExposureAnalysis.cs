@@ -1,5 +1,6 @@
 using System.Net;
 using System.Threading.Tasks;
+using Xunit.Sdk;
 
 namespace DomainDetective.Tests;
 
@@ -8,6 +9,10 @@ public class TestDirectoryExposureAnalysis
     [Fact]
     public async Task DetectsAccessibleDirectories()
     {
+        if (!HttpListener.IsSupported)
+        {
+            throw SkipException.ForSkip("HttpListener not supported");
+        }
         using var listener = new HttpListener();
         var prefix = $"http://localhost:{GetFreePort()}/";
         listener.Prefixes.Add(prefix);
@@ -45,6 +50,10 @@ public class TestDirectoryExposureAnalysis
     [Fact]
     public async Task NoExposedDirectoriesWhenNoneAccessible()
     {
+        if (!HttpListener.IsSupported)
+        {
+            throw SkipException.ForSkip("HttpListener not supported");
+        }
         using var listener = new HttpListener();
         var prefix = $"http://localhost:{GetFreePort()}/";
         listener.Prefixes.Add(prefix);
