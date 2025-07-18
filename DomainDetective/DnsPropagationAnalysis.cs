@@ -384,6 +384,7 @@ namespace DomainDetective {
             bool includeGeo = false) {
             var serverList = servers?.ToList() ?? new List<PublicDnsEntry>();
             if (serverList.Count == 0) {
+                progress?.Report(100);
                 return new List<DnsPropagationResult>();
             }
             maxParallelism = maxParallelism <= 0 ? serverList.Count : Math.Min(maxParallelism, serverList.Count);
