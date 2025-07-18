@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using PeriodicTimer = System.Threading.PeriodicTimer;
 
 namespace DomainDetective.Monitoring {
     /// <summary>Monitors DNS propagation discrepancies over time.</summary>
@@ -41,7 +42,9 @@ namespace DomainDetective.Monitoring {
         public int MaxParallelism { get; set; }
 
         private readonly DnsPropagationAnalysis _analysis = new();
-        private Timer? _timer;
+        private PeriodicTimer? _timer;
+        private CancellationTokenSource? _cts;
+        private Task? _loopTask;
 
         /// <summary>Adds a custom DNS server.</summary>
         /// <param name="entry">Server entry.</param>
@@ -54,13 +57,24 @@ namespace DomainDetective.Monitoring {
         /// <summary>Starts the monitor.</summary>
         public void Start() {
             Stop();
-            _timer = new Timer(async _ => await RunAsync(), null, TimeSpan.Zero, Interval);
+            _cts = new CancellationTokenSource();
+            _timer = new PeriodicTimer(Interval);
+            _loopTask = Task.Run(async () => {
+                await RunAsync().ConfigureAwait(false);
+                while (_timer != null && await _timer.WaitForNextTickAsync(_cts.Token).ConfigureAwait(false)) {
+                    await RunAsync().ConfigureAwait(false);
+                }
+            });
         }
 
         /// <summary>Stops the monitor.</summary>
         public void Stop() {
+            _cts?.Cancel();
             _timer?.Dispose();
             _timer = null;
+            _cts?.Dispose();
+            _cts = null;
+            _loopTask = null;
         }
 
         /// <summary>Loads DNS servers from JSON file.</summary>

@@ -5,7 +5,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using Timer = System.Threading.Timer;
+using PeriodicTimer = System.Threading.PeriodicTimer;
 
 namespace DomainDetective {
     /// <summary>
@@ -33,7 +33,9 @@ namespace DomainDetective {
             public CertificateAnalysis Analysis { get; init; }
         }
 
-        private Timer? _timer;
+        private PeriodicTimer? _timer;
+        private CancellationTokenSource? _cts;
+        private Task? _loopTask;
         private IReadOnlyList<string> _monitorHosts = Array.Empty<string>();
         private int _monitorPort;
         private InternalLogger? _monitorLogger;
@@ -81,13 +83,24 @@ namespace DomainDetective {
             _monitorHosts = hosts.ToList();
             _monitorPort = port;
             _monitorLogger = logger;
-            _timer = new Timer(async _ => await Analyze(_monitorHosts, _monitorPort, _monitorLogger ?? new InternalLogger()), null, TimeSpan.Zero, interval);
+            _cts = new CancellationTokenSource();
+            _timer = new PeriodicTimer(interval);
+            _loopTask = Task.Run(async () => {
+                await Analyze(_monitorHosts, _monitorPort, _monitorLogger ?? new InternalLogger()).ConfigureAwait(false);
+                while (_timer != null && await _timer.WaitForNextTickAsync(_cts.Token).ConfigureAwait(false)) {
+                    await Analyze(_monitorHosts, _monitorPort, _monitorLogger ?? new InternalLogger()).ConfigureAwait(false);
+                }
+            });
         }
 
         /// <summary>Stops periodic monitoring.</summary>
         public void Stop() {
+            _cts?.Cancel();
             _timer?.Dispose();
             _timer = null;
+            _cts?.Dispose();
+            _cts = null;
+            _loopTask = null;
         }
 
         /// <summary>Checks certificates for the provided hosts.</summary>
