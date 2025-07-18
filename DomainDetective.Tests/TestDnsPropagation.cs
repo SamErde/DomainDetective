@@ -23,6 +23,14 @@ namespace DomainDetective.Tests {
         }
 
         [Fact]
+        public void RemoveServerHandlesIpv4Mapped() {
+            var analysis = new DnsPropagationAnalysis();
+            analysis.AddServer(new PublicDnsEntry { IPAddress = IPAddress.Parse("192.0.2.1"), Country = "Test" });
+            analysis.RemoveServer("::ffff:192.0.2.1");
+            Assert.Empty(analysis.Servers);
+        }
+
+        [Fact]
         public async Task QueryHandlesDownServer() {
             var analysis = new DnsPropagationAnalysis();
             analysis.AddServer(new PublicDnsEntry { IPAddress = IPAddress.Parse("192.0.2.1"), Country = "Test" });
@@ -121,6 +129,29 @@ namespace DomainDetective.Tests {
             Assert.Single(groups);
             Assert.Equal(2, groups.First().Value.Count);
             Assert.Equal("2001:db8::1", groups.Keys.First());
+        }
+
+        [Fact]
+        public void CompareResultsHandlesIpv4MappedAddress() {
+            var results = new[] {
+                new DnsPropagationResult {
+                    Server = new PublicDnsEntry { IPAddress = IPAddress.Parse("1.1.1.1") },
+                    RecordType = DnsRecordType.A,
+                    Records = new[] { "::ffff:192.0.2.1" },
+                    Success = true
+                },
+                new DnsPropagationResult {
+                    Server = new PublicDnsEntry { IPAddress = IPAddress.Parse("8.8.8.8") },
+                    RecordType = DnsRecordType.A,
+                    Records = new[] { "192.0.2.1" },
+                    Success = true
+                }
+            };
+
+            var groups = DnsPropagationAnalysis.CompareResults(results);
+            Assert.Single(groups);
+            Assert.Equal(2, groups.First().Value.Count);
+            Assert.Equal("192.0.2.1", groups.Keys.First());
         }
 
         [Fact]
