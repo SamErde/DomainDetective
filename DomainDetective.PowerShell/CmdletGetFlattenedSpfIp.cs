@@ -46,10 +46,6 @@ namespace DomainDetective.PowerShell {
                 this.WriteInformation);
             internalLoggerPowerShell.ResetActivityIdCounter();
 
-            if (EqualityComparer<DnsEndpoint>.Default.Equals(DnsEndpoint, default)) {
-                DnsEndpoint = DnsEndpoint.System;
-            }
-
             _healthCheck = new DomainHealthCheck(DnsEndpoint, _logger);
             if (!string.IsNullOrEmpty(TestSpfRecord)) {
                 _healthCheck.SpfAnalysis.TestSpfRecords[DomainName] = TestSpfRecord;
