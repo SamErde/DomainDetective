@@ -23,4 +23,13 @@ public class TestIdnValidation
         var result = (string)method.Invoke(null, new object[] { "bücher.de:25" })!;
         Assert.Equal("xn--bcher-kva.de:25", result);
     }
+
+    [Fact]
+    public void ValidateHostNameRejectsNumericTld()
+    {
+        var method = typeof(DomainHealthCheck)
+            .GetMethod("ValidateHostName", BindingFlags.NonPublic | BindingFlags.Static)!;
+        var ex = Assert.Throws<TargetInvocationException>(() => method.Invoke(null, new object[] { "example.123" }));
+        Assert.IsType<ArgumentException>(ex.InnerException);
+    }
 }

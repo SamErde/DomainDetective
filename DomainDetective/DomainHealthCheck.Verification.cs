@@ -1470,22 +1470,22 @@ namespace DomainDetective {
 
             if (!Uri.TryCreate($"http://{trimmed}", UriKind.Absolute, out var uri)) {
                 // older frameworks may not handle IDN automatically
-                var host = trimmed;
+                var hostName = trimmed;
                 var portIndex = trimmed.LastIndexOf(':');
                 if (portIndex > 0 && trimmed.IndexOf(':') == portIndex &&
                     int.TryParse(trimmed.Substring(portIndex + 1), out _)) {
-                    host = trimmed.Substring(0, portIndex);
+                    hostName = trimmed.Substring(0, portIndex);
                 }
 
                 try {
-                    host = DomainHelper.ValidateIdn(host);
+                    hostName = DomainHelper.ValidateIdn(hostName);
                 } catch (ArgumentException) {
                     throw new ArgumentException("Invalid host name.", nameof(domainName));
                 }
 
                 var rebuilt = portIndex > 0 && trimmed.IndexOf(':') == portIndex
-                    ? host + trimmed.Substring(portIndex)
-                    : host;
+                    ? hostName + trimmed.Substring(portIndex)
+                    : hostName;
 
                 if (!Uri.TryCreate($"http://{rebuilt}", UriKind.Absolute, out uri)) {
                     throw new ArgumentException("Invalid host name.", nameof(domainName));
@@ -1497,14 +1497,20 @@ namespace DomainDetective {
                 throw new ArgumentException("Invalid host name.", nameof(domainName));
             }
 
+            var host = uri.IdnHost;
+            var labels = host.Split('.');
+            if (labels.Length == 0 || !Helpers.DomainHelper.IsValidTld(labels[labels.Length - 1])) {
+                throw new ArgumentException("Invalid host name.", nameof(domainName));
+            }
+
             if (!uri.IsDefaultPort) {
                 if (uri.Port <= 0 || uri.Port > 65535) {
                     throw new ArgumentException("Invalid port.", nameof(domainName));
                 }
-                return $"{NormalizeDomain(uri.IdnHost)}:{uri.Port}";
+                return $"{NormalizeDomain(host)}:{uri.Port}";
             }
 
-            return NormalizeDomain(uri.IdnHost);
+            return NormalizeDomain(host);
         }
 
         /// <summary>Creates a copy with only the specified analyses included.</summary>
