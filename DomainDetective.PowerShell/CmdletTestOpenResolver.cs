@@ -11,12 +11,12 @@ namespace DomainDetective.PowerShell {
     [Cmdlet(VerbsDiagnostic.Test, "DDDnsOpenResolver")]
     [Alias("Test-OpenResolver")]
     public sealed class CmdletTestOpenResolver : AsyncPSCmdlet {
-        /// <param name="Server">DNS server to check.</param>
+        /// <summary>DNS server to check.</summary>
         [Parameter(Mandatory = true, Position = 0)]
         [ValidateNotNullOrEmpty]
         public string Server;
 
-        /// <param name="Port">DNS port.</param>
+        /// <summary>DNS port.</summary>
         [Parameter(Mandatory = false, Position = 1)]
         public int Port = 53;
 

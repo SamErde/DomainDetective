@@ -12,12 +12,12 @@ namespace DomainDetective.PowerShell {
 [Cmdlet(VerbsDiagnostic.Test, "DDEmailOpenRelay", DefaultParameterSetName = "ServerName")]
 [Alias("Test-EmailOpenRelay")]
     public sealed class CmdletTestOpenRelay : AsyncPSCmdlet {
-        /// <param name="HostName">SMTP host name to check.</param>
+        /// <summary>SMTP host name to check.</summary>
         [Parameter(Mandatory = true, Position = 0, ParameterSetName = "ServerName")]
         [ValidateNotNullOrEmpty]
         public string HostName;
 
-        /// <param name="Port">SMTP port number.</param>
+        /// <summary>SMTP port number.</summary>
         [Parameter(Mandatory = false, Position = 1, ParameterSetName = "ServerName")]
         public int Port = 25;
 

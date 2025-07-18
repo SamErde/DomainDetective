@@ -13,20 +13,20 @@ namespace DomainDetective.PowerShell {
 [Cmdlet(VerbsDiagnostic.Test, "DDTlsDaneRecord", DefaultParameterSetName = "ServerName")]
 [Alias("Test-TlsDane")]
     public sealed class CmdletTestDaneRecord : AsyncPSCmdlet {
-        /// <param name="DomainName">Domain to query.</param>
+        /// <summary>Domain to query.</summary>
         [Parameter(Mandatory = true, Position = 0, ParameterSetName = "ServerName")]
         [ValidateNotNullOrEmpty]
         public string DomainName;
 
-        /// <param name="DnsEndpoint">DNS server used for queries.</param>
+        /// <summary>DNS server used for queries.</summary>
         [Parameter(Mandatory = false, Position = 1, ParameterSetName = "ServerName")]
         public DnsEndpoint DnsEndpoint = DnsEndpoint.System;
 
-        /// <param name="Ports">Custom ports to query.</param>
+        /// <summary>Custom ports to query.</summary>
         [Parameter(Mandatory = false, Position = 2, ParameterSetName = "ServerName")]
         public int[]? Ports;
 
-        /// <param name="FullResponse">Return full analysis object.</param>
+        /// <summary>Return full analysis object.</summary>
         [Parameter(Mandatory = false, ParameterSetName = "ServerName")]
         public SwitchParameter FullResponse;
 

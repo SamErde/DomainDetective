@@ -11,11 +11,11 @@ namespace DomainDetective.PowerShell {
 [Cmdlet(VerbsDiagnostic.Test, "DDPortAvailability", DefaultParameterSetName = "ServerName")]
 [Alias("Test-NetworkPortAvailability")]
     public sealed class CmdletTestPortAvailability : AsyncPSCmdlet {
-        /// <param name="HostName">Host to test.</param>
+        /// <summary>Host to test.</summary>
         [Parameter(Mandatory = true, Position = 0, ParameterSetName = "ServerName")]
         public string HostName;
 
-        /// <param name="Ports">Ports to check.</param>
+        /// <summary>Ports to check.</summary>
         [Parameter(Mandatory = false)]
         public int[] Ports = new[] { 25, 80, 443, 465, 587 };
 

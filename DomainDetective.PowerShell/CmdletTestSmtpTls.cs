@@ -11,15 +11,15 @@ namespace DomainDetective.PowerShell {
 [Cmdlet(VerbsDiagnostic.Test, "DDEmailSmtpTls", DefaultParameterSetName = "ServerName")]
 [Alias("Test-EmailSmtpTls")]
     public sealed class CmdletTestSmtpTls : AsyncPSCmdlet {
-        /// <param name="HostName">SMTP host to check.</param>
+        /// <summary>SMTP host to check.</summary>
         [Parameter(Mandatory = true, Position = 0, ParameterSetName = "ServerName")]
         public string HostName;
 
-        /// <param name="Port">SMTP port number.</param>
+        /// <summary>SMTP port number.</summary>
         [Parameter(Mandatory = false, Position = 1, ParameterSetName = "ServerName")]
         public int Port = 25;
 
-        /// <param name="ShowChain">Output certificate chain information.</param>
+        /// <summary>Output certificate chain information.</summary>
         [Parameter(Mandatory = false)]
         public SwitchParameter ShowChain;
 

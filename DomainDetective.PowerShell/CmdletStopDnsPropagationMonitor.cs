@@ -11,7 +11,7 @@ namespace DomainDetective.PowerShell {
     /// </example>
     [Cmdlet(VerbsLifecycle.Stop, "DnsPropagationMonitor")]
     public sealed class CmdletStopDnsPropagationMonitor : AsyncPSCmdlet {
-        /// <param name="Monitor">Monitor instance returned by Start-DnsPropagationMonitor.</param>
+        /// <summary>Monitor instance returned by Start-DnsPropagationMonitor.</summary>
         [Parameter(Mandatory = true, Position = 0)]
         public DnsPropagationMonitor Monitor = null!;
 

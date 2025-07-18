@@ -14,35 +14,35 @@ namespace DomainDetective.PowerShell {
 [Alias("Test-DomainHealth")]
     [OutputType(typeof(DomainHealthCheck))]
     public sealed class CmdletTestDomainHealth : AsyncPSCmdlet {
-        /// <param name="DomainName">Domain to analyze.</param>
+        /// <summary>Domain to analyze.</summary>
         [Parameter(Mandatory = true, Position = 0, ParameterSetName = "ServerName")]
         public string DomainName;
 
-        /// <param name="DnsEndpoint">DNS server used for queries.</param>
+        /// <summary>DNS server used for queries.</summary>
         [Parameter(Mandatory = false, Position = 1, ParameterSetName = "ServerName")]
         public DnsEndpoint DnsEndpoint = DnsEndpoint.System;
 
-        /// <param name="HealthCheckType">Specific tests to run.</param>
+        /// <summary>Specific tests to run.</summary>
         [Parameter(Mandatory = false)]
         public HealthCheckType[]? HealthCheckType;
 
-        /// <param name="DkimSelectors">DKIM selectors used when testing DKIM.</param>
+        /// <summary>DKIM selectors used when testing DKIM.</summary>
         [Parameter(Mandatory = false)]
         public string[]? DkimSelectors;
 
-        /// <param name="DaneServiceType">Service types to check for DANE. HTTPS (port 443) is queried by default.</param>
+        /// <summary>Service types to check for DANE. HTTPS (port 443) is queried by default.</summary>
         [Parameter(Mandatory = false)]
         public ServiceType[]? DaneServiceType;
 
-        /// <param name="DanePorts">Custom ports to check for DANE.</param>
+        /// <summary>Custom ports to check for DANE.</summary>
         [Parameter(Mandatory = false)]
         public int[]? DanePorts;
 
-        /// <param name="BrandKeyword">Protected brand terms for typosquatting analysis.</param>
+        /// <summary>Protected brand terms for typosquatting analysis.</summary>
         [Parameter(Mandatory = false)]
         public string[]? BrandKeyword;
         
-        /// <param name="PortScanProfile">Port scan profiles to use.</param>
+        /// <summary>Port scan profiles to use.</summary>
         [Parameter(Mandatory = false)]
         public PortScanProfile[]? PortScanProfile;
 

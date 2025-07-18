@@ -11,11 +11,11 @@ namespace DomainDetective.PowerShell {
 [Cmdlet(VerbsDiagnostic.Test, "DDMailLatency", DefaultParameterSetName = "ServerName")]
 [Alias("Test-EmailLatency")]
     public sealed class CmdletTestMailLatency : AsyncPSCmdlet {
-        /// <param name="HostName">SMTP host to check.</param>
+        /// <summary>SMTP host to check.</summary>
         [Parameter(Mandatory = true, Position = 0, ParameterSetName = "ServerName")]
         public string HostName;
 
-        /// <param name="Port">SMTP port number.</param>
+        /// <summary>SMTP port number.</summary>
         [Parameter(Mandatory = false, Position = 1, ParameterSetName = "ServerName")]
         public int Port = 25;
 

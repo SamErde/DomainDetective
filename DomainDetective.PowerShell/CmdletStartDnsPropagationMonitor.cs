@@ -20,43 +20,45 @@ namespace DomainDetective.PowerShell {
         SupportsShouldProcess = false,
         DefaultParameterSetName = "File")]
     public sealed class CmdletStartDnsPropagationMonitor : AsyncPSCmdlet {
-        /// <param name="DomainName">Domain to monitor.</param>
+        /// <summary>Domain to monitor.</summary>
         [Parameter(Mandatory = true, Position = 0, ParameterSetName = "File")]
         [Parameter(Mandatory = true, Position = 0, ParameterSetName = "Custom")]
         [ValidateNotNullOrEmpty]
         public string DomainName;
 
-        /// <param name="RecordType">DNS record type.</param>
+        /// <summary>DNS record type.</summary>
         [Parameter(Mandatory = true, Position = 1, ParameterSetName = "File")]
         [Parameter(Mandatory = true, Position = 1, ParameterSetName = "Custom")]
         public DnsRecordType RecordType;
 
-        /// <param name="ServersFile">Path to JSON file with DNS servers. If omitted the file
-        /// <c>Data/DNS/PublicDNS.json</c> in the module directory is used when present.</param>
+        /// <summary>
+        /// Path to JSON file with DNS servers. If omitted the file
+        /// <c>Data/DNS/PublicDNS.json</c> in the module directory is used when present.
+        /// </summary>
         [Parameter(Mandatory = false, ParameterSetName = "File")]
         public string? ServersFile;
 
-        /// <param name="DnsServer">One or more custom DNS servers.</param>
+        /// <summary>One or more custom DNS servers.</summary>
         [Parameter(Mandatory = false, ParameterSetName = "Custom")]
         public string[] DnsServer = Array.Empty<string>();
 
-        /// <param name="Country">Filter builtin servers by country.</param>
+        /// <summary>Filter builtin servers by country.</summary>
         [Parameter(Mandatory = false)]
         public CountryId? Country;
 
-        /// <param name="Location">Filter builtin servers by location.</param>
+        /// <summary>Filter builtin servers by location.</summary>
         [Parameter(Mandatory = false)]
         public LocationId? Location;
 
-        /// <param name="IntervalSeconds">Polling interval in seconds.</param>
+        /// <summary>Polling interval in seconds.</summary>
         [Parameter(Mandatory = false)]
         public int IntervalSeconds = 300;
 
-        /// <param name="WebhookUrl">Webhook URL for notifications.</param>
+        /// <summary>Webhook URL for notifications.</summary>
         [Parameter(Mandatory = false)]
         public string? WebhookUrl;
 
-        /// <param name="MaxParallelism">Maximum concurrent DNS queries.</param>
+        /// <summary>Maximum concurrent DNS queries.</summary>
         [Parameter(Mandatory = false)]
         public int MaxParallelism = 0;
 
