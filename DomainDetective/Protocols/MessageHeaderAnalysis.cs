@@ -43,6 +43,9 @@ namespace DomainDetective {
         /// <summary>Ignored DKIM-Signature headers with invalid signature values.</summary>
         public List<string> InvalidDkimSignatures { get; } = new();
 
+        /// <summary>Collection of detected issues.</summary>
+        public List<MessageHeaderIssue> Issues { get; } = new();
+
         /// <summary>
         /// Parses <paramref name="rawHeaders"/> into strongly typed properties.
         /// </summary>
@@ -54,6 +57,7 @@ namespace DomainDetective {
             DuplicateHeaders.Clear();
             ReceivedChain.Clear();
             SpamHeaders.Clear();
+            Issues.Clear();
             TotalTransitTime = null;
             From = null;
             To = null;
@@ -84,6 +88,7 @@ namespace DomainDetective {
                         logger?.WriteError("MimeKit failed to parse headers: {0}", ex.Message);
                         ParseManually(rawHeaders, logger);
                         ComputeTransitTime();
+                        DetermineIssues();
                         return;
                     }
                 }
@@ -94,6 +99,7 @@ namespace DomainDetective {
             } catch (Exception ex) {
                 logger?.WriteError("Failed to parse message headers: {0}", ex.Message);
             }
+            DetermineIssues();
         }
 
         private static readonly Regex FoldingWhitespace = new("\r?\n[ \t]+", RegexOptions.Compiled);
@@ -111,6 +117,7 @@ namespace DomainDetective {
 
             if (lower == "dkim-signature" && !HasValidSignature(normalized)) {
                 InvalidDkimSignatures.Add(normalized);
+                AddIssue(MessageHeaderIssue.InvalidDkim);
                 return;
             }
 
@@ -253,6 +260,27 @@ namespace DomainDetective {
             if (times.Count >= 2) {
                 times.Sort();
                 TotalTransitTime = times[times.Count-1] - times[0];
+            }
+        }
+
+        private void AddIssue(MessageHeaderIssue issue) {
+            if (!Issues.Contains(issue)) {
+                Issues.Add(issue);
+            }
+        }
+
+        private void DetermineIssues() {
+            if (InvalidDkimSignatures.Count > 0 ||
+                (!string.IsNullOrWhiteSpace(DkimResult) &&
+                 !DkimResult.Equals("pass", StringComparison.OrdinalIgnoreCase))) {
+                AddIssue(MessageHeaderIssue.InvalidDkim);
+            }
+
+            if (string.IsNullOrWhiteSpace(ArcResult) ||
+                ArcResult.Equals("none", StringComparison.OrdinalIgnoreCase)) {
+                AddIssue(MessageHeaderIssue.MissingArc);
+            } else if (!ArcResult.Equals("pass", StringComparison.OrdinalIgnoreCase)) {
+                AddIssue(MessageHeaderIssue.InvalidArc);
             }
         }
     }

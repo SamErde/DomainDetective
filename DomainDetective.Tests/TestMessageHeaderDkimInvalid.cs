@@ -10,6 +10,7 @@ namespace DomainDetective.Tests {
 
             Assert.False(analysis.Headers.ContainsKey("DKIM-Signature"));
             Assert.Single(analysis.InvalidDkimSignatures);
+            Assert.Contains(MessageHeaderIssue.InvalidDkim, analysis.Issues);
         }
     }
 }
