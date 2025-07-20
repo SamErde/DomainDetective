@@ -25,6 +25,8 @@ namespace DomainDetective {
         public bool ArcHeadersFound { get; private set; }
         /// <summary>Indicates whether the ARC chain is sequential and complete.</summary>
         public bool ValidChain { get; private set; }
+        /// <summary>Overall status of the ARC chain.</summary>
+        public ArcChainState ChainState { get; private set; } = ArcChainState.Missing;
 
         /// <summary>Resets all analysis properties.</summary>
         public void Reset() {
@@ -32,6 +34,7 @@ namespace DomainDetective {
             ArcAuthenticationResultsHeaders.Clear();
             ArcHeadersFound = false;
             ValidChain = false;
+            ChainState = ArcChainState.Missing;
         }
 
         /// <summary>
@@ -43,6 +46,7 @@ namespace DomainDetective {
             Reset();
             if (string.IsNullOrWhiteSpace(rawHeaders)) {
                 logger?.WriteVerbose("No headers supplied for ARC analysis.");
+                ChainState = ArcChainState.Missing;
                 return;
             }
 
@@ -69,11 +73,17 @@ namespace DomainDetective {
                 }
             } catch (Exception ex) {
                 logger?.WriteError("Failed to parse ARC headers: {0}", ex.Message);
+                ChainState = ArcChainState.Invalid;
                 return;
             }
 
             ArcHeadersFound = ArcSealHeaders.Count > 0 ||
                               ArcAuthenticationResultsHeaders.Count > 0;
+
+            if (!ArcHeadersFound) {
+                ChainState = ArcChainState.Missing;
+                return;
+            }
 
             var sealSequence = new List<int>();
             var aarSequence = new List<int>();
@@ -81,12 +91,14 @@ namespace DomainDetective {
             foreach (var seal in ArcSealHeaders) {
                 if (!HasSignature(seal)) {
                     ValidChain = false;
+                    ChainState = ArcChainState.Invalid;
                     return;
                 }
 
                 var inst = ParseInstance(seal);
                 if (inst == null) {
                     ValidChain = false;
+                    ChainState = ArcChainState.Invalid;
                     return;
                 }
 
@@ -97,6 +109,7 @@ namespace DomainDetective {
                 var inst = ParseInstance(aar);
                 if (inst == null) {
                     ValidChain = false;
+                    ChainState = ArcChainState.Invalid;
                     return;
                 }
 
@@ -107,6 +120,7 @@ namespace DomainDetective {
                 aarSequence.Count == 0 ||
                 sealSequence.Count != aarSequence.Count) {
                 ValidChain = false;
+                ChainState = ArcChainState.Invalid;
                 return;
             }
 
@@ -116,6 +130,7 @@ namespace DomainDetective {
 
             if (!ascending && !descending) {
                 ValidChain = false;
+                ChainState = ArcChainState.Invalid;
                 return;
             }
 
@@ -123,11 +138,13 @@ namespace DomainDetective {
                 var expected = ascending ? index + 1 : count - index;
                 if (sealSequence[index] != expected || aarSequence[index] != expected) {
                     ValidChain = false;
+                    ChainState = ArcChainState.Invalid;
                     return;
                 }
             }
 
             ValidChain = true;
+            ChainState = ArcChainState.Valid;
         }
 
         private static int? ParseInstance(string value) {
