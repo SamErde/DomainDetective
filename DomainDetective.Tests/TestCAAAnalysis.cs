@@ -176,7 +176,22 @@ namespace DomainDetective.Tests {
 
         [Fact]
         public async Task TestCAARecordByDomain() {
-            var healthCheck = new DomainHealthCheck();
+            var caaRecords = new List<DnsAnswer> {
+                new() { DataRaw = "0 issue \"ssl.com\"", Type = DnsRecordType.CAA },
+                new() { DataRaw = "0 issue \"digicert.com; cansignhttpexchanges=yes\"", Type = DnsRecordType.CAA },
+                new() { DataRaw = "0 issuewild \"comodoca.com\"", Type = DnsRecordType.CAA },
+                new() { DataRaw = "0 issue \"pki.goog; cansignhttpexchanges=yes\"", Type = DnsRecordType.CAA },
+                new() { DataRaw = "0 issuewild \"ssl.com\"", Type = DnsRecordType.CAA },
+                new() { DataRaw = "0 issuewild \"letsencrypt.org\"", Type = DnsRecordType.CAA },
+                new() { DataRaw = "0 issuewild \"pki.goog; cansignhttpexchanges=yes\"", Type = DnsRecordType.CAA },
+                new() { DataRaw = "0 issuewild \"digicert.com; cansignhttpexchanges=yes\"", Type = DnsRecordType.CAA },
+                new() { DataRaw = "0 issue \"comodoca.com\"", Type = DnsRecordType.CAA },
+                new() { DataRaw = "0 issue \"letsencrypt.org\"", Type = DnsRecordType.CAA }
+            };
+
+            var healthCheck = new DomainHealthCheck {
+                DnsConfiguration = { QueryDnsOverride = (name, type) => Task.FromResult(type == DnsRecordType.CAA ? caaRecords.ToArray() : Array.Empty<DnsAnswer>()) }
+            };
             healthCheck.Verbose = false;
             await healthCheck.Verify("evotec.pl", [HealthCheckType.CAA]);
 
