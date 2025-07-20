@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading;
@@ -18,10 +19,8 @@ public class ThreatFeedAnalysis {
     /// <summary>Override AbuseIPDB query.</summary>
     public Func<string, Task<string>>? AbuseIpDbOverride { private get; set; }
 
-    /// <summary>True when VirusTotal lists the IP as malicious.</summary>
-    public bool ListedByVirusTotal { get; private set; }
-    /// <summary>True when AbuseIPDB lists the IP as malicious.</summary>
-    public bool ListedByAbuseIpDb { get; private set; }
+    /// <summary>Results returned from the consulted sources.</summary>
+    public List<ThreatIntelFinding> Listings { get; } = new();
     /// <summary>If feed queries fail, explains why.</summary>
     public string? FailureReason { get; private set; }
 
@@ -87,14 +86,16 @@ public class ThreatFeedAnalysis {
 
     /// <summary>Queries all enabled threat feeds.</summary>
     public async Task Analyze(string ip, string? virusTotalApiKey, string? abuseIpDbApiKey, InternalLogger logger, CancellationToken ct = default) {
-        ListedByVirusTotal = false;
-        ListedByAbuseIpDb = false;
+        Listings.Clear();
         FailureReason = null;
+
+        var vtListed = false;
+        var abuseListed = false;
 
         if (!string.IsNullOrWhiteSpace(virusTotalApiKey)) {
             try {
                 var result = await QueryVirusTotal(ip, virusTotalApiKey, ct).ConfigureAwait(false);
-                ListedByVirusTotal = result?.Attributes?.LastAnalysisStats?.Malicious > 0;
+                vtListed = result?.Attributes?.LastAnalysisStats?.Malicious > 0;
             } catch (Exception ex) {
                 logger?.WriteError("VirusTotal query failed: {0}", ex.Message);
                 FailureReason = $"VirusTotal query failed: {ex.Message}";
@@ -104,11 +105,14 @@ public class ThreatFeedAnalysis {
         if (!string.IsNullOrWhiteSpace(abuseIpDbApiKey)) {
             try {
                 var json = await QueryAbuseIpDb(ip, abuseIpDbApiKey, ct);
-                ListedByAbuseIpDb = ParseAbuseIpDb(json);
+                abuseListed = ParseAbuseIpDb(json);
             } catch (Exception ex) {
                 logger?.WriteError("AbuseIPDB query failed: {0}", ex.Message);
                 FailureReason = $"AbuseIPDB query failed: {ex.Message}";
             }
         }
+
+        Listings.Add(new ThreatIntelFinding { Source = ThreatIntelSource.VirusTotal, IsListed = vtListed });
+        Listings.Add(new ThreatIntelFinding { Source = ThreatIntelSource.AbuseIpDb, IsListed = abuseListed });
     }
 }
