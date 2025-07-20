@@ -254,5 +254,33 @@ namespace DomainDetective.Tests {
             Assert.Equal(2, groups.First().Value.Count);
             Assert.Equal(IPAddress.Parse("fe80::1%2").ToString(), groups.Keys.First());
         }
+
+        [Fact]
+        public void CompareResultsParsesEnumValues() {
+            var results = new[] {
+                new DnsPropagationResult {
+                    Server = new PublicDnsEntry {
+                        IPAddress = IPAddress.Parse("1.1.1.1"),
+                        Country = "Afghanistan",
+                        Location = "Kabul"
+                    },
+                    RecordType = DnsRecordType.A,
+                    Records = new[] { "1.2.3.4" },
+                    Success = true
+                }
+            };
+
+            var groups = DnsPropagationAnalysis.CompareResults(results);
+            var entry = Assert.Single(groups.Single().Value);
+            Assert.True(entry.Country.HasValue);
+            Assert.Equal("Afghanistan", entry.Country!.Value.ToName());
+            Assert.True(entry.Location.HasValue);
+            Assert.Equal("Kabul", entry.Location!.Value.ToName());
+
+            var details = DnsPropagationAnalysis.GetComparisonDetails(results);
+            var json = System.Text.Json.JsonSerializer.Serialize(details, DomainHealthCheck.JsonOptions);
+            Assert.Contains("Afghanistan", json);
+            Assert.Contains("Kabul", json);
+        }
     }
 }

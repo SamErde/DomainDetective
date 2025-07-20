@@ -24,7 +24,12 @@ namespace DomainDetective {
         public static readonly JsonSerializerOptions JsonOptions = new()
         {
             WriteIndented = true,
-            Converters = { new IPAddressJsonConverter() }
+            Converters =
+            {
+                new IPAddressJsonConverter(),
+                new CountryIdConverter(),
+                new LocationIdConverter()
+            }
         };
 
         /// <summary>Factory used to obtain <see cref="HttpClient"/> instances.</summary>
