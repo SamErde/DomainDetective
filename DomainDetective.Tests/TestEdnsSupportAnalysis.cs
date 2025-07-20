@@ -67,10 +67,10 @@ public class TestEdnsSupportAnalysis
     [Fact]
     public async Task RetriesOverTcpWhenTruncated()
     {
-        var port = PortHelper.GetFreePort();
         using var udpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
         udpSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-        udpSocket.Bind(new IPEndPoint(IPAddress.Loopback, port));
+        udpSocket.Bind(new IPEndPoint(IPAddress.Loopback, 0));
+        var port = ((IPEndPoint)udpSocket.LocalEndPoint!).Port;
         using var udpServer = new UdpClient { Client = udpSocket };
 
         var tcpListener = new TcpListener(IPAddress.Loopback, port);
