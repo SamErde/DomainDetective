@@ -28,7 +28,7 @@ public class RdapAnalysis
     /// <summary>List of authoritative name servers.</summary>
     public List<string> NameServers { get; private set; } = new();
     /// <summary>Status values reported by RDAP.</summary>
-    public List<string> Status { get; private set; } = new();
+    public List<RdapDomainStatus> Status { get; private set; } = new();
     /// <summary>Deserialized RDAP domain data.</summary>
     public RdapDomain? DomainData { get; private set; }
 
@@ -55,7 +55,7 @@ public class RdapAnalysis
         CreationDate = null;
         ExpiryDate = null;
         NameServers = new List<string>();
-        Status = new List<string>();
+        Status = new List<RdapDomainStatus>();
 
         RdapDomain? rdapResult;
         if (QueryOverride != null)
@@ -104,12 +104,7 @@ public class RdapAnalysis
         if (DomainData.Status != null)
         {
             Status = DomainData.Status
-                .Where(s => s != RdapStatus.Unknown)
-                .Select(s =>
-                {
-                    var text = s.ToString();
-                    return char.ToLowerInvariant(text[0]) + text.Substring(1);
-                })
+                .Where(s => s != RdapDomainStatus.Unknown)
                 .ToList();
         }
 

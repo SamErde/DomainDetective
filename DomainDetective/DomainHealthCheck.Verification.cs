@@ -12,6 +12,7 @@ using System.Globalization;
 using DomainDetective.Network;
 using DomainDetective.Helpers;
 
+using PortScanProfile = DomainDetective.PortScanProfileDefinition.PortScanProfile;
 namespace DomainDetective {
     /// <summary>
     /// Contains verification methods used by <see cref="DomainHealthCheck"/>.
@@ -489,9 +490,9 @@ namespace DomainDetective {
             if (ports != null && ports.Any()) {
                 selected = ports;
             } else if (profiles != null && profiles.Length > 0) {
-                selected = profiles.SelectMany(PortScanAnalysis.GetPorts).Distinct();
+                selected = profiles.SelectMany(PortScanProfileDefinition.GetPorts).Distinct();
             } else {
-                selected = PortScanAnalysis.DefaultPorts;
+                selected = PortScanProfileDefinition.DefaultPorts;
             }
             var list = selected.ToArray();
             foreach (var p in list) {

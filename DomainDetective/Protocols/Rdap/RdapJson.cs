@@ -1,5 +1,5 @@
-namespace DomainDetective
-{
+namespace DomainDetective;
+
 using System.Text.Json;
 
 /// <summary>
@@ -13,8 +13,7 @@ public static class RdapJson
     static RdapJson()
     {
         Options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
-        Options.Converters.Add(new RdapStatusConverter());
+        Options.Converters.Add(new RdapDomainStatusConverter());
         Options.Converters.Add(new RdapEventActionConverter());
     }
-}
 }

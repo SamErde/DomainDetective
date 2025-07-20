@@ -1,12 +1,12 @@
-namespace DomainDetective
-{
+namespace DomainDetective;
+
 using System.Text.Json.Serialization;
 
 /// <summary>
 /// RDAP status values defined in RFC 9083.
 /// </summary>
-[JsonConverter(typeof(RdapStatusConverter))]
-public enum RdapStatus
+[JsonConverter(typeof(RdapDomainStatusConverter))]
+public enum RdapDomainStatus
 {
     /// <summary>Unknown or unmapped status.</summary>
     Unknown,
@@ -48,5 +48,4 @@ public enum RdapStatus
     ServerDeleteProhibited,
     /// <summary>The object has been validated.</summary>
     Validated
-}
 }

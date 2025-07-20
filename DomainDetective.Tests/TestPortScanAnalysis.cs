@@ -1,4 +1,5 @@
 using DomainDetective;
+using PortScanProfile = DomainDetective.PortScanProfileDefinition.PortScanProfile;
 using System;
 using System.Net;
 using System.Net.Sockets;
@@ -151,14 +152,14 @@ namespace DomainDetective.Tests {
             var port = ((IPEndPoint)listener.LocalEndpoint).Port;
             var accept = listener.AcceptTcpClientAsync();
             try {
-                PortScanAnalysis.OverrideProfilePorts(PortScanProfile.SMB, new[] { port });
+                PortScanProfileDefinition.OverrideProfilePorts(PortScanProfile.SMB, new[] { port });
                 var analysis = new PortScanAnalysis { Timeout = TimeSpan.FromMilliseconds(200) };
                 await analysis.Scan("127.0.0.1", PortScanProfile.SMB, new InternalLogger());
                 using var _ = await accept;
                 Assert.True(analysis.Results[port].TcpOpen);
             } finally {
                 listener.Stop();
-                PortScanAnalysis.OverrideProfilePorts(PortScanProfile.SMB, new[] { 445, 139 });
+                PortScanProfileDefinition.OverrideProfilePorts(PortScanProfile.SMB, new[] { 445, 139 });
             }
         }
 
@@ -171,13 +172,13 @@ namespace DomainDetective.Tests {
                 await server.SendAsync(new byte[] { 1 }, 1, r.RemoteEndPoint);
             });
             try {
-                PortScanAnalysis.OverrideProfilePorts(PortScanProfile.NTP, new[] { port });
+                PortScanProfileDefinition.OverrideProfilePorts(PortScanProfile.NTP, new[] { port });
                 var analysis = new PortScanAnalysis { Timeout = TimeSpan.FromMilliseconds(200) };
                 await analysis.Scan("127.0.0.1", PortScanProfile.NTP, new InternalLogger());
                 Assert.True(analysis.Results[port].UdpOpen);
             } finally {
                 await task;
-                PortScanAnalysis.OverrideProfilePorts(PortScanProfile.NTP, new[] { 123 });
+                PortScanProfileDefinition.OverrideProfilePorts(PortScanProfile.NTP, new[] { 123 });
             }
         }
 

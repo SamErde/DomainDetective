@@ -74,6 +74,8 @@ namespace DomainDetective {
             using var stream = File.OpenRead(filePath);
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             options.Converters.Add(new IPAddressJsonConverter());
+            options.Converters.Add(new CountryIdJsonConverter());
+            options.Converters.Add(new LocationIdJsonConverter());
             var servers = JsonSerializer.DeserializeAsync<List<PublicDnsEntry>>(stream, options)
                 .GetAwaiter().GetResult();
             if (servers == null) {
@@ -88,10 +90,10 @@ namespace DomainDetective {
                 }
 
                 var trimmed = new PublicDnsEntry {
-                    Country = entry.Country?.Trim(),
+                    Country = entry.Country,
                     IPAddress = ip,
                     HostName = entry.HostName?.Trim(),
-                    Location = entry.Location?.Trim(),
+                    Location = entry.Location,
                     ASN = entry.ASN,
                     ASNName = entry.ASNName?.Trim(),
                     Enabled = entry.Enabled
@@ -121,6 +123,8 @@ namespace DomainDetective {
             var json = reader.ReadToEnd();
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             options.Converters.Add(new IPAddressJsonConverter());
+            options.Converters.Add(new CountryIdJsonConverter());
+            options.Converters.Add(new LocationIdJsonConverter());
             var servers = JsonSerializer.Deserialize<List<PublicDnsEntry>>(json, options);
             if (servers == null) {
                 return;
@@ -134,10 +138,10 @@ namespace DomainDetective {
                 }
 
                 var trimmed = new PublicDnsEntry {
-                    Country = entry.Country?.Trim(),
+                    Country = entry.Country,
                     IPAddress = ip,
                     HostName = entry.HostName?.Trim(),
-                    Location = entry.Location?.Trim(),
+                    Location = entry.Location,
                     ASN = entry.ASN,
                     ASNName = entry.ASNName?.Trim(),
                     Enabled = entry.Enabled
@@ -249,12 +253,10 @@ namespace DomainDetective {
         public IEnumerable<PublicDnsEntry> FilterServers(CountryId? country = null, LocationId? location = null, int? take = null) {
             IEnumerable<PublicDnsEntry> query = _servers.Where(s => s.Enabled);
             if (country.HasValue) {
-                var name = country.Value.ToName();
-                query = query.Where(s => string.Equals(s.Country, name, StringComparison.OrdinalIgnoreCase));
+                query = query.Where(s => s.Country == country.Value);
             }
             if (location.HasValue) {
-                var name = location.Value.ToName();
-                query = query.Where(s => s.Location != null && s.Location.IndexOf(name, StringComparison.OrdinalIgnoreCase) >= 0);
+                query = query.Where(s => s.Location == location.Value);
             }
             if (take.HasValue) {
                 query = query.OrderBy(_ => _rnd.Value.Next()).Take(take.Value);
@@ -298,13 +300,11 @@ namespace DomainDetective {
                     continue;
                 }
 
-                string name;
-                if (CountryIdExtensions.TryParse(kvp.Key, out var id)) {
-                    name = id.ToName();
-                } else {
+                CountryId id;
+                if (!CountryIdExtensions.TryParse(kvp.Key, out id)) {
                     try {
                         var region = new System.Globalization.RegionInfo(kvp.Key);
-                        name = region.EnglishName;
+                        var name = region.EnglishName;
                         if (!CountryIdExtensions.TryParse(name, out id)) {
                             continue;
                         }

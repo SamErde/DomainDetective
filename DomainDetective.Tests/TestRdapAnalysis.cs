@@ -4,7 +4,7 @@ namespace DomainDetective.Tests {
     public class TestRdapAnalysis {
         [Fact]
         public async Task ParsesRdapResponse() {
-            const string json = "{\"ldhName\":\"example.com\",\"nameservers\":[{\"ldhName\":\"ns1.example.net\"},{\"ldhName\":\"ns2.example.net\"}],\"events\":[{\"eventAction\":\"registration\",\"eventDate\":\"2000-01-01T00:00:00Z\"},{\"eventAction\":\"expiration\",\"eventDate\":\"2030-01-01T00:00:00Z\"}],\"entities\":[{\"handle\":\"123\",\"roles\":[\"registrar\"],\"vcardArray\":[\"vcard\",[[\"fn\",{},\"text\",\"Registrar Inc\"]]]}]}";
+            const string json = "{\"ldhName\":\"example.com\",\"status\":[\"active\"],\"nameservers\":[{\"ldhName\":\"ns1.example.net\"},{\"ldhName\":\"ns2.example.net\"}],\"events\":[{\"eventAction\":\"registration\",\"eventDate\":\"2000-01-01T00:00:00Z\"},{\"eventAction\":\"expiration\",\"eventDate\":\"2030-01-01T00:00:00Z\"}],\"entities\":[{\"handle\":\"123\",\"roles\":[\"registrar\"],\"vcardArray\":[\"vcard\",[[\"fn\",{},\"text\",\"Registrar Inc\"]]]}]}";
             var analysis = new RdapAnalysis { QueryOverride = _ => Task.FromResult(json) };
             await analysis.Analyze("example.com", new InternalLogger());
             Assert.Equal("example.com", analysis.DomainName.ToLowerInvariant());
@@ -14,6 +14,7 @@ namespace DomainDetective.Tests {
             Assert.Equal("2030-01-01T00:00:00Z", analysis.ExpiryDate);
             Assert.Contains("ns1.example.net", analysis.NameServers);
             Assert.Contains("ns2.example.net", analysis.NameServers);
+            Assert.Contains(RdapDomainStatus.Active, analysis.Status);
         }
 
         [Fact]
