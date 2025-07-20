@@ -522,10 +522,18 @@ namespace DomainDetective {
                     list = new List<DnsComparisonEntry>();
                     comparison[key] = list;
                 }
+                CountryId? countryId = null;
+                if (CountryIdExtensions.TryParse(res.Server.Country, out var cid)) {
+                    countryId = cid;
+                }
+                LocationId? locationId = null;
+                if (LocationIdExtensions.TryParse(res.Server.Location, out var lid)) {
+                    locationId = lid;
+                }
                 list.Add(new DnsComparisonEntry {
                     IPAddress = res.Server.IPAddress.ToString(),
-                    Country = res.Server.Country,
-                    Location = res.Server.Location
+                    Country = countryId,
+                    Location = locationId
                 });
             }
             return comparison;
@@ -544,8 +552,8 @@ namespace DomainDetective {
                     details.Add(new DnsComparisonDetail {
                         Records = kvp.Key,
                         IPAddress = entry.IPAddress,
-                        Country = entry.Country,
-                        Location = entry.Location
+                        Country = entry.Country?.ToName(),
+                        Location = entry.Location?.ToName()
                     });
                 }
             }
