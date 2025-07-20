@@ -12,8 +12,8 @@ public sealed class DnsComparisonDetail {
     public string IPAddress { get; init; } = string.Empty;
 
     /// <summary>Country of the server.</summary>
-    public string? Country { get; init; }
+    public CountryId? Country { get; init; }
 
     /// <summary>Location of the server.</summary>
-    public string? Location { get; init; }
+    public LocationId? Location { get; init; }
 }

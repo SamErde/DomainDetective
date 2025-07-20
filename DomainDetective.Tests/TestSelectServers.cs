@@ -10,8 +10,10 @@ namespace DomainDetective.Tests {
             analysis.LoadBuiltinServers();
             var servers = analysis.SelectServers(new Dictionary<string, int> { ["PL"] = 2, ["DE"] = 1 });
             Assert.Equal(3, servers.Count);
-            Assert.Equal(2, servers.Count(s => s.Country == "Poland"));
-            Assert.Equal(1, servers.Count(s => s.Country == "Germany"));
+            CountryIdExtensions.TryParse("Poland", out var pl);
+            CountryIdExtensions.TryParse("Germany", out var de);
+            Assert.Equal(2, servers.Count(s => s.Country == pl));
+            Assert.Equal(1, servers.Count(s => s.Country == de));
         }
     }
 }
