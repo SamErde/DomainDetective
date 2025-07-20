@@ -3,6 +3,7 @@ using System.Management.Automation;
 using System.Threading.Tasks;
 using DomainDetective;
 
+using PortScanProfile = DomainDetective.PortScanProfileDefinition.PortScanProfile;
 namespace DomainDetective.PowerShell {
     /// <summary>Runs multiple domain health checks and returns the results.</summary>
     /// <para>Part of the DomainDetective project.</para>

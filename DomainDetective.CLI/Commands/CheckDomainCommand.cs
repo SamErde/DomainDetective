@@ -1,4 +1,5 @@
 using DomainDetective;
+using PortScanProfile = DomainDetective.PortScanProfileDefinition.PortScanProfile;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using System.IO;
