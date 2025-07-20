@@ -261,8 +261,8 @@ namespace DomainDetective.Tests {
                 new DnsPropagationResult {
                     Server = new PublicDnsEntry {
                         IPAddress = IPAddress.Parse("1.1.1.1"),
-                        Country = "Afghanistan",
-                        Location = "Kabul"
+                        Country = CountryIdExtensions.TryParse("Afghanistan", out var c) ? c : null,
+                        Location = LocationIdExtensions.TryParse("Kabul", out var l) ? l : null
                     },
                     RecordType = DnsRecordType.A,
                     Records = new[] { "1.2.3.4" },
