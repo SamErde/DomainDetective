@@ -1,5 +1,5 @@
-namespace DomainDetective
-{
+namespace DomainDetective;
+
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -17,8 +17,11 @@ public sealed class RdapEntity
     [JsonPropertyName("roles")]
     public List<string> Roles { get; set; } = new();
 
+    /// <summary>Status values for the entity.</summary>
+    [JsonPropertyName("status")]
+    public List<RdapDomainStatus> Status { get; set; } = new();
+
     /// <summary>Raw vCard array.</summary>
     [JsonPropertyName("vcardArray")]
     public JsonElement? VcardArray { get; set; }
-}
 }

@@ -1,5 +1,5 @@
-namespace DomainDetective
-{
+namespace DomainDetective;
+
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
@@ -22,7 +22,7 @@ public sealed class RdapDomain
 
     /// <summary>Status values reported for the domain.</summary>
     [JsonPropertyName("status")]
-    public List<RdapStatus> Status { get; set; } = new();
+    public List<RdapDomainStatus> Status { get; set; } = new();
 
     /// <summary>Event list.</summary>
     [JsonPropertyName("events")]
@@ -35,5 +35,4 @@ public sealed class RdapDomain
     /// <summary>Authoritative nameservers.</summary>
     [JsonPropertyName("nameservers")]
     public List<RdapNameserver> Nameservers { get; set; } = new();
-}
 }
