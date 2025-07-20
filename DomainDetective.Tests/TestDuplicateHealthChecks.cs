@@ -3,11 +3,15 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using Xunit.Sdk;
 
 namespace DomainDetective.Tests {
     public class TestDuplicateHealthChecks {
         [Fact]
         public async Task DuplicatesExecuteOnce() {
+            if (!HttpListener.IsSupported) {
+                throw SkipException.ForSkip("HttpListener not supported");
+            }
             using var listener = new HttpListener();
             var prefix = $"http://localhost:{GetFreePort()}/";
             listener.Prefixes.Add(prefix);
