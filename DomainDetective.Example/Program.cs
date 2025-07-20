@@ -68,6 +68,7 @@ public static partial class Program {
         await ExampleValidateServerAsn();
         await ExampleAnalyseDnsPropagationRegions();
         await ExampleAnalyseDnsTtl();
+        await ExampleAnalyseDnsSec();
         await ExampleDomainSummary();
         await ExampleAnalyseThreatIntel();
         await ExampleAnalyseThreatFeed();
