@@ -27,9 +27,9 @@ public class TestThreatIntelAnalysis
 
         await analysis.Analyze("example.com", "g", "p", "v", new InternalLogger());
 
-        Assert.True(analysis.ListedByGoogle);
-        Assert.True(analysis.ListedByPhishTank);
-        Assert.True(analysis.ListedByVirusTotal);
+        Assert.Contains(analysis.Listings, f => f.Source == ThreatIntelSource.GoogleSafeBrowsing && f.IsListed);
+        Assert.Contains(analysis.Listings, f => f.Source == ThreatIntelSource.PhishTank && f.IsListed);
+        Assert.Contains(analysis.Listings, f => f.Source == ThreatIntelSource.VirusTotal && f.IsListed);
     }
 
     [Fact]
@@ -52,9 +52,9 @@ public class TestThreatIntelAnalysis
 
         await health.VerifyThreatIntel("example.com");
 
-        Assert.True(health.ThreatIntelAnalysis.ListedByGoogle);
-        Assert.True(health.ThreatIntelAnalysis.ListedByPhishTank);
-        Assert.True(health.ThreatIntelAnalysis.ListedByVirusTotal);
+        Assert.Contains(health.ThreatIntelAnalysis.Listings, f => f.Source == ThreatIntelSource.GoogleSafeBrowsing && f.IsListed);
+        Assert.Contains(health.ThreatIntelAnalysis.Listings, f => f.Source == ThreatIntelSource.PhishTank && f.IsListed);
+        Assert.Contains(health.ThreatIntelAnalysis.Listings, f => f.Source == ThreatIntelSource.VirusTotal && f.IsListed);
     }
 
     [Fact]
@@ -77,7 +77,7 @@ public class TestThreatIntelAnalysis
         await analysis.Analyze("example.com", "g", null, null, new InternalLogger());
 
         Assert.False(string.IsNullOrEmpty(analysis.FailureReason));
-        Assert.False(analysis.ListedByGoogle);
+        Assert.Contains(analysis.Listings, f => f.Source == ThreatIntelSource.GoogleSafeBrowsing && !f.IsListed);
     }
 
     [Fact]
@@ -123,7 +123,7 @@ public class TestThreatIntelAnalysis
 
         await analysis.Analyze("example.com", null, null, "v", new InternalLogger());
 
-        Assert.True(analysis.ListedByVirusTotal);
+        Assert.Contains(analysis.Listings, f => f.Source == ThreatIntelSource.VirusTotal && f.IsListed);
         Assert.Equal(42, analysis.RiskScore);
     }
 }

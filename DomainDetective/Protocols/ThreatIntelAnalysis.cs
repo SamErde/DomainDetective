@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
@@ -22,12 +23,8 @@ public class ThreatIntelAnalysis
     /// <summary>Override VirusTotal query returning a model.</summary>
     public Func<string, Task<VirusTotalObject?>>? VirusTotalObjectOverride { private get; set; }
 
-    /// <summary>True when Google Safe Browsing lists the entry.</summary>
-    public bool ListedByGoogle { get; private set; }
-    /// <summary>True when PhishTank lists the entry.</summary>
-    public bool ListedByPhishTank { get; private set; }
-    /// <summary>True when VirusTotal lists the entry as malicious.</summary>
-    public bool ListedByVirusTotal { get; private set; }
+    /// <summary>Results returned from the consulted sources.</summary>
+    public List<ThreatIntelFinding> Listings { get; } = new();
     /// <summary>Risk score returned by the reputation service.</summary>
     public int? RiskScore { get; private set; }
     /// <summary>If feed queries fail, explains why.</summary>
@@ -141,18 +138,20 @@ public class ThreatIntelAnalysis
     /// </summary>
     public async Task Analyze(string domainName, string? googleApiKey, string? phishTankApiKey, string? virusTotalApiKey, InternalLogger logger, CancellationToken ct = default)
     {
-        ListedByGoogle = false;
-        ListedByPhishTank = false;
-        ListedByVirusTotal = false;
+        Listings.Clear();
         RiskScore = null;
         FailureReason = null;
+
+        var googleListed = false;
+        var phishListed = false;
+        var vtListed = false;
 
         if (!string.IsNullOrWhiteSpace(googleApiKey))
         {
             try
             {
                 var json = await QueryGoogle(domainName, googleApiKey, ct);
-                ListedByGoogle = ParseGoogle(json);
+                googleListed = ParseGoogle(json);
             }
             catch (Exception ex)
             {
@@ -166,7 +165,7 @@ public class ThreatIntelAnalysis
             try
             {
                 var json = await QueryPhishTank(domainName, phishTankApiKey, ct);
-                ListedByPhishTank = ParsePhishTank(json);
+                phishListed = ParsePhishTank(json);
             }
             catch (Exception ex)
             {
@@ -180,7 +179,7 @@ public class ThreatIntelAnalysis
             try
             {
                 var result = await QueryVirusTotal(domainName, virusTotalApiKey, ct).ConfigureAwait(false);
-                ListedByVirusTotal = result?.Attributes?.LastAnalysisStats?.Malicious > 0;
+                vtListed = result?.Attributes?.LastAnalysisStats?.Malicious > 0;
                 RiskScore = result?.Attributes?.Reputation;
                 if (RiskScore.HasValue && RiskScore.Value >= 70)
                 {
@@ -193,5 +192,9 @@ public class ThreatIntelAnalysis
                 FailureReason = $"VirusTotal query failed: {ex.Message}";
             }
         }
+
+        Listings.Add(new ThreatIntelFinding { Source = ThreatIntelSource.GoogleSafeBrowsing, IsListed = googleListed });
+        Listings.Add(new ThreatIntelFinding { Source = ThreatIntelSource.PhishTank, IsListed = phishListed });
+        Listings.Add(new ThreatIntelFinding { Source = ThreatIntelSource.VirusTotal, IsListed = vtListed });
     }
 }

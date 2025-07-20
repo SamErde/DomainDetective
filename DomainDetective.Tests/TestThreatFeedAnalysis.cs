@@ -21,8 +21,8 @@ public class TestThreatFeedAnalysis {
 
         await analysis.Analyze("8.8.8.8", "v", "a", new InternalLogger());
 
-        Assert.True(analysis.ListedByVirusTotal);
-        Assert.True(analysis.ListedByAbuseIpDb);
+        Assert.Contains(analysis.Listings, f => f.Source == ThreatIntelSource.VirusTotal && f.IsListed);
+        Assert.Contains(analysis.Listings, f => f.Source == ThreatIntelSource.AbuseIpDb && f.IsListed);
     }
 
     [Fact]
@@ -42,8 +42,8 @@ public class TestThreatFeedAnalysis {
 
         await health.VerifyThreatFeed("8.8.8.8");
 
-        Assert.True(health.ThreatFeedAnalysis.ListedByVirusTotal);
-        Assert.True(health.ThreatFeedAnalysis.ListedByAbuseIpDb);
+        Assert.Contains(health.ThreatFeedAnalysis.Listings, f => f.Source == ThreatIntelSource.VirusTotal && f.IsListed);
+        Assert.Contains(health.ThreatFeedAnalysis.Listings, f => f.Source == ThreatIntelSource.AbuseIpDb && f.IsListed);
     }
 
     [Fact]
@@ -63,7 +63,7 @@ public class TestThreatFeedAnalysis {
         await analysis.Analyze("8.8.8.8", "v", null, new InternalLogger());
 
         Assert.False(string.IsNullOrEmpty(analysis.FailureReason));
-        Assert.False(analysis.ListedByVirusTotal);
+        Assert.Contains(analysis.Listings, f => f.Source == ThreatIntelSource.VirusTotal && !f.IsListed);
     }
 
     [Fact]
@@ -79,6 +79,6 @@ public class TestThreatFeedAnalysis {
 
         await analysis.Analyze("8.8.8.8", "v", null, new InternalLogger());
 
-        Assert.True(analysis.ListedByVirusTotal);
+        Assert.Contains(analysis.Listings, f => f.Source == ThreatIntelSource.VirusTotal && f.IsListed);
     }
 }
