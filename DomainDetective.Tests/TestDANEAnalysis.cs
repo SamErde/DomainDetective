@@ -433,5 +433,30 @@ namespace DomainDetective.Tests {
             Assert.False(healthCheck.DaneAnalysis.HasInvalidRecords);
             Assert.Equal(2, healthCheck.DaneAnalysis.AnalysisResults.Count);
         }
+
+        [Fact]
+        public async Task EnumValuesAreReturned() {
+            var record = $"3 1 1 {new string('A', 64)}";
+            var healthCheck = new DomainHealthCheck { Verbose = false };
+            await healthCheck.CheckDANE(record);
+
+            var result = healthCheck.DaneAnalysis.AnalysisResults[0];
+            Assert.Equal(TlsaUsage.DaneEe, result.CertificateUsage);
+            Assert.Equal(TlsaSelector.Spki, result.SelectorField);
+            Assert.Equal(TlsaMatchingType.Sha256, result.MatchingTypeField);
+        }
+
+        [Fact]
+        public void EnumDescriptionsAreAvailable() {
+            Assert.Equal(
+                "PKIX-TA: CA Constraint",
+                TlsaUsage.PkixTa.GetDescription());
+            Assert.Equal(
+                "SPKI: SubjectPublicKeyInfo",
+                TlsaSelector.Spki.GetDescription());
+            Assert.Equal(
+                "SHA-256: SHA-256 of Certificate or SPKI",
+                TlsaMatchingType.Sha256.GetDescription());
+        }
     }
 }

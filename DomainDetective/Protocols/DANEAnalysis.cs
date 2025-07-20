@@ -185,30 +185,30 @@ namespace DomainDetective {
             };
         }
 
-        private string TranslateUsage(int usage) {
+        private TlsaUsage TranslateUsage(int usage) {
             return usage switch {
-                0 => "PKIX-TA: CA Constraint",
-                1 => "PKIX-EE: Service Certificate Constraint",
-                2 => "DANE-TA: Trust Anchor Assertion",
-                3 => "DANE-EE: Domain Issued Certificate",
-                _ => "Unknown",
+                0 => TlsaUsage.PkixTa,
+                1 => TlsaUsage.PkixEe,
+                2 => TlsaUsage.DaneTa,
+                3 => TlsaUsage.DaneEe,
+                _ => TlsaUsage.Unknown,
             };
         }
 
-        private string TranslateSelector(int selector) {
+        private TlsaSelector TranslateSelector(int selector) {
             return selector switch {
-                0 => "Cert: Full Certificate",
-                1 => "SPKI: SubjectPublicKeyInfo",
-                _ => "Unknown",
+                0 => TlsaSelector.Cert,
+                1 => TlsaSelector.Spki,
+                _ => TlsaSelector.Unknown,
             };
         }
 
-        private string TranslateMatchingType(int matchingType) {
+        private TlsaMatchingType TranslateMatchingType(int matchingType) {
             return matchingType switch {
-                0 => "Full: Full Certificate or SPKI",
-                1 => "SHA-256: SHA-256 of Certificate or SPKI",
-                2 => "SHA-512: SHA-512 of Certificate or SPKI",
-                _ => "Unknown",
+                0 => TlsaMatchingType.Full,
+                1 => TlsaMatchingType.Sha256,
+                2 => TlsaMatchingType.Sha512,
+                _ => TlsaMatchingType.Unknown,
             };
         }
 
@@ -244,12 +244,12 @@ namespace DomainDetective {
         public bool IsValidChoiceForSmtp { get; set; }
         /// <summary>Gets or sets a value indicating whether this configuration is recommended for HTTPS.</summary>
         public bool IsValidChoiceForHttps { get; set; }
-        /// <summary>Gets or sets the textual description of the certificate usage.</summary>
-        public string CertificateUsage { get; set; }
-        /// <summary>Gets or sets the textual description of the selector field.</summary>
-        public string SelectorField { get; set; }
-        /// <summary>Gets or sets the textual description of the matching type.</summary>
-        public string MatchingTypeField { get; set; }
+        /// <summary>Gets or sets the certificate usage value.</summary>
+        public TlsaUsage CertificateUsage { get; set; }
+        /// <summary>Gets or sets the selector value.</summary>
+        public TlsaSelector SelectorField { get; set; }
+        /// <summary>Gets or sets the matching type value.</summary>
+        public TlsaMatchingType MatchingTypeField { get; set; }
         /// <summary>Gets or sets the certificate association data.</summary>
         public string CertificateAssociationData { get; set; }
         /// <summary>Gets or sets a value indicating whether the record contains four fields.</summary>
