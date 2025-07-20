@@ -110,7 +110,9 @@ internal sealed class DnsPropagationCommand : AsyncCommand<DnsPropagationSetting
                 Console.WriteLine(JsonSerializer.Serialize(details, DomainHealthCheck.JsonOptions));
             } else {
                 foreach (var d in details) {
-                    Console.WriteLine($"{d.Records}: {d.IPAddress} ({d.Country}/{d.Location})");
+                    var country = d.Country?.ToName() ?? string.Empty;
+                    var location = d.Location?.ToName() ?? string.Empty;
+                    Console.WriteLine($"{d.Records}: {d.IPAddress} ({country}/{location})");
                 }
             }
         } else {
