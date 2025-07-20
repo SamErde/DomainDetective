@@ -19,6 +19,7 @@ namespace DomainDetective.Tests {
             var parseDs = converter.GetMethod("ParseDsRecord", BindingFlags.NonPublic | BindingFlags.Static)!;
             var ds = (DsRecordInfo)parseDs.Invoke(null, new object[] { "60485 8 2 ABCD" })!;
             Assert.Equal("RSASHA256", ds.Algorithm);
+            Assert.Equal(DnsDigestType.Sha256, ds.DigestType);
 
             var parseKey = converter.GetMethod("ParseDnsKey", BindingFlags.NonPublic | BindingFlags.Static)!;
             var key = (DnsKeyInfo)parseKey.Invoke(null, new object[] { "257 3 8 AAAA" })!;

@@ -17,6 +17,16 @@ namespace DomainDetective {
             };
         }
 
+        private static DnsDigestType MapDigestTypeNumber(int number) {
+            return number switch {
+                1 => DnsDigestType.Sha1,
+                2 => DnsDigestType.Sha256,
+                4 => DnsDigestType.Sha384,
+                5 => DnsDigestType.Sha512,
+                _ => DnsDigestType.Unknown,
+            };
+        }
+
         /// <summary>
         ///     Builds a <see cref="DnsSecInfo"/> object from analysis data.
         /// </summary>
@@ -68,7 +78,7 @@ namespace DomainDetective {
             }
 
             _ = int.TryParse(parts[0], out int keyTag);
-            _ = int.TryParse(parts[2], out int digestType);
+            _ = int.TryParse(parts[2], out int digestTypeNumber);
             string algorithm = parts[1];
             if (int.TryParse(parts[1], out int algNum)) {
                 string name = MapAlgorithmNumber(algNum);
@@ -79,7 +89,7 @@ namespace DomainDetective {
             return new DsRecordInfo {
                 KeyTag = keyTag,
                 Algorithm = algorithm,
-                DigestType = digestType,
+                DigestType = MapDigestTypeNumber(digestTypeNumber),
                 Digest = parts[3],
             };
         }
@@ -168,7 +178,7 @@ namespace DomainDetective {
         public string Algorithm { get; set; }
 
         /// <summary>Digest type identifier.</summary>
-        public int DigestType { get; set; }
+        public DnsDigestType DigestType { get; set; }
 
         /// <summary>Digest hex string.</summary>
         public string Digest { get; set; }
