@@ -1,5 +1,6 @@
 using System.IO;
 using System.Threading.Tasks;
+using DomainDetective;
 
 namespace DomainDetective.Tests {
     public class TestARCAnalysis {
@@ -8,8 +9,7 @@ namespace DomainDetective.Tests {
             var raw = File.ReadAllText("Data/arc-valid.txt");
             var hc = new DomainHealthCheck();
             var result = await hc.VerifyARCAsync(raw);
-            Assert.True(result.ArcHeadersFound);
-            Assert.True(result.ValidChain);
+            Assert.Equal(ArcChainState.Valid, result.ChainState);
         }
 
         [Fact]
@@ -17,8 +17,7 @@ namespace DomainDetective.Tests {
             var raw = File.ReadAllText("Data/arc-invalid.txt");
             var hc = new DomainHealthCheck();
             var result = await hc.VerifyARCAsync(raw);
-            Assert.True(result.ArcHeadersFound);
-            Assert.False(result.ValidChain);
+            Assert.Equal(ArcChainState.Invalid, result.ChainState);
         }
 
         [Fact]
@@ -26,8 +25,7 @@ namespace DomainDetective.Tests {
             var raw = File.ReadAllText("Data/arc-missing-sig.txt");
             var hc = new DomainHealthCheck();
             var result = await hc.VerifyARCAsync(raw);
-            Assert.True(result.ArcHeadersFound);
-            Assert.False(result.ValidChain);
+            Assert.Equal(ArcChainState.Invalid, result.ChainState);
         }
 
         [Fact]
@@ -35,8 +33,7 @@ namespace DomainDetective.Tests {
             var raw = File.ReadAllText("Data/arc-empty-sig.txt");
             var hc = new DomainHealthCheck();
             var result = await hc.VerifyARCAsync(raw);
-            Assert.True(result.ArcHeadersFound);
-            Assert.False(result.ValidChain);
+            Assert.Equal(ArcChainState.Invalid, result.ChainState);
         }
 
         [Fact]
@@ -44,8 +41,7 @@ namespace DomainDetective.Tests {
             var raw = File.ReadAllText("Data/arc-out-of-order.txt");
             var hc = new DomainHealthCheck();
             var result = await hc.VerifyARCAsync(raw);
-            Assert.True(result.ArcHeadersFound);
-            Assert.False(result.ValidChain);
+            Assert.Equal(ArcChainState.Invalid, result.ChainState);
         }
 
         [Fact]
@@ -53,8 +49,15 @@ namespace DomainDetective.Tests {
             var raw = File.ReadAllText("Data/arc-rfc-example.txt");
             var hc = new DomainHealthCheck();
             var result = await hc.VerifyARCAsync(raw);
-            Assert.True(result.ArcHeadersFound);
-            Assert.True(result.ValidChain);
+            Assert.Equal(ArcChainState.Valid, result.ChainState);
+        }
+
+        [Fact]
+        public async Task MissingArcHeadersReturnMissingState() {
+            var raw = File.ReadAllText("Data/sample-headers.txt");
+            var hc = new DomainHealthCheck();
+            var result = await hc.VerifyARCAsync(raw);
+            Assert.Equal(ArcChainState.Missing, result.ChainState);
         }
     }
 }
