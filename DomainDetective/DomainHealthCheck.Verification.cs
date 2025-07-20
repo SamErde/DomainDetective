@@ -127,6 +127,56 @@ namespace DomainDetective {
             var totalChecks = healthCheckTypes.Length;
             var processedChecks = 0;
 
+            var actions = new Dictionary<HealthCheckType, Func<Task>> {
+                [HealthCheckType.DMARC] = () => VerifyDMARC(domainName, cancellationToken),
+                [HealthCheckType.SPF] = () => VerifySPF(domainName, cancellationToken),
+                [HealthCheckType.DKIM] = () => VerifyDKIM(domainName, dkimSelectors ?? Definitions.DKIMSelectors.GuessSelectors().ToArray(), cancellationToken),
+                [HealthCheckType.MX] = () => VerifyMX(domainName, cancellationToken),
+                [HealthCheckType.REVERSEDNS] = () => VerifyReverseDnsAsync(domainName, cancellationToken),
+                [HealthCheckType.FCRDNS] = () => VerifyFcrDnsAsync(domainName, cancellationToken),
+                [HealthCheckType.CAA] = () => VerifyCAA(domainName, cancellationToken),
+                [HealthCheckType.NS] = () => VerifyNS(domainName, cancellationToken),
+                [HealthCheckType.DELEGATION] = () => VerifyDelegation(domainName, cancellationToken),
+                [HealthCheckType.ZONETRANSFER] = () => VerifyZoneTransfer(domainName, cancellationToken),
+                [HealthCheckType.DANE] = () => VerifyDaneAsync(domainName, daneServiceType, danePorts, cancellationToken),
+                [HealthCheckType.DNSSEC] = () => VerifyDNSSEC(domainName, cancellationToken),
+                [HealthCheckType.DNSBL] = () => VerifyDNSBL(domainName, cancellationToken),
+                [HealthCheckType.MTASTS] = () => VerifyMTASTS(domainName, cancellationToken),
+                [HealthCheckType.TLSRPT] = () => VerifyTLSRPT(domainName, cancellationToken),
+                [HealthCheckType.BIMI] = () => VerifyBIMI(domainName, cancellationToken),
+                [HealthCheckType.AUTODISCOVER] = () => VerifyAutodiscover(domainName, cancellationToken),
+                [HealthCheckType.CERT] = () => VerifyWebsiteCertificate(domainName, cancellationToken: cancellationToken),
+                [HealthCheckType.SECURITYTXT] = () => VerifySecurityTxtAsync(domainName, cancellationToken),
+                [HealthCheckType.SOA] = () => VerifySOA(domainName, cancellationToken),
+                [HealthCheckType.OPENRELAY] = () => VerifyOpenRelay(domainName, 25, cancellationToken),
+                [HealthCheckType.OPENRESOLVER] = () => VerifyOpenResolver(domainName, cancellationToken),
+                [HealthCheckType.STARTTLS] = () => VerifySTARTTLS(domainName, 25, cancellationToken),
+                [HealthCheckType.SMTPTLS] = () => VerifySMTPTLS(domainName, cancellationToken),
+                [HealthCheckType.IMAPTLS] = () => VerifyIMAPTLS(domainName, cancellationToken),
+                [HealthCheckType.POP3TLS] = () => VerifyPOP3TLS(domainName, cancellationToken),
+                [HealthCheckType.SMTPBANNER] = () => VerifySMTPBanner(domainName, 25, cancellationToken),
+                [HealthCheckType.SMTPAUTH] = () => VerifySmtpAuth(domainName, 25, cancellationToken),
+                [HealthCheckType.HTTP] = () => VerifyPlainHttp(domainName, cancellationToken),
+                [HealthCheckType.HPKP] = () => VerifyHpkpAsync(domainName, cancellationToken),
+                [HealthCheckType.CONTACT] = () => VerifyContactInfo(domainName, cancellationToken),
+                [HealthCheckType.MESSAGEHEADER] = () => VerifyMessageHeaderAsync(cancellationToken),
+                [HealthCheckType.DANGLINGCNAME] = () => VerifyDanglingCname(domainName, cancellationToken),
+                [HealthCheckType.TTL] = () => VerifyDnsTtlAsync(domainName, cancellationToken),
+                [HealthCheckType.PORTAVAILABILITY] = () => CheckPortAvailability(domainName, null, cancellationToken),
+                [HealthCheckType.PORTSCAN] = () => ScanPorts(domainName, null, portScanProfiles, cancellationToken),
+                [HealthCheckType.SNMP] = () => CheckSnmpHost(domainName, 161, cancellationToken),
+                [HealthCheckType.IPNEIGHBOR] = () => CheckIPNeighbors(domainName, cancellationToken),
+                [HealthCheckType.RPKI] = () => VerifyRPKI(domainName, cancellationToken),
+                [HealthCheckType.DNSTUNNELING] = () => CheckDnsTunnelingAsync(domainName, cancellationToken),
+                [HealthCheckType.TYPOSQUATTING] = () => VerifyTyposquatting(domainName, cancellationToken),
+                [HealthCheckType.WILDCARDDNS] = () => VerifyWildcardDns(domainName),
+                [HealthCheckType.EDNSSUPPORT] = () => VerifyEdnsSupport(domainName, cancellationToken),
+                [HealthCheckType.FLATTENINGSERVICE] = () => VerifyFlatteningServiceAsync(domainName, cancellationToken),
+                [HealthCheckType.THREATINTEL] = () => VerifyThreatIntel(domainName, cancellationToken),
+                [HealthCheckType.THREATFEED] = () => VerifyThreatFeed(domainName, cancellationToken),
+                [HealthCheckType.DIRECTORYEXPOSURE] = () => VerifyDirectoryExposure(domainName, cancellationToken)
+            };
+
             foreach (var healthCheckType in healthCheckTypes) {
                 cancellationToken.ThrowIfCancellationRequested();
                 _logger.WriteProgress(
@@ -135,214 +185,9 @@ namespace DomainDetective {
                     processedChecks * 100d / totalChecks,
                     processedChecks,
                     totalChecks);
-                switch (healthCheckType) {
-                    case HealthCheckType.DMARC:
-                        var dmarc = await DnsConfiguration.QueryDNS("_dmarc." + domainName, DnsRecordType.TXT, "DMARC1", cancellationToken);
-                        await DmarcAnalysis.AnalyzeDmarcRecords(dmarc, _logger, domainName, _publicSuffixList.GetRegistrableDomain);
-                        DmarcAnalysis.EvaluatePolicyStrength(UseSubdomainPolicy);
-                        break;
-                    case HealthCheckType.SPF:
-                        var spf = await DnsConfiguration.QueryDNS(domainName, DnsRecordType.TXT, "SPF1", cancellationToken);
-                        await SpfAnalysis.AnalyzeSpfRecords(spf, _logger);
-                        break;
-                    case HealthCheckType.DKIM:
-                        var selectors = dkimSelectors;
-                        if (selectors == null || selectors.Length == 0) {
-                            selectors = Definitions.DKIMSelectors.GuessSelectors().ToArray();
-                        }
-
-                        var adsp = await DnsConfiguration.QueryDNS($"_adsp._domainkey.{domainName}", DnsRecordType.TXT, cancellationToken: cancellationToken);
-                        if (adsp.Any()) {
-                            await DKIMAnalysis.AnalyzeAdspRecord(adsp, _logger);
-                        }
-
-                        foreach (var selector in selectors) {
-                            cancellationToken.ThrowIfCancellationRequested();
-                            var dkim = await DnsConfiguration.QueryDNS($"{selector}._domainkey.{domainName}", DnsRecordType.TXT, "DKIM1", cancellationToken);
-                            await DKIMAnalysis.AnalyzeDkimRecords(selector, dkim, _logger);
-                        }
-                        break;
-                    case HealthCheckType.MX:
-                        var mx = await DnsConfiguration.QueryDNS(domainName, DnsRecordType.MX, cancellationToken: cancellationToken);
-                        await MXAnalysis.AnalyzeMxRecords(mx, _logger);
-                        break;
-                    case HealthCheckType.REVERSEDNS:
-                        var mxRecords = await DnsConfiguration.QueryDNS(domainName, DnsRecordType.MX, cancellationToken: cancellationToken);
-                        var rdnsHosts = CertificateAnalysis.ExtractMxHosts(mxRecords);
-                        await ReverseDnsAnalysis.AnalyzeHosts(rdnsHosts, _logger);
-                        break;
-                    case HealthCheckType.FCRDNS:
-                        var mxRecordsFcr = await DnsConfiguration.QueryDNS(domainName, DnsRecordType.MX, cancellationToken: cancellationToken);
-                        var rdnsHostsFcr = CertificateAnalysis.ExtractMxHosts(mxRecordsFcr);
-                        await ReverseDnsAnalysis.AnalyzeHosts(rdnsHostsFcr, _logger);
-                        await FcrDnsAnalysis.Analyze(ReverseDnsAnalysis.Results, _logger);
-                        break;
-                    case HealthCheckType.CAA:
-                        var caa = await DnsConfiguration.QueryDNS(domainName, DnsRecordType.CAA, cancellationToken: cancellationToken);
-                        await CAAAnalysis.AnalyzeCAARecords(caa, _logger);
-                        break;
-                    case HealthCheckType.NS:
-                        var ns = await DnsConfiguration.QueryDNS(domainName, DnsRecordType.NS, cancellationToken: cancellationToken);
-                        await NSAnalysis.AnalyzeNsRecords(ns, _logger);
-                        break;
-                    case HealthCheckType.DELEGATION:
-                        await VerifyDelegation(domainName, cancellationToken);
-                        break;
-                    case HealthCheckType.ZONETRANSFER:
-                        var nsRecords = await DnsConfiguration.QueryDNS(domainName, DnsRecordType.NS, cancellationToken: cancellationToken);
-                        var servers = nsRecords.Select(r => r.Data.Trim('.'));
-                        await ZoneTransferAnalysis.AnalyzeServers(domainName, servers, _logger, cancellationToken);
-                        break;
-                    case HealthCheckType.DANE:
-                        if (danePorts != null && danePorts.Length > 0) {
-                            await VerifyDANE(domainName, danePorts, cancellationToken);
-                        } else {
-                            await VerifyDANE(domainName, daneServiceType, cancellationToken);
-                        }
-                        break;
-                    case HealthCheckType.DNSSEC:
-                        DnsSecAnalysis = new DnsSecAnalysis();
-                        await DnsSecAnalysis.Analyze(domainName, _logger, DnsConfiguration);
-                        break;
-                    case HealthCheckType.DNSBL:
-                        await DNSBLAnalysis.AnalyzeDNSBLRecordsMX(domainName, _logger);
-                        break;
-                    case HealthCheckType.MTASTS:
-                        MTASTSAnalysis = new MTASTSAnalysis {
-                            PolicyUrlOverride = MtaStsPolicyUrlOverride,
-                            DnsConfiguration = DnsConfiguration
-                        };
-                        await MTASTSAnalysis.AnalyzePolicy(domainName, _logger);
-                        break;
-                    case HealthCheckType.TLSRPT:
-                        TLSRPTAnalysis = new TLSRPTAnalysis();
-                        var tlsrpt = await DnsConfiguration.QueryDNS("_smtp._tls." + domainName, DnsRecordType.TXT, cancellationToken: cancellationToken);
-                        await TLSRPTAnalysis.AnalyzeTlsRptRecords(tlsrpt, _logger, cancellationToken);
-                        break;
-                    case HealthCheckType.BIMI:
-                        BimiAnalysis = new BimiAnalysis();
-                        var bimi = await DnsConfiguration.QueryDNS($"default._bimi.{domainName}", DnsRecordType.TXT, cancellationToken: cancellationToken);
-                        await BimiAnalysis.AnalyzeBimiRecords(bimi, _logger, cancellationToken: cancellationToken);
-                        break;
-                    case HealthCheckType.AUTODISCOVER:
-                        AutodiscoverAnalysis = new AutodiscoverAnalysis();
-                        await AutodiscoverAnalysis.Analyze(domainName, DnsConfiguration, _logger, cancellationToken);
-                        break;
-                    case HealthCheckType.CERT:
-                        await VerifyWebsiteCertificate(domainName, cancellationToken: cancellationToken);
-                        break;
-                    case HealthCheckType.SECURITYTXT:
-                        // lets reset the SecurityTXTAnalysis, so it's overwritten completely on next run
-                        SecurityTXTAnalysis = new SecurityTXTAnalysis();
-                        await SecurityTXTAnalysis.AnalyzeSecurityTxtRecord(domainName, _logger);
-                        break;
-                    case HealthCheckType.SOA:
-                        var soa = await DnsConfiguration.QueryDNS(domainName, DnsRecordType.SOA, cancellationToken: cancellationToken);
-                        await SOAAnalysis.AnalyzeSoaRecords(soa, _logger);
-                        break;
-                    case HealthCheckType.OPENRELAY:
-                        var mxRecordsForRelay = await DnsConfiguration.QueryDNS(domainName, DnsRecordType.MX, cancellationToken: cancellationToken);
-                        IEnumerable<string> hosts = CertificateAnalysis.ExtractMxHosts(mxRecordsForRelay);
-                        foreach (string host in hosts) {
-                            cancellationToken.ThrowIfCancellationRequested();
-                            await OpenRelayAnalysis.AnalyzeServer(host, 25, _logger, cancellationToken);
-                        }
-                        break;
-                    case HealthCheckType.OPENRESOLVER:
-                        await VerifyOpenResolver(domainName, cancellationToken);
-                        break;
-                    case HealthCheckType.STARTTLS:
-                        var mxRecordsForTls = await DnsConfiguration.QueryDNS(domainName, DnsRecordType.MX, cancellationToken: cancellationToken);
-                        IEnumerable<string> tlsHosts = CertificateAnalysis.ExtractMxHosts(mxRecordsForTls);
-                        await StartTlsAnalysis.AnalyzeServers(tlsHosts, new[] { 25 }, _logger, cancellationToken);
-                        break;
-                    case HealthCheckType.SMTPTLS:
-                        var mxRecordsForSmtpTls = await DnsConfiguration.QueryDNS(domainName, DnsRecordType.MX, cancellationToken: cancellationToken);
-                        IEnumerable<string> smtpTlsHosts = CertificateAnalysis.ExtractMxHosts(mxRecordsForSmtpTls);
-                        await SmtpTlsAnalysis.AnalyzeServers(smtpTlsHosts, 25, _logger, cancellationToken);
-                        break;
-                    case HealthCheckType.IMAPTLS:
-                        var mxRecordsForImapTls = await DnsConfiguration.QueryDNS(domainName, DnsRecordType.MX, cancellationToken: cancellationToken);
-                        IEnumerable<string> imapTlsHosts = CertificateAnalysis.ExtractMxHosts(mxRecordsForImapTls);
-                        await ImapTlsAnalysis.AnalyzeServers(imapTlsHosts, 143, _logger, cancellationToken);
-                        break;
-                    case HealthCheckType.POP3TLS:
-                        var mxRecordsForPop3Tls = await DnsConfiguration.QueryDNS(domainName, DnsRecordType.MX, cancellationToken: cancellationToken);
-                        IEnumerable<string> pop3TlsHosts = CertificateAnalysis.ExtractMxHosts(mxRecordsForPop3Tls);
-                        await Pop3TlsAnalysis.AnalyzeServers(pop3TlsHosts, 110, _logger, cancellationToken);
-                        break;
-                    case HealthCheckType.SMTPBANNER:
-                        var mxRecordsForBanner = await DnsConfiguration.QueryDNS(domainName, DnsRecordType.MX, cancellationToken: cancellationToken);
-                        IEnumerable<string> bannerHosts = CertificateAnalysis.ExtractMxHosts(mxRecordsForBanner);
-                        await SmtpBannerAnalysis.AnalyzeServers(bannerHosts, 25, _logger, cancellationToken);
-                        break;
-                    case HealthCheckType.SMTPAUTH:
-                        var mxRecordsForAuth = await DnsConfiguration.QueryDNS(domainName, DnsRecordType.MX, cancellationToken: cancellationToken);
-                        IEnumerable<string> authHosts = CertificateAnalysis.ExtractMxHosts(mxRecordsForAuth);
-                        await SmtpAuthAnalysis.AnalyzeServers(authHosts, 25, _logger, cancellationToken);
-                        break;
-                    case HealthCheckType.HTTP:
-                        await HttpAnalysis.AnalyzeUrl($"http://{domainName}", true, _logger, cancellationToken: cancellationToken);
-                        break;
-                    case HealthCheckType.HPKP:
-                        await HPKPAnalysis.AnalyzeUrl($"http://{domainName}", _logger);
-                        break;
-                    case HealthCheckType.CONTACT:
-                        ContactInfoAnalysis = new ContactInfoAnalysis();
-                        var contact = await DnsConfiguration.QueryDNS("contact." + domainName, DnsRecordType.TXT, cancellationToken: cancellationToken);
-                        await ContactInfoAnalysis.AnalyzeContactRecords(contact, _logger);
-                        break;
-                    case HealthCheckType.MESSAGEHEADER:
-                        MessageHeaderAnalysis = CheckMessageHeaders(string.Empty, cancellationToken);
-                        break;
-                    case HealthCheckType.DANGLINGCNAME:
-                        await DanglingCnameAnalysis.Analyze(domainName, _logger, cancellationToken);
-                        break;
-                    case HealthCheckType.TTL:
-                        await DnsTtlAnalysis.Analyze(domainName, _logger);
-                        break;
-                    case HealthCheckType.PORTAVAILABILITY:
-                        await CheckPortAvailability(domainName, null, cancellationToken);
-                        break;
-                    case HealthCheckType.PORTSCAN:
-                        await ScanPorts(domainName, null, portScanProfiles, cancellationToken);
-                        break;
-                    case HealthCheckType.SNMP:
-                        await CheckSnmpHost(domainName, 161, cancellationToken);
-                        break;
-                    case HealthCheckType.IPNEIGHBOR:
-                        await CheckIPNeighbors(domainName, cancellationToken);
-                        break;
-                    case HealthCheckType.RPKI:
-                        await VerifyRPKI(domainName, cancellationToken);
-                        break;
-                    case HealthCheckType.DNSTUNNELING:
-                        await CheckDnsTunnelingAsync(domainName, cancellationToken);
-                        break;
-                    case HealthCheckType.TYPOSQUATTING:
-                        await VerifyTyposquatting(domainName, cancellationToken);
-                        break;
-                    case HealthCheckType.WILDCARDDNS:
-                        await VerifyWildcardDns(domainName);
-                        break;
-                    case HealthCheckType.EDNSSUPPORT:
-                        EdnsSupportAnalysis = new EdnsSupportAnalysis { DnsConfiguration = DnsConfiguration };
-                        await EdnsSupportAnalysis.Analyze(domainName, _logger);
-                        break;
-                    case HealthCheckType.FLATTENINGSERVICE:
-                        FlatteningServiceAnalysis = new FlatteningServiceAnalysis { DnsConfiguration = DnsConfiguration };
-                        await FlatteningServiceAnalysis.Analyze(domainName, _logger, cancellationToken);
-                        break;
-                    case HealthCheckType.THREATINTEL:
-                        await VerifyThreatIntel(domainName, cancellationToken);
-                        break;
-                    case HealthCheckType.THREATFEED:
-                        await VerifyThreatFeed(domainName, cancellationToken);
-                        break;
-                    case HealthCheckType.DIRECTORYEXPOSURE:
-                        await VerifyDirectoryExposure(domainName, cancellationToken);
-                        break;
-                default:
+                if (actions.TryGetValue(healthCheckType, out var action)) {
+                    await action();
+                } else {
                     _logger.WriteError("Unknown health check type: {0}", healthCheckType);
                     throw new NotSupportedException("Health check type not implemented.");
                 }
@@ -1086,6 +931,50 @@ namespace DomainDetective {
             domainName = NormalizeDomain(domainName);
             AutodiscoverAnalysis = new AutodiscoverAnalysis();
             await AutodiscoverAnalysis.Analyze(domainName, DnsConfiguration, _logger, cancellationToken);
+        }
+
+        private async Task VerifyReverseDnsAsync(string domainName, CancellationToken cancellationToken) {
+            var mxRecords = await DnsConfiguration.QueryDNS(domainName, DnsRecordType.MX, cancellationToken: cancellationToken);
+            var rdnsHosts = CertificateAnalysis.ExtractMxHosts(mxRecords);
+            await ReverseDnsAnalysis.AnalyzeHosts(rdnsHosts, _logger);
+        }
+
+        private async Task VerifyFcrDnsAsync(string domainName, CancellationToken cancellationToken) {
+            var mxRecords = await DnsConfiguration.QueryDNS(domainName, DnsRecordType.MX, cancellationToken: cancellationToken);
+            var rdnsHosts = CertificateAnalysis.ExtractMxHosts(mxRecords);
+            await ReverseDnsAnalysis.AnalyzeHosts(rdnsHosts, _logger);
+            await FcrDnsAnalysis.Analyze(ReverseDnsAnalysis.Results, _logger);
+        }
+
+        private async Task VerifyDaneAsync(string domainName, ServiceType[]? serviceTypes, int[]? ports, CancellationToken cancellationToken) {
+            if (ports != null && ports.Length > 0) {
+                await VerifyDANE(domainName, ports, cancellationToken);
+            } else {
+                await VerifyDANE(domainName, serviceTypes, cancellationToken);
+            }
+        }
+
+        private async Task VerifySecurityTxtAsync(string domainName, CancellationToken cancellationToken) {
+            SecurityTXTAnalysis = new SecurityTXTAnalysis();
+            await SecurityTXTAnalysis.AnalyzeSecurityTxtRecord(domainName, _logger);
+        }
+
+        private Task VerifyHpkpAsync(string domainName, CancellationToken cancellationToken) {
+            return HPKPAnalysis.AnalyzeUrl($"http://{domainName}", _logger);
+        }
+
+        private Task VerifyMessageHeaderAsync(CancellationToken cancellationToken) {
+            MessageHeaderAnalysis = CheckMessageHeaders(string.Empty, cancellationToken);
+            return Task.CompletedTask;
+        }
+
+        private Task VerifyDnsTtlAsync(string domainName, CancellationToken cancellationToken) {
+            return DnsTtlAnalysis.Analyze(domainName, _logger);
+        }
+
+        private Task VerifyFlatteningServiceAsync(string domainName, CancellationToken cancellationToken) {
+            FlatteningServiceAnalysis = new FlatteningServiceAnalysis { DnsConfiguration = DnsConfiguration };
+            return FlatteningServiceAnalysis.Analyze(domainName, _logger, cancellationToken);
         }
 
         private async Task<DnsAnswer[]> QueryDaneDns(string name, CancellationToken cancellationToken) {
