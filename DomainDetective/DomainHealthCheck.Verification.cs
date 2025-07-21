@@ -204,34 +204,6 @@ namespace DomainDetective {
             }
         }
 
-        /// <summary>
-        /// Analyzes a raw DMARC record.
-        /// </summary>
-        /// <param name="dmarcRecord">DMARC record text.</param>
-        /// <param name="cancellationToken">Token to cancel the operation.</param>
-        public async Task CheckDMARC(string dmarcRecord, CancellationToken cancellationToken = default) {
-            await DmarcAnalysis.AnalyzeDmarcRecords(new List<DnsAnswer> {
-                new DnsAnswer {
-                    DataRaw = dmarcRecord,
-                    Type = DnsRecordType.TXT
-                }
-            }, _logger);
-            DmarcAnalysis.EvaluatePolicyStrength(UseSubdomainPolicy);
-        }
-
-        /// <summary>
-        /// Analyzes a raw SPF record.
-        /// </summary>
-        /// <param name="spfRecord">SPF record text.</param>
-        /// <param name="cancellationToken">Token to cancel the operation.</param>
-        public async Task CheckSPF(string spfRecord, CancellationToken cancellationToken = default) {
-            await SpfAnalysis.AnalyzeSpfRecords(new List<DnsAnswer> {
-                new DnsAnswer {
-                    DataRaw = spfRecord,
-                    Type = DnsRecordType.TXT
-                }
-            }, _logger);
-        }
 
         /// <summary>
         /// Analyzes a raw DKIM record.

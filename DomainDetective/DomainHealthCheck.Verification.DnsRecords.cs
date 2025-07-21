@@ -7,42 +7,6 @@ using System.Threading.Tasks;
 
 namespace DomainDetective {
     public partial class DomainHealthCheck {
-        /// <summary>
-        /// Queries DNS and analyzes SPF records for a domain.
-        /// </summary>
-        /// <param name="domainName">Domain to verify.</param>
-        /// <param name="cancellationToken">Token to cancel the operation.</param>
-        public async Task VerifySPF(string domainName, CancellationToken cancellationToken = default) {
-            if (string.IsNullOrWhiteSpace(domainName)) {
-                throw new ArgumentNullException(nameof(domainName));
-            }
-            domainName = NormalizeDomain(domainName);
-            UpdateIsPublicSuffix(domainName);
-            if (IsPublicSuffix) {
-                return;
-            }
-            var spf = await DnsConfiguration.QueryDNS(domainName, DnsRecordType.TXT, "SPF1", cancellationToken);
-            await SpfAnalysis.AnalyzeSpfRecords(spf, _logger);
-        }
-
-        /// <summary>
-        /// Queries DNS and analyzes DMARC records for a domain.
-        /// </summary>
-        /// <param name="domainName">Domain to verify.</param>
-        /// <param name="cancellationToken">Token to cancel the operation.</param>
-        public async Task VerifyDMARC(string domainName, CancellationToken cancellationToken = default) {
-            if (string.IsNullOrWhiteSpace(domainName)) {
-                throw new ArgumentNullException(nameof(domainName));
-            }
-            domainName = NormalizeDomain(domainName);
-            UpdateIsPublicSuffix(domainName);
-            if (IsPublicSuffix) {
-                return;
-            }
-            var dmarc = await DnsConfiguration.QueryDNS("_dmarc." + domainName, DnsRecordType.TXT, "DMARC1", cancellationToken);
-            await DmarcAnalysis.AnalyzeDmarcRecords(dmarc, _logger, domainName, _publicSuffixList.GetRegistrableDomain);
-            DmarcAnalysis.EvaluatePolicyStrength(UseSubdomainPolicy);
-        }
 
         /// <summary>
         /// Queries DNSSEC information for a domain.
