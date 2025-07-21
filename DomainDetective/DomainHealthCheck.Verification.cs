@@ -176,76 +176,6 @@ namespace DomainDetective {
                     totalChecks);
             }
         }
-
-
-
-        /// <summary>
-        /// Analyzes a raw MX record.
-        /// </summary>
-        /// <param name="mxRecord">MX record text.</param>
-        /// <param name="cancellationToken">Token to cancel the operation.</param>
-        public async Task CheckMX(string mxRecord, CancellationToken cancellationToken = default) {
-            await MXAnalysis.AnalyzeMxRecords(new List<DnsAnswer> {
-                new DnsAnswer {
-                    DataRaw = mxRecord,
-                    Type = DnsRecordType.MX
-                }
-            }, _logger);
-        }
-
-        /// <summary>
-        /// Analyzes a single CAA record.
-        /// </summary>
-        /// <param name="caaRecord">CAA record text.</param>
-        /// <param name="cancellationToken">Token to cancel the operation.</param>
-        public async Task CheckCAA(string caaRecord, CancellationToken cancellationToken = default) {
-            await CAAAnalysis.AnalyzeCAARecords(new List<DnsAnswer> {
-                new DnsAnswer {
-                    DataRaw = caaRecord,
-                    Type = DnsRecordType.CAA
-                }
-            }, _logger);
-        }
-        /// <summary>
-        /// Analyzes multiple CAA records.
-        /// </summary>
-        /// <param name="caaRecords">Collection of CAA record texts.</param>
-        /// <param name="cancellationToken">Token to cancel the operation.</param>
-        public async Task CheckCAA(List<string> caaRecords, CancellationToken cancellationToken = default) {
-            var dnsResults = caaRecords.Select(record => new DnsAnswer {
-                DataRaw = record,
-            }).ToList();
-
-            await CAAAnalysis.AnalyzeCAARecords(dnsResults, _logger);
-        }
-
-        /// <summary>
-        /// Analyzes a single NS record.
-        /// </summary>
-        /// <param name="nsRecord">NS record text.</param>
-        /// <param name="cancellationToken">Token to cancel the operation.</param>
-        public async Task CheckNS(string nsRecord, CancellationToken cancellationToken = default) {
-            await NSAnalysis.AnalyzeNsRecords(new List<DnsAnswer> {
-                new DnsAnswer {
-                    DataRaw = nsRecord,
-                    Type = DnsRecordType.NS
-                }
-            }, _logger);
-        }
-        /// <summary>
-        /// Analyzes multiple NS records.
-        /// </summary>
-        /// <param name="nsRecords">Collection of NS record texts.</param>
-        /// <param name="cancellationToken">Token to cancel the operation.</param>
-        public async Task CheckNS(List<string> nsRecords, CancellationToken cancellationToken = default) {
-            var dnsResults = nsRecords.Select(record => new DnsAnswer {
-                DataRaw = record,
-            }).ToList();
-            await NSAnalysis.AnalyzeNsRecords(dnsResults, _logger);
-        }
-
-        /// <summary>
-
         /// <summary>
         /// Analyzes a raw SMIMEA record.
         /// </summary>
@@ -259,19 +189,6 @@ namespace DomainDetective {
             }, _logger);
         }
 
-        /// <summary>
-        /// Analyzes a raw SOA record.
-        /// </summary>
-        /// <param name="soaRecord">SOA record text.</param>
-        /// <param name="cancellationToken">Token to cancel the operation.</param>
-        public async Task CheckSOA(string soaRecord, CancellationToken cancellationToken = default) {
-            await SOAAnalysis.AnalyzeSoaRecords(new List<DnsAnswer> {
-                new DnsAnswer {
-                    DataRaw = soaRecord,
-                    Type = DnsRecordType.SOA
-                }
-            }, _logger);
-        }
 
         /// <summary>
         /// Tests an SMTP server for open relay configuration.
