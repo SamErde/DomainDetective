@@ -48,15 +48,16 @@ namespace DomainDetective {
             using var client = new TcpClient();
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(token);
             cts.CancelAfter(Timeout);
-            var connectSw = Stopwatch.StartNew();
+            var sw = Stopwatch.StartNew();
+            TimeSpan connectElapsed = TimeSpan.Zero;
             try {
 #if NET6_0_OR_GREATER
                 await client.ConnectAsync(host, port, cts.Token);
 #else
                 await client.ConnectAsync(host, port).WaitWithCancellation(cts.Token);
 #endif
-                connectSw.Stop();
-                var bannerSw = Stopwatch.StartNew();
+                connectElapsed = sw.Elapsed;
+                var bannerStart = sw.Elapsed;
                 using NetworkStream network = client.GetStream();
                 using var reader = new StreamReader(network);
                 using var writer = new StreamWriter(network) { AutoFlush = true, NewLine = "\r\n" };
@@ -65,7 +66,7 @@ namespace DomainDetective {
 #else
                 var banner = await reader.ReadLineAsync().WaitWithCancellation(cts.Token);
 #endif
-                bannerSw.Stop();
+                var bannerElapsed = sw.Elapsed;
                 try {
                     await writer.WriteLineAsync("QUIT").WaitWithCancellation(cts.Token);
                     await writer.FlushAsync().WaitWithCancellation(cts.Token);
@@ -74,16 +75,15 @@ namespace DomainDetective {
                 return new LatencyResult {
                     ConnectSuccess = true,
                     BannerSuccess = banner != null,
-                    ConnectTime = connectSw.Elapsed,
-                    BannerTime = bannerSw.Elapsed
+                    ConnectTime = connectElapsed,
+                    BannerTime = bannerElapsed - bannerStart
                 };
             } catch (Exception ex) when (ex is SocketException || ex is IOException || ex is OperationCanceledException || ex is TaskCanceledException) {
-                connectSw.Stop();
                 logger?.WriteVerbose("Mail latency check failed for {0}:{1} - {2}", host, port, ex.Message);
                 return new LatencyResult {
                     ConnectSuccess = client.Connected,
                     BannerSuccess = false,
-                    ConnectTime = connectSw.Elapsed,
+                    ConnectTime = connectElapsed == TimeSpan.Zero ? sw.Elapsed : connectElapsed,
                     BannerTime = TimeSpan.Zero
                 };
             }
