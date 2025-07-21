@@ -12,6 +12,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Collections.Generic;
 using System.Linq;
 using DnsClientX;
+using DomainDetective.Tests.Fixtures;
 
 namespace DomainDetective.Tests {
     public class TestCertificateHTTP {
@@ -109,21 +110,16 @@ namespace DomainDetective.Tests {
         [Fact]
         public async Task DetectsHostnameMismatch() {
             using var cert = CreateSelfSigned("example.com");
-            var listener = new TcpListener(IPAddress.Loopback, 0);
-            listener.Start();
-            var port = ((IPEndPoint)listener.LocalEndpoint).Port;
-            using var cts = new CancellationTokenSource();
-            var serverTask = Task.Run(() => RunServer(listener, cert, SslProtocols.Tls12, cts.Token), cts.Token);
+            var server = new TcpListenerFixture((l, t) => Task.Run(() => RunServer(l, cert, SslProtocols.Tls12, t), t));
+            await server.InitializeAsync();
 
             try {
                 var logger = new InternalLogger();
                 var analysis = new CertificateAnalysis { CtLogQueryOverride = _ => Task.FromResult("[]") };
-                await analysis.AnalyzeUrl($"https://localhost", port, logger);
+                await analysis.AnalyzeUrl($"https://localhost", server.Port, logger);
                 Assert.False(analysis.HostnameMatch);
             } finally {
-                cts.Cancel();
-                listener.Stop();
-                await serverTask;
+                await server.DisposeAsync();
             }
         }
 
@@ -131,24 +127,19 @@ namespace DomainDetective.Tests {
         [Fact]
         public async Task DetectsTls13WhenSupported() {
             using var cert = CreateSelfSigned("localhost");
-            var listener = new TcpListener(IPAddress.Loopback, 0);
-            listener.Start();
-            var port = ((IPEndPoint)listener.LocalEndpoint).Port;
-            using var cts = new CancellationTokenSource();
-            var serverTask = Task.Run(() => RunServer(listener, cert, SslProtocols.Tls13, cts.Token), cts.Token);
+            var server = new TcpListenerFixture((l, t) => Task.Run(() => RunServer(l, cert, SslProtocols.Tls13, t), t));
+            await server.InitializeAsync();
 
             try {
                 var logger = new InternalLogger();
                 var analysis = new CertificateAnalysis { CaptureTlsDetails = true, CtLogQueryOverride = _ => Task.FromResult("[]") };
-                await analysis.AnalyzeUrl($"https://localhost", port, logger);
+                await analysis.AnalyzeUrl($"https://localhost", server.Port, logger);
                 if (analysis.TlsProtocol != SslProtocols.Tls13) {
                     return;
                 }
                 Assert.True(analysis.Tls13Used);
             } finally {
-                cts.Cancel();
-                listener.Stop();
-                await serverTask;
+                await server.DisposeAsync();
             }
         }
 #endif
