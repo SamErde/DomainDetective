@@ -36,5 +36,10 @@ namespace DomainDetective {
                 return ArcAnalysis;
             }, ct);
         }
+
+        private Task VerifyMessageHeaderAsync(CancellationToken cancellationToken) {
+            MessageHeaderAnalysis = CheckMessageHeaders(string.Empty, cancellationToken);
+            return Task.CompletedTask;
+        }
     }
 }
