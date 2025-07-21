@@ -357,92 +357,6 @@ namespace DomainDetective {
         public Task TestNtpServer(NtpServer server, int port = 123, CancellationToken cancellationToken = default) =>
             TestNtpServer(server.ToHost(), port, cancellationToken);
 
-        /// <summary>
-        /// Generates typosquatting variants and checks if they resolve.
-        /// </summary>
-        /// <param name="domainName">Domain to analyze.</param>
-        /// <param name="cancellationToken">Token to cancel the operation.</param>
-        public async Task VerifyTyposquatting(string domainName, CancellationToken cancellationToken = default) {
-            if (string.IsNullOrWhiteSpace(domainName)) {
-                throw new ArgumentNullException(nameof(domainName));
-            }
-            domainName = NormalizeDomain(domainName);
-            UpdateIsPublicSuffix(domainName);
-            TyposquattingAnalysis.DnsConfiguration = DnsConfiguration;
-            TyposquattingAnalysis.LevenshteinThreshold = TyposquattingLevenshteinThreshold;
-            TyposquattingAnalysis.DetectHomoglyphs = EnableHomoglyphDetection;
-            TyposquattingAnalysis.BrandKeywords.Clear();
-            TyposquattingAnalysis.BrandKeywords.AddRange(TyposquattingBrandKeywords);
-            await TyposquattingAnalysis.Analyze(domainName, _logger, cancellationToken);
-        }
-
-        /// <summary>Queries reputation services for threat listings.</summary>
-        /// <param name="domainName">Domain or IP address to check.</param>
-        /// <param name="cancellationToken">Token to cancel the operation.</param>
-        public async Task VerifyThreatIntel(string domainName, CancellationToken cancellationToken = default) {
-            if (string.IsNullOrWhiteSpace(domainName)) {
-                throw new ArgumentNullException(nameof(domainName));
-            }
-            domainName = NormalizeDomain(domainName);
-            UpdateIsPublicSuffix(domainName);
-            await ThreatIntelAnalysis.Analyze(domainName, GoogleSafeBrowsingApiKey, PhishTankApiKey, VirusTotalApiKey, _logger, cancellationToken);
-        }
-
-        /// <summary>Queries threat feeds for IP reputation.</summary>
-        /// <param name="ipAddress">IP address to check.</param>
-        /// <param name="cancellationToken">Token to cancel the operation.</param>
-        public async Task VerifyThreatFeed(string ipAddress, CancellationToken cancellationToken = default) {
-            if (string.IsNullOrWhiteSpace(ipAddress)) {
-                throw new ArgumentNullException(nameof(ipAddress));
-            }
-
-            await ThreatFeedAnalysis.Analyze(ipAddress, VirusTotalApiKey, AbuseIpDbApiKey, _logger, cancellationToken);
-        }
-
-        /// <summary>
-        /// Tests authoritative name servers for EDNS support.
-        /// </summary>
-        /// <param name="domainName">Domain to verify.</param>
-        /// <param name="cancellationToken">Token to cancel the operation.</param>
-        public async Task VerifyEdnsSupport(string domainName, CancellationToken cancellationToken = default) {
-            cancellationToken.ThrowIfCancellationRequested();
-            if (string.IsNullOrWhiteSpace(domainName)) {
-                throw new ArgumentNullException(nameof(domainName));
-            }
-            domainName = NormalizeDomain(domainName);
-            UpdateIsPublicSuffix(domainName);
-            await EdnsSupportAnalysis.Analyze(domainName, _logger);
-        }
-
-        /// <summary>
-        /// Validates RPKI origins for domain IPs.
-        /// </summary>
-        /// <param name="domainName">Domain to verify.</param>
-        /// <param name="cancellationToken">Token to cancel the operation.</param>
-        public async Task VerifyRPKI(string domainName, CancellationToken cancellationToken = default) {
-            cancellationToken.ThrowIfCancellationRequested();
-            if (string.IsNullOrWhiteSpace(domainName)) {
-                throw new ArgumentNullException(nameof(domainName));
-            }
-            domainName = NormalizeDomain(domainName);
-            UpdateIsPublicSuffix(domainName);
-            RpkiAnalysis.DnsConfiguration = DnsConfiguration;
-            await RpkiAnalysis.Analyze(domainName, _logger, cancellationToken);
-        }
-
-        /// <summary>
-        /// Analyzes a raw TLSRPT record.
-        /// </summary>
-        /// <param name="tlsRptRecord">TLSRPT record text.</param>
-        /// <param name="cancellationToken">Token to cancel the operation.</param>
-        public async Task CheckTLSRPT(string tlsRptRecord, CancellationToken cancellationToken = default) {
-            await TLSRPTAnalysis.AnalyzeTlsRptRecords(new List<DnsAnswer> {
-                new DnsAnswer {
-                    DataRaw = tlsRptRecord,
-                    Type = DnsRecordType.TXT
-                }
-            }, _logger, cancellationToken);
-        }
 
         /// <summary>
         /// Analyzes a raw BIMI record.
@@ -639,22 +553,6 @@ namespace DomainDetective {
             var mx = await DnsConfiguration.QueryDNS(domainName, DnsRecordType.MX, cancellationToken: cancellationToken);
             var hosts = CertificateAnalysis.ExtractMxHosts(mx);
             await SmtpAuthAnalysis.AnalyzeServers(hosts, port, _logger, cancellationToken);
-        }
-
-        /// <summary>
-        /// Queries and analyzes TLSRPT records for a domain.
-        /// </summary>
-        /// <param name="domainName">Domain to verify.</param>
-        /// <param name="cancellationToken">Token to cancel the operation.</param>
-        public async Task VerifyTLSRPT(string domainName, CancellationToken cancellationToken = default) {
-            if (string.IsNullOrWhiteSpace(domainName)) {
-                throw new ArgumentNullException(nameof(domainName));
-            }
-            domainName = NormalizeDomain(domainName);
-            UpdateIsPublicSuffix(domainName);
-            TLSRPTAnalysis = new TLSRPTAnalysis();
-            var tlsrpt = await DnsConfiguration.QueryDNS("_smtp._tls." + domainName, DnsRecordType.TXT, cancellationToken: cancellationToken);
-            await TLSRPTAnalysis.AnalyzeTlsRptRecords(tlsrpt, _logger, cancellationToken);
         }
 
         /// <summary>
