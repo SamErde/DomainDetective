@@ -35,7 +35,9 @@ Describe 'Clear-DnsblProvider cmdlet' {
 Describe 'Import-DnsblConfig cmdlet' {
     It 'executes and returns analysis' {
         Import-Module "$PSScriptRoot/../DomainDetective.psd1" -Force
-        $path = "$PSScriptRoot/../../DnsblProviders.sample.json"
+        $source = Join-Path $PSScriptRoot '../../DnsblProviders.sample.json'
+        $path = Join-Path $TestDrive 'DnsblProviders.sample.json'
+        Copy-Item -Path $source -Destination $path
         $result = Import-DnsblConfig -Path $path -OverwriteExisting
         $result | Should -Not -BeNullOrEmpty
     }
@@ -47,8 +49,7 @@ Describe 'Import-DnsblConfig cmdlet' {
     It 'skips duplicate domains' {
         Import-Module "$PSScriptRoot/../DomainDetective.psd1" -Force
         $json = '{"providers":[{"domain":"dup.test"},{"domain":"DUP.test"}]}'
-        $temp = if ($env:TEMP) { $env:TEMP } else { [System.IO.Path]::GetTempPath() }
-        $path = Join-Path $temp ([guid]::NewGuid().ToString() + '.json')
+        $path = Join-Path $TestDrive (([guid]::NewGuid()).ToString() + '.json')
         $json | Set-Content -Path $path
         try {
             $result = Import-DnsblConfig -Path $path -ClearExisting
