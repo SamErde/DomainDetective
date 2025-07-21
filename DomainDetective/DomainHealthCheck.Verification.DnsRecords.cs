@@ -27,22 +27,6 @@ namespace DomainDetective {
         }
 
 
-        /// <summary>
-        /// Checks domain MX hosts against configured DNS block lists.
-        /// </summary>
-        /// <param name="domainName">Domain to verify.</param>
-        /// <param name="cancellationToken">Token to cancel the operation.</param>
-        public async Task VerifyDNSBL(string domainName, CancellationToken cancellationToken = default) {
-            if (string.IsNullOrWhiteSpace(domainName)) {
-                throw new ArgumentNullException(nameof(domainName));
-            }
-            domainName = NormalizeDomain(domainName);
-            UpdateIsPublicSuffix(domainName);
-            if (IsPublicSuffix) {
-                return;
-            }
-            await DNSBLAnalysis.AnalyzeDNSBLRecordsMX(domainName, _logger);
-        }
 
         /// <summary>
         /// Tests MX hosts for open relay configuration.

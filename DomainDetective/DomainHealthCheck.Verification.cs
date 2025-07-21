@@ -358,33 +358,7 @@ namespace DomainDetective {
             TestNtpServer(server.ToHost(), port, cancellationToken);
 
 
-        /// <summary>
-        /// Analyzes a raw BIMI record.
-        /// </summary>
-        /// <param name="bimiRecord">BIMI record text.</param>
-        /// <param name="cancellationToken">Token to cancel the operation.</param>
-        public async Task CheckBIMI(string bimiRecord, CancellationToken cancellationToken = default) {
-            await BimiAnalysis.AnalyzeBimiRecords(new List<DnsAnswer> {
-                new DnsAnswer {
-                    DataRaw = bimiRecord,
-                    Type = DnsRecordType.TXT
-                }
-            }, _logger, cancellationToken: cancellationToken);
-        }
 
-        /// <summary>
-        /// Analyzes a raw contact TXT record.
-        /// </summary>
-        /// <param name="contactRecord">Contact record text.</param>
-        /// <param name="cancellationToken">Token to cancel the operation.</param>
-        public async Task CheckContactInfo(string contactRecord, CancellationToken cancellationToken = default) {
-            await ContactInfoAnalysis.AnalyzeContactRecords(new List<DnsAnswer> {
-                new DnsAnswer {
-                    DataRaw = contactRecord,
-                    Type = DnsRecordType.TXT
-                }
-            }, _logger);
-        }
 
         /// <summary>
         /// Queries random subdomains to detect wildcard DNS behavior.
@@ -401,57 +375,10 @@ namespace DomainDetective {
             await WildcardDnsAnalysis.Analyze(domainName, _logger, sampleCount);
         }
 
-        /// <summary>
-        /// Parses raw message headers.
-        /// </summary>
-        /// <param name="rawHeaders">Unparsed header text.</param>
-        /// <param name="ct">Token to cancel the operation.</param>
-        /// <returns>Populated <see cref="MessageHeaderAnalysis"/> instance.</returns>
-        public MessageHeaderAnalysis CheckMessageHeaders(string rawHeaders, CancellationToken ct = default) {
-            ct.ThrowIfCancellationRequested();
-
-            var analysis = new MessageHeaderAnalysis();
-            analysis.Parse(rawHeaders, _logger);
-            return analysis;
-        }
-
-        /// <summary>
-        /// Validates ARC headers contained in <paramref name="rawHeaders"/>.
-        /// </summary>
-        /// <param name="rawHeaders">Raw message headers.</param>
-        /// <param name="ct">Token to cancel the operation.</param>
-        /// <returns>Populated <see cref="ARCAnalysis"/> instance.</returns>
-        public ARCAnalysis VerifyARC(string rawHeaders, CancellationToken ct = default) {
-            return VerifyARCAsync(rawHeaders, ct).GetAwaiter().GetResult();
-        }
-
-        public async Task<ARCAnalysis> VerifyARCAsync(string rawHeaders, CancellationToken ct = default) {
-            ct.ThrowIfCancellationRequested();
-            return await Task.Run(() => {
-                ArcAnalysis = new ARCAnalysis();
-                ArcAnalysis.Analyze(rawHeaders, _logger);
-                return ArcAnalysis;
-            }, ct);
-        }
 
 
-        /// <summary>
-        /// Verifies MTA-STS policy for a domain.
-        /// </summary>
-        /// <param name="domainName">Domain to verify.</param>
-        /// <param name="cancellationToken">Token to cancel the operation.</param>
-        public async Task VerifyMTASTS(string domainName, CancellationToken cancellationToken = default) {
-            if (string.IsNullOrWhiteSpace(domainName)) {
-                throw new ArgumentNullException(nameof(domainName));
-            }
-            domainName = NormalizeDomain(domainName);
-            UpdateIsPublicSuffix(domainName);
-            MTASTSAnalysis = new MTASTSAnalysis {
-                PolicyUrlOverride = MtaStsPolicyUrlOverride,
-                DnsConfiguration = DnsConfiguration
-            };
-            await MTASTSAnalysis.AnalyzePolicy(domainName, _logger);
-        }
+
+
 
         /// <summary>
         /// Checks all MX hosts for STARTTLS support.
@@ -556,36 +483,7 @@ namespace DomainDetective {
         }
 
         /// <summary>
-        /// Queries and analyzes BIMI records for a domain.
-        /// </summary>
-        /// <param name="domainName">Domain to verify.</param>
-        /// <param name="cancellationToken">Token to cancel the operation.</param>
-        public async Task VerifyBIMI(string domainName, CancellationToken cancellationToken = default) {
-            if (string.IsNullOrWhiteSpace(domainName)) {
-                throw new ArgumentNullException(nameof(domainName));
-            }
-            domainName = NormalizeDomain(domainName);
-            UpdateIsPublicSuffix(domainName);
-            BimiAnalysis = new BimiAnalysis();
-            var bimi = await DnsConfiguration.QueryDNS($"default._bimi.{domainName}", DnsRecordType.TXT, cancellationToken: cancellationToken);
-            await BimiAnalysis.AnalyzeBimiRecords(bimi, _logger, cancellationToken: cancellationToken);
-        }
 
-        /// <summary>
-        /// Queries contact TXT records for a domain.
-        /// </summary>
-        /// <param name="domainName">Domain to verify.</param>
-        /// <param name="cancellationToken">Token to cancel the operation.</param>
-        public async Task VerifyContactInfo(string domainName, CancellationToken cancellationToken = default) {
-            if (string.IsNullOrWhiteSpace(domainName)) {
-                throw new ArgumentNullException(nameof(domainName));
-            }
-            domainName = NormalizeDomain(domainName);
-            UpdateIsPublicSuffix(domainName);
-            ContactInfoAnalysis = new ContactInfoAnalysis();
-            var contact = await DnsConfiguration.QueryDNS("contact." + domainName, DnsRecordType.TXT, cancellationToken: cancellationToken);
-            await ContactInfoAnalysis.AnalyzeContactRecords(contact, _logger);
-        }
 
         /// Attempts zone transfers against authoritative name servers.
         /// </summary>
@@ -636,25 +534,7 @@ namespace DomainDetective {
             await TakeoverCnameAnalysis.Analyze(domainName, _logger, cancellationToken);
         }
 
-        /// <summary>
-        /// Scans common directories for public exposure.
-        /// </summary>
-        public async Task VerifyDirectoryExposure(string domainName, CancellationToken cancellationToken = default) {
-            domainName = ValidateHostName(domainName);
-            UpdateIsPublicSuffix(domainName);
-            DirectoryExposureAnalysis = new DirectoryExposureAnalysis();
-            await DirectoryExposureAnalysis.Analyze($"http://{domainName}", _logger, cancellationToken);
-        }
 
-        /// Queries Autodiscover related records for a domain.
-        /// </summary>
-        /// <param name="domainName">Domain to verify.</param>
-        /// <param name="cancellationToken">Token to cancel the operation.</param>
-        public async Task VerifyAutodiscover(string domainName, CancellationToken cancellationToken = default) {
-            domainName = NormalizeDomain(domainName);
-            AutodiscoverAnalysis = new AutodiscoverAnalysis();
-            await AutodiscoverAnalysis.Analyze(domainName, DnsConfiguration, _logger, cancellationToken);
-        }
 
         private async Task VerifyReverseDnsAsync(string domainName, CancellationToken cancellationToken) {
             var mxRecords = await DnsConfiguration.QueryDNS(domainName, DnsRecordType.MX, cancellationToken: cancellationToken);
@@ -780,32 +660,7 @@ namespace DomainDetective {
             return await PingTraceroute.TracerouteAsync(host, maxHops, timeout, _logger);
         }
 
-        /// <summary>
-        /// Checks an IP address against configured DNS block lists.
-        /// </summary>
-        /// <param name="ipAddress">IP address to query.</param>
-        /// <param name="cancellationToken">Token to cancel the operation.</param>
-        public async Task CheckDNSBL(string ipAddress, CancellationToken cancellationToken = default) {
-            await foreach (var _ in DNSBLAnalysis.AnalyzeDNSBLRecords(ipAddress, _logger)) {
-                cancellationToken.ThrowIfCancellationRequested();
-                // enumeration triggers processing
-            }
-        }
 
-        /// <summary>
-        /// Checks multiple IP addresses against DNS block lists.
-        /// </summary>
-        /// <param name="ipAddresses">IPs to query.</param>
-        /// <param name="cancellationToken">Token to cancel the operation.</param>
-        public async Task CheckDNSBL(string[] ipAddresses, CancellationToken cancellationToken = default) {
-            foreach (var ip in ipAddresses) {
-                cancellationToken.ThrowIfCancellationRequested();
-                await foreach (var _ in DNSBLAnalysis.AnalyzeDNSBLRecords(ip, _logger)) {
-                    cancellationToken.ThrowIfCancellationRequested();
-                    // enumeration triggers processing
-                }
-            }
-        }
 
         /// <summary>
         /// Queries WHOIS information and IANA RDAP for a domain.
