@@ -320,10 +320,14 @@ namespace DomainDetective.Tests {
             listener.Start();
             var tcs = new TaskCompletionSource<object?>();
             var serverTask = Task.Run(async () => {
-                var ctx = await listener.GetContextAsync();
-                await tcs.Task;
-                ctx.Response.StatusCode = 200;
-                ctx.Response.Close();
+                try {
+                    var ctx = await listener.GetContextAsync();
+                    await tcs.Task;
+                    ctx.Response.StatusCode = 200;
+                    ctx.Response.Close();
+                } catch (HttpListenerException) {
+                    // Ignore aborted requests when the client times out
+                }
             });
 
             try {
