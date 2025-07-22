@@ -7,6 +7,7 @@ using System.IO;
 using System.Reflection;
 using System.Text.Json;
 using System.Threading;
+using DomainDetective.Helpers;
 
 namespace DomainDetective.CLI;
 
@@ -107,7 +108,7 @@ internal sealed class DnsPropagationCommand : AsyncCommand<DnsPropagationSetting
         if (settings.Compare) {
             var details = DnsPropagationAnalysis.GetComparisonDetails(results);
             if (settings.Json) {
-                Console.WriteLine(JsonSerializer.Serialize(details, DomainHealthCheck.JsonOptions));
+                Console.WriteLine(JsonSerializer.Serialize(details, JsonOptions.Default));
             } else {
                 foreach (var d in details) {
                     var country = d.Country?.ToName() ?? string.Empty;
@@ -117,7 +118,7 @@ internal sealed class DnsPropagationCommand : AsyncCommand<DnsPropagationSetting
             }
         } else {
             if (settings.Json) {
-                Console.WriteLine(JsonSerializer.Serialize(results, DomainHealthCheck.JsonOptions));
+                Console.WriteLine(JsonSerializer.Serialize(results, JsonOptions.Default));
             } else {
                 foreach (var r in results) {
                     var records = r.Records.Select(rec => {

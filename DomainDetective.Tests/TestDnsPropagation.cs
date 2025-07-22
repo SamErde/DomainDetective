@@ -3,6 +3,7 @@ using DomainDetective;
 using System.Net;
 using System.Threading;
 using System.Linq;
+using DomainDetective.Helpers;
 namespace DomainDetective.Tests {
     public class TestDnsPropagation {
         [Fact]
@@ -278,7 +279,7 @@ namespace DomainDetective.Tests {
             Assert.Equal("Kabul", entry.Location!.Value.ToName());
 
             var details = DnsPropagationAnalysis.GetComparisonDetails(results);
-            var json = System.Text.Json.JsonSerializer.Serialize(details, DomainHealthCheck.JsonOptions);
+            var json = System.Text.Json.JsonSerializer.Serialize(details, JsonOptions.Default);
             Assert.Contains("Afghanistan", json);
             Assert.Contains("Kabul", json);
         }

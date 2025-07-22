@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using DomainDetective.Helpers;
 
 namespace DomainDetective.CLI;
 
@@ -91,7 +92,7 @@ internal sealed class SearchDomainCommand : AsyncCommand<SearchDomainSettings>
                 {
                     list.Add(r);
                 }
-                var json = JsonSerializer.Serialize(list, new JsonSerializerOptions { WriteIndented = true });
+                var json = JsonSerializer.Serialize(list, JsonOptions.Default);
                 Console.WriteLine(json);
                 break;
             }

@@ -6,6 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
+using DomainDetective.Helpers;
 using System.Text.Json;
 using System.Threading;
 
@@ -67,7 +68,7 @@ internal static class CommandUtilities {
         var result = hc.CheckMessageHeaders(headerText);
 
         if (json) {
-            var jsonText = JsonSerializer.Serialize(result, DomainHealthCheck.JsonOptions);
+            var jsonText = JsonSerializer.Serialize(result, JsonOptions.Default);
             Console.WriteLine(jsonText);
         } else {
             CliHelpers.ShowPropertiesTable("Message Header Analysis", result, false);
@@ -96,7 +97,7 @@ internal static class CommandUtilities {
         var result = hc.VerifyARCAsync(headerText).GetAwaiter().GetResult();
 
         if (json) {
-            var jsonText = JsonSerializer.Serialize(result, DomainHealthCheck.JsonOptions);
+            var jsonText = JsonSerializer.Serialize(result, JsonOptions.Default);
             Console.WriteLine(jsonText);
         } else {
             CliHelpers.ShowPropertiesTable("ARC Analysis", result, false);
@@ -114,7 +115,7 @@ internal static class CommandUtilities {
         hc.CheckDnsTunnelingAsync(domain).GetAwaiter().GetResult();
         var result = hc.DnsTunnelingAnalysis;
         if (json) {
-            var jsonText = JsonSerializer.Serialize(result, DomainHealthCheck.JsonOptions);
+            var jsonText = JsonSerializer.Serialize(result, JsonOptions.Default);
             Console.WriteLine(jsonText);
         } else {
             CliHelpers.ShowPropertiesTable($"DNS Tunneling for {domain}", result, false);
@@ -126,7 +127,7 @@ internal static class CommandUtilities {
     internal static void ImportDmarcForensic(string path, bool json) {
         var reports = DmarcForensicParser.ParseZip(path).ToList();
         if (json) {
-            var jsonText = JsonSerializer.Serialize(reports, DomainHealthCheck.JsonOptions);
+            var jsonText = JsonSerializer.Serialize(reports, JsonOptions.Default);
             Console.WriteLine(jsonText);
         } else {
             foreach (var report in reports) {
