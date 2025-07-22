@@ -55,5 +55,20 @@ namespace DomainDetective.Tests {
             LocationIdExtensions.TryParse("Kabul", out var kab);
             Assert.All(servers, s => Assert.Equal(kab, s.Location));
         }
+
+        [Fact]
+        public void FilterServersAppliesAllFilters() {
+            var analysis = new DnsPropagationAnalysis();
+            analysis.LoadBuiltinServers();
+            CountryIdExtensions.TryParse("Afghanistan", out var af);
+            LocationIdExtensions.TryParse("Kabul", out var kab);
+            var query = DnsServerQuery.Create().FilterServers(af, kab, 1);
+            var servers = analysis.FilterServers(query).ToList();
+            Assert.Single(servers);
+            Assert.All(servers, s => {
+                Assert.Equal(af, s.Country);
+                Assert.Equal(kab, s.Location);
+            });
+        }
     }
 }

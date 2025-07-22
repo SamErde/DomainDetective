@@ -111,7 +111,8 @@ namespace DomainDetective.PowerShell {
                 }
                 servers = _analysis.SelectServers(dict);
             } else {
-                servers = _analysis.FilterServers(Country, Location, Take);
+                var query = DnsServerQuery.Create().FilterServers(Country, Location, Take);
+                servers = _analysis.FilterServers(query);
             }
             var serverList = servers.ToList();
             var progress = new Progress<double>(p => {
