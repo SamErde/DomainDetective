@@ -94,6 +94,7 @@ public class BgpPrefixMonitor
         var aaaa = await config.QueryDNS(domain, DnsRecordType.AAAA, cancellationToken: ct).ConfigureAwait(false);
         var ips = a.Concat(aaaa).Select(r => r.Data).Distinct(StringComparer.OrdinalIgnoreCase);
         var result = new Dictionary<string, int>(StringComparer.Ordinal);
+
         foreach (var ip in ips)
         {
             var url = $"https://stat.ripe.net/data/prefix-overview/data.json?resource={ip}";
@@ -109,16 +110,28 @@ public class BgpPrefixMonitor
             using var stream = await response.Content.ReadAsStreamAsync().WaitWithCancellation(ct).ConfigureAwait(false);
 #endif
             using var doc = await JsonDocument.ParseAsync(stream, cancellationToken: ct).ConfigureAwait(false);
-            var data = doc.RootElement.GetProperty("data");
-            var prefix = data.GetProperty("resource").GetString() ?? ip;
-            var asns = data.GetProperty("asns");
-            if (asns.GetArrayLength() == 0)
+            foreach (var kvp in ParsePrefixes(doc))
             {
-                continue;
+                result[kvp.Key] = kvp.Value;
             }
+        }
+
+        return result;
+    }
+
+    private static Dictionary<string, int> ParsePrefixes(JsonDocument doc)
+    {
+        var result = new Dictionary<string, int>(StringComparer.Ordinal);
+        var data = doc.RootElement.GetProperty("data");
+        var prefix = data.GetProperty("resource").GetString();
+        var asns = data.GetProperty("asns");
+
+        if (prefix != null && asns.GetArrayLength() > 0)
+        {
             var asn = asns[0].GetProperty("asn").GetInt32();
             result[prefix] = asn;
         }
+
         return result;
     }
 }

@@ -1,5 +1,7 @@
 using DomainDetective.Monitoring;
 using System.Collections.Generic;
+using System.Reflection;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -54,5 +56,19 @@ public class TestBgpPrefixMonitor
             monitor.Stop();
             Assert.Null(timerField.GetValue(monitor));
         }
+    }
+
+    [Fact]
+    public void ParsePrefixesParsesDocument()
+    {
+        var method = typeof(BgpPrefixMonitor).GetMethod(
+            "ParsePrefixes",
+            BindingFlags.NonPublic | BindingFlags.Static)!;
+        using var doc = JsonDocument.Parse(
+            "{\"data\":{\"resource\":\"1.1.1.0/24\",\"asns\":[{\"asn\":65000}]}}"
+        );
+        var result = (Dictionary<string, int>)method.Invoke(null, new object?[] { doc })!;
+        Assert.Single(result);
+        Assert.Equal(65000, result["1.1.1.0/24"]);
     }
 }
