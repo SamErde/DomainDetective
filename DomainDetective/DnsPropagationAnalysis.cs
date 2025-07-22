@@ -9,6 +9,7 @@ using System.Text.Json;
 using System.Text;
 using System.Net.Http;
 using DomainDetective.Helpers;
+using DomainDetective.Monitoring;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -24,6 +25,7 @@ namespace DomainDetective {
     /// </remarks>
     public class DnsPropagationAnalysis {
         private readonly List<PublicDnsEntry> _servers = new();
+        private readonly DnsSnapshotManager _snapshotManager = new();
         /// <summary>
         /// Thread-safe random number generator used for selecting a subset of servers.
         /// </summary>
@@ -554,7 +556,11 @@ namespace DomainDetective {
         }
 
         /// <summary>Directory used to store snapshot files.</summary>
-        public string? SnapshotDirectory { get; set; }
+        public string? SnapshotDirectory
+        {
+            get => _snapshotManager.DirectoryPath;
+            set => _snapshotManager.DirectoryPath = value;
+        }
 
         /// <summary>
         /// Saves the provided results to a timestamped snapshot file.
@@ -562,16 +568,9 @@ namespace DomainDetective {
         /// <param name="domain">Queried domain name.</param>
         /// <param name="recordType">DNS record type.</param>
         /// <param name="results">Results to persist.</param>
-        public void SaveSnapshot(string domain, DnsRecordType recordType, IEnumerable<DnsPropagationResult> results) {
-            if (string.IsNullOrEmpty(SnapshotDirectory) || string.IsNullOrEmpty(domain) || results == null) {
-                return;
-            }
-
-            Directory.CreateDirectory(SnapshotDirectory);
-            var safe = domain.Replace(Path.DirectorySeparatorChar, '-').Replace(Path.AltDirectorySeparatorChar, '-');
-            var file = Path.Combine(SnapshotDirectory, $"{safe}_{recordType}_{DateTime.UtcNow:yyyyMMddHHmmss}.json");
-            var json = JsonSerializer.Serialize(results, JsonOptions.Default);
-            File.WriteAllText(file, json, Encoding.UTF8);
+        public void SaveSnapshot(string domain, DnsRecordType recordType, IEnumerable<DnsPropagationResult> results)
+        {
+            _snapshotManager.SaveSnapshot(domain, recordType, results);
         }
 
         /// <summary>
@@ -581,39 +580,9 @@ namespace DomainDetective {
         /// <param name="recordType">DNS record type.</param>
         /// <param name="results">Current query results.</param>
         /// <returns>List of diff lines.</returns>
-        public IEnumerable<string> GetSnapshotChanges(string domain, DnsRecordType recordType, IEnumerable<DnsPropagationResult> results) {
-            if (string.IsNullOrEmpty(SnapshotDirectory) || string.IsNullOrEmpty(domain)) {
-                return Array.Empty<string>();
-            }
-
-            var safe = domain.Replace(Path.DirectorySeparatorChar, '-').Replace(Path.AltDirectorySeparatorChar, '-');
-            var files = Directory.GetFiles(SnapshotDirectory, $"{safe}_{recordType}_*.json");
-            if (files.Length == 0) {
-                return Array.Empty<string>();
-            }
-
-            var previousFile = files.OrderByDescending(f => f).First();
-            var previousJson = File.ReadAllText(previousFile);
-            var previousResults = JsonSerializer.Deserialize<List<DnsPropagationResult>>(previousJson, JsonOptions.Default) ?? new List<DnsPropagationResult>();
-
-            static string[] ToLines(IEnumerable<DnsPropagationResult> res) => res
-                .OrderBy(r => r.Server.IPAddress.ToString())
-                .Select(r => $"{r.Server.IPAddress}:{string.Join(",", r.Records ?? Array.Empty<string>())}")
-                .ToArray();
-
-            var prevLines = ToLines(previousResults);
-            var currLines = ToLines(results);
-            var max = Math.Max(prevLines.Length, currLines.Length);
-            var changes = new List<string>();
-            for (var i = 0; i < max; i++) {
-                var prev = i < prevLines.Length ? prevLines[i] : string.Empty;
-                var curr = i < currLines.Length ? currLines[i] : string.Empty;
-                if (!string.Equals(prev, curr, StringComparison.Ordinal)) {
-                    changes.Add("- " + prev);
-                    changes.Add("+ " + curr);
-                }
-            }
-            return changes;
+        public IEnumerable<string> GetSnapshotChanges(string domain, DnsRecordType recordType, IEnumerable<DnsPropagationResult> results)
+        {
+            return _snapshotManager.GetSnapshotChanges(domain, recordType, results);
         }
     }
 }
