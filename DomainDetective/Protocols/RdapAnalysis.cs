@@ -67,7 +67,7 @@ public class RdapAnalysis
         {
             try
             {
-                rdapResult = await _rdapClient.GetDomain(domain, cancellationToken).ConfigureAwait(false);
+                rdapResult = await _rdapClient.QueryDomainAsync(domain, cancellationToken).ConfigureAwait(false);
             }
             catch (HttpRequestException ex)
             {

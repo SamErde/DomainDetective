@@ -49,30 +49,56 @@ public sealed class RdapClient
     }
 
     /// <summary>Queries domain information.</summary>
-    public Task<RdapDomain?> GetDomain(string domain, CancellationToken ct = default)
+    public Task<RdapDomain?> QueryDomainAsync(string domain, CancellationToken ct = default)
         => QueryAsync<RdapDomain>($"domain/{domain}", ct);
+
+    /// <summary>Queries domain information.</summary>
+    public Task<RdapDomain?> GetDomain(string domain, CancellationToken ct = default)
+        => QueryDomainAsync(domain, ct);
+
+    /// <summary>Queries top-level domain information.</summary>
+    public Task<RdapDomain?> QueryTldAsync(string tld, CancellationToken ct = default)
+        => QueryDomainAsync(tld, ct);
 
     /// <summary>Queries top-level domain information.</summary>
     public Task<RdapDomain?> GetTld(string tld, CancellationToken ct = default)
-        => GetDomain(tld, ct);
+        => QueryTldAsync(tld, ct);
+
+    /// <summary>Queries IP network information.</summary>
+    public Task<RdapIpNetwork?> QueryIpAsync(string ipOrCidr, CancellationToken ct = default)
+        => QueryAsync<RdapIpNetwork>($"ip/{ipOrCidr}", ct);
 
     /// <summary>Queries IP network information.</summary>
     public Task<RdapIpNetwork?> GetIp(string ipOrCidr, CancellationToken ct = default)
-        => QueryAsync<RdapIpNetwork>($"ip/{ipOrCidr}", ct);
+        => QueryIpAsync(ipOrCidr, ct);
+
+    /// <summary>Queries autonomous system information.</summary>
+    public Task<RdapAutnum?> QueryAutnumAsync(string asNumber, CancellationToken ct = default)
+        => QueryAsync<RdapAutnum>($"autnum/{asNumber}", ct);
 
     /// <summary>Queries autonomous system information.</summary>
     public Task<RdapAutnum?> GetAutnum(string asNumber, CancellationToken ct = default)
-        => QueryAsync<RdapAutnum>($"autnum/{asNumber}", ct);
+        => QueryAutnumAsync(asNumber, ct);
+
+    /// <summary>Queries entity information.</summary>
+    public Task<RdapEntity?> QueryEntityAsync(string handle, CancellationToken ct = default)
+        => QueryAsync<RdapEntity>($"entity/{handle}", ct);
 
     /// <summary>Queries entity information.</summary>
     public Task<RdapEntity?> GetEntity(string handle, CancellationToken ct = default)
-        => QueryAsync<RdapEntity>($"entity/{handle}", ct);
+        => QueryEntityAsync(handle, ct);
 
     /// <summary>Queries registrar information.</summary>
+    public Task<RdapEntity?> QueryRegistrarAsync(string handle, CancellationToken ct = default)
+        => QueryEntityAsync(handle, ct);
+
     public Task<RdapEntity?> GetRegistrar(string handle, CancellationToken ct = default)
-        => GetEntity(handle, ct);
+        => QueryRegistrarAsync(handle, ct);
 
     /// <summary>Queries nameserver information.</summary>
-    public Task<RdapNameserver?> GetNameserver(string host, CancellationToken ct = default)
+    public Task<RdapNameserver?> QueryNameserverAsync(string host, CancellationToken ct = default)
         => QueryAsync<RdapNameserver>($"nameserver/{host}", ct);
+
+    public Task<RdapNameserver?> GetNameserver(string host, CancellationToken ct = default)
+        => QueryNameserverAsync(host, ct);
 }

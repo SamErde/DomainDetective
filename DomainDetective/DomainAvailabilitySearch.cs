@@ -216,7 +216,7 @@ public class DomainAvailabilitySearch
 
         try
         {
-            var result = await _rdapClient.GetDomain(domain, ct).ConfigureAwait(false);
+            var result = await _rdapClient.QueryDomainAsync(domain, ct).ConfigureAwait(false);
             return result == null;
         }
         catch (HttpRequestException ex)

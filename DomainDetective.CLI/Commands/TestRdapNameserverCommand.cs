@@ -21,7 +21,7 @@ internal sealed class TestRdapNameserverCommand : AsyncCommand<TestRdapNameserve
     /// <inheritdoc/>
     public override async Task<int> ExecuteAsync(CommandContext context, TestRdapNameserverSettings settings) {
         var client = new RdapClient();
-        var result = await client.GetNameserver(settings.Host, Program.CancellationToken);
+        var result = await client.QueryNameserverAsync(settings.Host, Program.CancellationToken);
         if (result != null) {
             CliHelpers.ShowPropertiesTable($"RDAP nameserver {settings.Host}", result, false);
         }
