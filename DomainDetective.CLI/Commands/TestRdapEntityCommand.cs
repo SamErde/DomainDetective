@@ -21,7 +21,7 @@ internal sealed class TestRdapEntityCommand : AsyncCommand<TestRdapEntitySetting
     /// <inheritdoc/>
     public override async Task<int> ExecuteAsync(CommandContext context, TestRdapEntitySettings settings) {
         var client = new RdapClient();
-        var result = await client.GetEntity(settings.Handle, Program.CancellationToken);
+        var result = await client.QueryEntityAsync(settings.Handle, Program.CancellationToken);
         if (result != null) {
             CliHelpers.ShowPropertiesTable($"RDAP entity {settings.Handle}", result, false);
         }

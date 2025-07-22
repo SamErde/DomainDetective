@@ -68,13 +68,13 @@ public sealed class CmdletGetRdapObject : AsyncPSCmdlet
     {
         object? result = ParameterSetName switch
         {
-            "Domain" => await _client.GetDomain(Domain, CancelToken).ConfigureAwait(false),
-            "Tld" => await _client.GetTld(Tld, CancelToken).ConfigureAwait(false),
-            "Ip" => await _client.GetIp(Ip, CancelToken).ConfigureAwait(false),
-            "As" => await _client.GetAutnum(AsNumber, CancelToken).ConfigureAwait(false),
-            "Entity" => await _client.GetEntity(Entity, CancelToken).ConfigureAwait(false),
-            "Registrar" => await _client.GetRegistrar(Registrar, CancelToken).ConfigureAwait(false),
-            "Nameserver" => await _client.GetNameserver(Nameserver, CancelToken).ConfigureAwait(false),
+            "Domain" => await _client.QueryDomainAsync(Domain, CancelToken).ConfigureAwait(false),
+            "Tld" => await _client.QueryTldAsync(Tld, CancelToken).ConfigureAwait(false),
+            "Ip" => await _client.QueryIpAsync(Ip, CancelToken).ConfigureAwait(false),
+            "As" => await _client.QueryAutnumAsync(AsNumber, CancelToken).ConfigureAwait(false),
+            "Entity" => await _client.QueryEntityAsync(Entity, CancelToken).ConfigureAwait(false),
+            "Registrar" => await _client.QueryRegistrarAsync(Registrar, CancelToken).ConfigureAwait(false),
+            "Nameserver" => await _client.QueryNameserverAsync(Nameserver, CancelToken).ConfigureAwait(false),
             _ => null,
         };
 

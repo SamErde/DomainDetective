@@ -21,7 +21,7 @@ internal sealed class TestRdapIpCommand : AsyncCommand<TestRdapIpSettings> {
     /// <inheritdoc/>
     public override async Task<int> ExecuteAsync(CommandContext context, TestRdapIpSettings settings) {
         var client = new RdapClient();
-        var result = await client.GetIp(settings.Ip, Program.CancellationToken);
+        var result = await client.QueryIpAsync(settings.Ip, Program.CancellationToken);
         if (result != null) {
             CliHelpers.ShowPropertiesTable($"RDAP IP {settings.Ip}", result, false);
         }
