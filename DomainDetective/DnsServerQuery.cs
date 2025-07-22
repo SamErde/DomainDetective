@@ -60,12 +60,12 @@ namespace DomainDetective {
             if (country.HasValue) {
                 Country = country.Value;
             }
+
             if (location.HasValue) {
                 Location = location.Value;
             }
-            if (take.HasValue) {
-                TakeCount = take.Value > 0 ? take.Value : null;
-            }
+
+            TakeCount = take;
 
             return this;
         }
