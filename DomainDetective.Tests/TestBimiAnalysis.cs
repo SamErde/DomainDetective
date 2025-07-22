@@ -328,6 +328,34 @@ namespace DomainDetective.Tests {
             }
         }
 
+        [Fact]
+        public void ParseHeaderExtractsFields() {
+            var analysis = new BimiAnalysis();
+            var logger = new InternalLogger();
+
+            analysis.ParseBimiHeader(
+                "v=BIMI1; l=https://example.com/logo.svg; a=https://example.com/vmc.cer",
+                logger);
+
+            Assert.True(analysis.StartsCorrectly);
+            Assert.Equal("https://example.com/logo.svg", analysis.Location);
+            Assert.Equal("https://example.com/vmc.cer", analysis.Authority);
+            Assert.True(analysis.LocationUsesHttps);
+            Assert.True(analysis.AuthorityUsesHttps);
+            Assert.False(analysis.InvalidLocation);
+        }
+
+        [Fact]
+        public void ParseHeaderMarksInvalidLocation() {
+            var analysis = new BimiAnalysis();
+            var logger = new InternalLogger();
+
+            analysis.ParseBimiHeader("v=BIMI1; l=http://example.com/logo.svg", logger);
+
+            Assert.True(analysis.InvalidLocation);
+            Assert.False(analysis.LocationUsesHttps);
+        }
+
         private static X509Certificate2 CreateSelfSigned() {
             using var rsa = System.Security.Cryptography.RSA.Create(2048);
             var req = new System.Security.Cryptography.X509Certificates.CertificateRequest("CN=example", rsa, System.Security.Cryptography.HashAlgorithmName.SHA256, System.Security.Cryptography.RSASignaturePadding.Pkcs1);
