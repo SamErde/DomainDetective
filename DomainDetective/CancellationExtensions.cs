@@ -6,7 +6,7 @@ namespace DomainDetective {
     /// <summary>
     /// Provides helper methods for working with tasks and cancellation tokens.
     /// </summary>
-    internal static class TaskExtensions {
+    internal static class CancellationExtensions {
         /// <summary>
         /// Waits for the task to complete while observing a cancellation token.
         /// </summary>
