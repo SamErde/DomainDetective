@@ -24,6 +24,16 @@ namespace DomainDetective {
     /// additional checks for common mistakes such as missing rua addresses.
     /// </remarks>
     public class DmarcAnalysis {
+        private const string TagVersion = "v";
+        private const string TagPolicy = "p";
+        private const string TagSubPolicy = "sp";
+        private const string TagReportingInterval = "ri";
+        private const string TagFailureOptions = "fo";
+        private const string TagPercent = "pct";
+        private const string TagDkimAlignment = "adkim";
+        private const string TagSpfAlignment = "aspf";
+        private const string TagRua = "rua";
+        private const string TagRuf = "ruf";
         public DnsConfiguration DnsConfiguration { get; set; }
         public Func<string, DnsRecordType, Task<DnsAnswer[]>>? QueryDnsOverride { private get; set; }
         public Dictionary<string, bool> ExternalReportAuthorization { get; private set; } = new();
@@ -151,17 +161,17 @@ namespace DomainDetective {
                     var key = keyValue[0].Trim();
                     var value = keyValue[1].Trim();
                     switch (key) {
-                        case "v":
+                        case TagVersion:
                             break;
-                        case "p":
+                        case TagPolicy:
                             PolicyShort = value;
                             policyTagFound = true;
                             IsPolicyValid = value == "none" || value == "quarantine" || value == "reject";
                             break;
-                        case "sp":
+                        case TagSubPolicy:
                             SubPolicyShort = value;
                             break;
-                        case "ri":
+                        case TagReportingInterval:
                             // RFC 7489 section 6.3 defines 'ri' as the reporting
                             // interval in seconds. The raw value is stored here.
                             // TranslateReportingInterval will warn and default to
@@ -169,10 +179,10 @@ namespace DomainDetective {
                             ReportingIntervalShort = value;
                             _ = TranslateReportingInterval(ReportingIntervalShort, logger);
                             break;
-                        case "fo":
+                        case TagFailureOptions:
                             FoShort = value;
                             break;
-                        case "pct":
+                        case TagPercent:
                             // RFC 7489 section 6.3 defines 'pct' as the
                             // percentage of messages to which the DMARC policy
                             // applies.  It should be a number between 0 and 100.
@@ -190,25 +200,25 @@ namespace DomainDetective {
                                 IsPctValid = false;
                             }
                             break;
-                        case "adkim":
+                        case TagDkimAlignment:
                             DkimAShort = value;
                             ValidDkimAlignment = value == "s" || value == "r";
                             if (!ValidDkimAlignment) {
                                 logger?.WriteWarning($"Invalid adkim value '{value}', expected 's' or 'r'");
                             }
                             break;
-                        case "aspf":
+                        case TagSpfAlignment:
                             SpfAShort = value;
                             ValidSpfAlignment = value == "s" || value == "r";
                             if (!ValidSpfAlignment) {
                                 logger?.WriteWarning($"Invalid aspf value '{value}', expected 's' or 'r'");
                             }
                             break;
-                        case "rua":
+                        case TagRua:
                             Rua = value;
                             AddUriToList(value, MailtoRua, HttpRua, logger);
                             break;
-                        case "ruf":
+                        case TagRuf:
                             Ruf = value;
                             AddUriToList(value, MailtoRuf, HttpRuf, logger, true);
                             break;
