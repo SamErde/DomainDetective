@@ -8,6 +8,7 @@ using System.Net;
 using System.Text.Json;
 using System.Text;
 using System.Net.Http;
+using DomainDetective.Helpers;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -569,7 +570,7 @@ namespace DomainDetective {
             Directory.CreateDirectory(SnapshotDirectory);
             var safe = domain.Replace(Path.DirectorySeparatorChar, '-').Replace(Path.AltDirectorySeparatorChar, '-');
             var file = Path.Combine(SnapshotDirectory, $"{safe}_{recordType}_{DateTime.UtcNow:yyyyMMddHHmmss}.json");
-            var json = JsonSerializer.Serialize(results, DomainHealthCheck.JsonOptions);
+            var json = JsonSerializer.Serialize(results, JsonOptions.Default);
             File.WriteAllText(file, json, Encoding.UTF8);
         }
 
@@ -593,7 +594,7 @@ namespace DomainDetective {
 
             var previousFile = files.OrderByDescending(f => f).First();
             var previousJson = File.ReadAllText(previousFile);
-            var previousResults = JsonSerializer.Deserialize<List<DnsPropagationResult>>(previousJson, DomainHealthCheck.JsonOptions) ?? new List<DnsPropagationResult>();
+            var previousResults = JsonSerializer.Deserialize<List<DnsPropagationResult>>(previousJson, JsonOptions.Default) ?? new List<DnsPropagationResult>();
 
             static string[] ToLines(IEnumerable<DnsPropagationResult> res) => res
                 .OrderBy(r => r.Server.IPAddress.ToString())

@@ -21,16 +21,7 @@ namespace DomainDetective {
         /// <summary>
         /// Serialization settings used when persisting analysis data.
         /// </summary>
-        public static readonly JsonSerializerOptions JsonOptions = new()
-        {
-            WriteIndented = true,
-            Converters =
-            {
-                new IPAddressJsonConverter(),
-                new CountryIdConverter(),
-                new LocationIdConverter()
-            }
-        };
+        public static readonly JsonSerializerOptions JsonOptions = Helpers.JsonOptions.Default;
 
         /// <summary>Factory used to obtain <see cref="HttpClient"/> instances.</summary>
         public IHttpClientFactory HttpClientFactory { get; set; } = new SharedHttpClient();

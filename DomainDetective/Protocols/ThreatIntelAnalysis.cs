@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using DomainDetective.Helpers;
 
 namespace DomainDetective;
 
@@ -70,7 +71,7 @@ public class ThreatIntelAnalysis
                 threatEntries = new[] { new { url = domainName } }
             }
         };
-        var json = JsonSerializer.Serialize(payload, DomainHealthCheck.JsonOptions);
+        var json = JsonSerializer.Serialize(payload, JsonOptions.Default);
         using var content = new StringContent(json, Encoding.UTF8, "application/json");
         using var resp = await _client.PostAsync(url, content, ct);
         return await ReadAsStringAsync(resp);
