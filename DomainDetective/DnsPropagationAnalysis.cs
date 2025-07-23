@@ -1,15 +1,15 @@
 using DnsClientX;
+using DomainDetective.Helpers;
+using DomainDetective.Monitoring;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Text.Json;
-using System.Text;
 using System.Net.Http;
-using DomainDetective.Helpers;
-using DomainDetective.Monitoring;
+using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -25,6 +25,7 @@ namespace DomainDetective {
     /// </remarks>
     public class DnsPropagationAnalysis {
         private readonly List<PublicDnsEntry> _servers = new();
+        private readonly object _serversLock = new();
         private readonly DnsSnapshotManager _snapshotManager = new();
         /// <summary>
         /// Thread-safe random number generator used for selecting a subset of servers.
@@ -38,7 +39,13 @@ namespace DomainDetective {
         /// <summary>
         /// Gets the collection of configured DNS servers.
         /// </summary>
-        public IReadOnlyList<PublicDnsEntry> Servers => _servers;
+        public IReadOnlyList<PublicDnsEntry> Servers {
+            get {
+                lock (_serversLock) {
+                    return _servers.ToList();
+                }
+            }
+        }
 
         /// <summary>Override DNS queries for testing.</summary>
         internal Func<string, DnsRecordType, PublicDnsEntry, CancellationToken, Task<IEnumerable<string>>>? DnsQueryOverride { get; set; }
@@ -48,7 +55,7 @@ namespace DomainDetective {
 
         /// <summary>Override BGP lookup for testing.</summary>
         internal Func<string, CancellationToken, Task<int?>>? BgpLookupOverride { get; set; }
-      
+
         /// <summary>GeoIP database used for lookups.</summary>
         public GeoIpAnalysis GeoIp { get; } = new GeoIpAnalysis();
 
@@ -71,7 +78,9 @@ namespace DomainDetective {
             }
 
             if (clearExisting) {
-                _servers.Clear();
+                lock (_serversLock) {
+                    _servers.Clear();
+                }
             }
 
             using var stream = File.OpenRead(filePath);
@@ -102,8 +111,10 @@ namespace DomainDetective {
                     Enabled = entry.Enabled
                 };
 
-                if (_servers.All(s => !s.IPAddress.Equals(trimmed.IPAddress))) {
-                    _servers.Add(trimmed);
+                lock (_serversLock) {
+                    if (_servers.All(s => !s.IPAddress.Equals(trimmed.IPAddress))) {
+                        _servers.Add(trimmed);
+                    }
                 }
             }
         }
@@ -114,7 +125,9 @@ namespace DomainDetective {
         /// <param name="clearExisting">Whether to clear existing entries.</param>
         public void LoadBuiltinServers(bool clearExisting = true) {
             if (clearExisting) {
-                _servers.Clear();
+                lock (_serversLock) {
+                    _servers.Clear();
+                }
             }
 
             using var stream = typeof(DnsPropagationAnalysis).Assembly.GetManifestResourceStream("DomainDetective.DNS.PublicDNS.json");
@@ -150,8 +163,10 @@ namespace DomainDetective {
                     Enabled = entry.Enabled
                 };
 
-                if (_servers.All(s => !s.IPAddress.Equals(trimmed.IPAddress))) {
-                    _servers.Add(trimmed);
+                lock (_serversLock) {
+                    if (_servers.All(s => !s.IPAddress.Equals(trimmed.IPAddress))) {
+                        _servers.Add(trimmed);
+                    }
                 }
             }
         }
@@ -172,17 +187,19 @@ namespace DomainDetective {
                 throw new FormatException($"Invalid IP address '{entry.IPAddress}'");
             }
 
-            if (_servers.All(s => !s.IPAddress.Equals(ip))) {
-                var trimmed = new PublicDnsEntry {
-                    Country = entry.Country,
-                    IPAddress = ip,
-                    HostName = entry.HostName,
-                    Location = entry.Location,
-                    ASN = entry.ASN,
-                    ASNName = entry.ASNName,
-                    Enabled = entry.Enabled
-                };
-                _servers.Add(trimmed);
+            lock (_serversLock) {
+                if (_servers.All(s => !s.IPAddress.Equals(ip))) {
+                    var trimmed = new PublicDnsEntry {
+                        Country = entry.Country,
+                        IPAddress = ip,
+                        HostName = entry.HostName,
+                        Location = entry.Location,
+                        ASN = entry.ASN,
+                        ASNName = entry.ASNName,
+                        Enabled = entry.Enabled
+                    };
+                    _servers.Add(trimmed);
+                }
             }
         }
 
@@ -194,9 +211,11 @@ namespace DomainDetective {
             if (!TryParseNormalized(ipAddress, out var parsed)) {
                 return;
             }
-            var existing = _servers.FirstOrDefault(s => s.IPAddress.Equals(parsed));
-            if (existing != null) {
-                _servers.Remove(existing);
+            lock (_serversLock) {
+                var existing = _servers.FirstOrDefault(s => s.IPAddress.Equals(parsed));
+                if (existing != null) {
+                    _servers.Remove(existing);
+                }
             }
         }
 
@@ -208,18 +227,20 @@ namespace DomainDetective {
             if (!TryParseNormalized(ipAddress, out var parsed)) {
                 return;
             }
-            var existing = _servers.FirstOrDefault(s => s.IPAddress.Equals(parsed));
-            if (existing != null && existing.Enabled) {
-                var index = _servers.IndexOf(existing);
-                _servers[index] = new PublicDnsEntry {
-                    Country = existing.Country,
-                    IPAddress = existing.IPAddress,
-                    HostName = existing.HostName,
-                    Location = existing.Location,
-                    ASN = existing.ASN,
-                    ASNName = existing.ASNName,
-                    Enabled = false
-                };
+            lock (_serversLock) {
+                var existing = _servers.FirstOrDefault(s => s.IPAddress.Equals(parsed));
+                if (existing != null && existing.Enabled) {
+                    var index = _servers.IndexOf(existing);
+                    _servers[index] = new PublicDnsEntry {
+                        Country = existing.Country,
+                        IPAddress = existing.IPAddress,
+                        HostName = existing.HostName,
+                        Location = existing.Location,
+                        ASN = existing.ASN,
+                        ASNName = existing.ASNName,
+                        Enabled = false
+                    };
+                }
             }
         }
 
@@ -231,18 +252,20 @@ namespace DomainDetective {
             if (!TryParseNormalized(ipAddress, out var parsed)) {
                 return;
             }
-            var existing = _servers.FirstOrDefault(s => s.IPAddress.Equals(parsed));
-            if (existing != null && !existing.Enabled) {
-                var index = _servers.IndexOf(existing);
-                _servers[index] = new PublicDnsEntry {
-                    Country = existing.Country,
-                    IPAddress = existing.IPAddress,
-                    HostName = existing.HostName,
-                    Location = existing.Location,
-                    ASN = existing.ASN,
-                    ASNName = existing.ASNName,
-                    Enabled = true
-                };
+            lock (_serversLock) {
+                var existing = _servers.FirstOrDefault(s => s.IPAddress.Equals(parsed));
+                if (existing != null && !existing.Enabled) {
+                    var index = _servers.IndexOf(existing);
+                    _servers[index] = new PublicDnsEntry {
+                        Country = existing.Country,
+                        IPAddress = existing.IPAddress,
+                        HostName = existing.HostName,
+                        Location = existing.Location,
+                        ASN = existing.ASN,
+                        ASNName = existing.ASNName,
+                        Enabled = true
+                    };
+                }
             }
         }
 
@@ -254,7 +277,12 @@ namespace DomainDetective {
         /// <param name="take">If specified, randomly selects this many servers.</param>
         /// <returns>The filtered server list.</returns>
         public IEnumerable<PublicDnsEntry> FilterServers(CountryId? country = null, LocationId? location = null, int? take = null) {
-            IEnumerable<PublicDnsEntry> query = _servers.Where(s => s.Enabled);
+            List<PublicDnsEntry> snapshot;
+            lock (_serversLock) {
+                snapshot = _servers.Where(s => s.Enabled).ToList();
+            }
+
+            IEnumerable<PublicDnsEntry> query = snapshot;
             if (country.HasValue) {
                 query = query.Where(s => s.Country == country.Value);
             }
@@ -381,7 +409,12 @@ namespace DomainDetective {
         }
 
         public async Task ValidateServerAsnsAsync(InternalLogger? logger = null, CancellationToken ct = default) {
-            foreach (var server in _servers) {
+            List<PublicDnsEntry> snapshot;
+            lock (_serversLock) {
+                snapshot = _servers.ToList();
+            }
+
+            foreach (var server in snapshot) {
                 ct.ThrowIfCancellationRequested();
                 if (string.IsNullOrWhiteSpace(server.ASN)) {
                     continue;
@@ -556,8 +589,7 @@ namespace DomainDetective {
         }
 
         /// <summary>Directory used to store snapshot files.</summary>
-        public string? SnapshotDirectory
-        {
+        public string? SnapshotDirectory {
             get => _snapshotManager.DirectoryPath;
             set => _snapshotManager.DirectoryPath = value;
         }
@@ -568,8 +600,7 @@ namespace DomainDetective {
         /// <param name="domain">Queried domain name.</param>
         /// <param name="recordType">DNS record type.</param>
         /// <param name="results">Results to persist.</param>
-        public void SaveSnapshot(string domain, DnsRecordType recordType, IEnumerable<DnsPropagationResult> results)
-        {
+        public void SaveSnapshot(string domain, DnsRecordType recordType, IEnumerable<DnsPropagationResult> results) {
             _snapshotManager.SaveSnapshot(domain, recordType, results);
         }
 
@@ -580,8 +611,7 @@ namespace DomainDetective {
         /// <param name="recordType">DNS record type.</param>
         /// <param name="results">Current query results.</param>
         /// <returns>List of diff lines.</returns>
-        public IEnumerable<string> GetSnapshotChanges(string domain, DnsRecordType recordType, IEnumerable<DnsPropagationResult> results)
-        {
+        public IEnumerable<string> GetSnapshotChanges(string domain, DnsRecordType recordType, IEnumerable<DnsPropagationResult> results) {
             return _snapshotManager.GetSnapshotChanges(domain, recordType, results);
         }
     }
