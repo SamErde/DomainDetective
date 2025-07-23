@@ -46,6 +46,7 @@ public class PortScanAnalysis
 
     /// <summary>Factory used to create <see cref="UdpClient"/> instances.</summary>
     internal Func<AddressFamily, UdpClient> UdpClientFactory { get; set; } = af => new UdpClient(af);
+    internal Func<AddressFamily, TcpClient> TcpClientFactory { get; set; } = af => new TcpClient(af);
 
 
     private static readonly Func<NetworkStream, CancellationToken, Task<string?>>[] DefaultDetectors =
@@ -133,10 +134,8 @@ public class PortScanAnalysis
             }
         }
 
-        TcpClient? client = null;
-        try
+        using (var client = TcpClientFactory(address.AddressFamily))
         {
-            client = new TcpClient(address.AddressFamily);
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(token);
             cts.CancelAfter(Timeout);
             try
@@ -154,10 +153,6 @@ public class PortScanAnalysis
                 logger?.WriteVerbose("TCP {0}:{1} closed - {2}", address, port, ex.Message);
                 error = ex.Message;
             }
-        }
-        finally
-        {
-            client?.Dispose();
         }
         sw.Stop();
 
