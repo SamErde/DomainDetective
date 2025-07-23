@@ -107,6 +107,8 @@ namespace DomainDetective.Tests {
             Assert.Single(groups);
             Assert.Equal(2, groups.First().Value.Count);
             Assert.Equal(IPAddress.Parse("2001:db8::1").ToString(), groups.Keys.First());
+            Assert.True(groups.ContainsKey("2001:DB8::1"));
+            Assert.Equal(2, groups["2001:DB8::1"].Count);
         }
 
         [Fact]
@@ -130,6 +132,8 @@ namespace DomainDetective.Tests {
             Assert.Single(groups);
             Assert.Equal(2, groups.First().Value.Count);
             Assert.Equal("2001:db8::1", groups.Keys.First());
+            Assert.True(groups.ContainsKey("2001:DB8::1"));
+            Assert.Equal(2, groups["2001:DB8::1"].Count);
         }
 
         [Fact]
@@ -254,6 +258,8 @@ namespace DomainDetective.Tests {
             Assert.Single(groups);
             Assert.Equal(2, groups.First().Value.Count);
             Assert.Equal(IPAddress.Parse("fe80::1%2").ToString(), groups.Keys.First());
+            Assert.True(groups.ContainsKey("FE80::1%2"));
+            Assert.Equal(2, groups["FE80::1%2"].Count);
         }
 
         [Fact]
