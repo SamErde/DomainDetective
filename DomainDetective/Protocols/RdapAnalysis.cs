@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Http;
 using System.Linq;
@@ -15,6 +16,14 @@ namespace DomainDetective;
 /// <para>Part of the DomainDetective project.</para>
 public class RdapAnalysis
 {
+    private record CacheEntry(RdapDomain? Domain, DateTimeOffset Expires);
+    private static readonly ConcurrentDictionary<string, CacheEntry> _cache = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>Maximum time cached results are kept.</summary>
+    public TimeSpan CacheDuration { get; set; } = TimeSpan.FromHours(1);
+
+    /// <summary>Clears the shared cache.</summary>
+    public static void ClearCache() => _cache.Clear();
     /// <summary>Domain name returned by the RDAP server.</summary>
     public string DomainName { get; private set; } = string.Empty;
     /// <summary>Registrar display name.</summary>
@@ -57,43 +66,51 @@ public class RdapAnalysis
         NameServers = new List<string>();
         Status = new List<RdapDomainStatus>();
 
-        RdapDomain? rdapResult;
-        if (QueryOverride != null)
+        if (_cache.TryGetValue(domain, out var cached) && cached.Expires > DateTimeOffset.UtcNow)
         {
-            var json = await QueryOverride(domain).ConfigureAwait(false);
-            rdapResult = JsonSerializer.Deserialize<RdapDomain>(json, RdapJson.Options);
+            DomainData = cached.Domain;
         }
         else
         {
-            try
+            RdapDomain? rdapResult;
+            if (QueryOverride != null)
             {
-                rdapResult = await _rdapClient.QueryDomainAsync(domain, cancellationToken).ConfigureAwait(false);
+                var json = await QueryOverride(domain).ConfigureAwait(false);
+                rdapResult = JsonSerializer.Deserialize<RdapDomain>(json, RdapJson.Options);
             }
-            catch (HttpRequestException ex)
+            else
             {
+                try
+                {
+                    rdapResult = await _rdapClient.QueryDomainAsync(domain, cancellationToken).ConfigureAwait(false);
+                }
+                catch (HttpRequestException ex)
+                {
 #if NET6_0_OR_GREATER
-                if (ex.StatusCode == HttpStatusCode.NotFound)
-                {
-                    rdapResult = null;
-                }
-                else
-                {
-                    throw;
-                }
+                    if (ex.StatusCode == HttpStatusCode.NotFound)
+                    {
+                        rdapResult = null;
+                    }
+                    else
+                    {
+                        throw;
+                    }
 #else
-                if (ex.Message.Contains("404"))
-                {
-                    rdapResult = null;
-                }
-                else
-                {
-                    throw;
-                }
+                    if (ex.Message.Contains("404"))
+                    {
+                        rdapResult = null;
+                    }
+                    else
+                    {
+                        throw;
+                    }
 #endif
+                }
             }
-        }
 
-        DomainData = rdapResult;
+            DomainData = rdapResult;
+            _cache[domain] = new CacheEntry(rdapResult, DateTimeOffset.UtcNow.Add(CacheDuration));
+        }
         if (DomainData == null)
         {
             return;
