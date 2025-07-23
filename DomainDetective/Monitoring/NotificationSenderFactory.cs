@@ -1,4 +1,6 @@
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace DomainDetective.Monitoring;
 
@@ -17,6 +19,20 @@ public static class NotificationSenderFactory
         }
 
         return new WebhookNotificationSender(url);
+    }
+
+    /// <summary>
+    /// Creates a notification sender using a custom delegate.
+    /// </summary>
+    /// <param name="handler">Delegate invoked to deliver the message.</param>
+    public static INotificationSender CreateCustom(Func<string, CancellationToken, Task> handler)
+    {
+        if (handler == null)
+        {
+            throw new ArgumentNullException(nameof(handler));
+        }
+
+        return new DelegateNotificationSender(handler);
     }
 
     /// <summary>

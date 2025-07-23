@@ -26,4 +26,11 @@ public class TestNotificationSenderFactory
         Assert.Equal("user", email.Username);
         Assert.Equal("pass", email.Password);
     }
+
+    [Fact]
+    public void CreatesCustomSender()
+    {
+        var sender = NotificationSenderFactory.CreateCustom((_, _) => Task.CompletedTask);
+        Assert.IsType<DelegateNotificationSender>(sender);
+    }
 }
