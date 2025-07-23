@@ -71,4 +71,18 @@ public class TestBgpPrefixMonitor
         Assert.Single(result);
         Assert.Equal(65000, result["1.1.1.0/24"]);
     }
+     
+    [Fact]
+    public void FactoryMethodsSetNotifier()
+    {
+        var monitor = new BgpPrefixMonitor { Domain = "example.com" };
+        monitor.UseWebhook("https://example.com");
+        Assert.IsType<WebhookNotificationSender>(monitor.Notifier);
+
+        monitor.UseEmail("smtp", 25, false, "from@e.com", "to@e.com");
+        Assert.IsType<EmailNotificationSender>(monitor.Notifier);
+
+        monitor.UseCustom((_, _) => Task.CompletedTask);
+        Assert.IsType<DelegateNotificationSender>(monitor.Notifier);
+    }
 }

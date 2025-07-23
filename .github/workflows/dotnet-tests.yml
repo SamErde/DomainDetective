@@ -57,6 +57,8 @@ jobs:
 
             - name: Upload coverage to Codecov
               uses: codecov/codecov-action@v3
+              if: always()
+              continue-on-error: true
               with:
                   files: '**/coverage.cobertura.xml'
                   fail_ci_if_error: false
@@ -99,6 +101,8 @@ jobs:
 
             - name: Upload coverage to Codecov
               uses: codecov/codecov-action@v3
+              if: always()
+              continue-on-error: true
               with:
                   files: '**/coverage.cobertura.xml'
                   fail_ci_if_error: false
@@ -142,6 +146,8 @@ jobs:
 
             - name: Upload coverage to Codecov
               uses: codecov/codecov-action@v3
+              if: always()
+              continue-on-error: true
               with:
                   files: '**/coverage.cobertura.xml'
                   fail_ci_if_error: false

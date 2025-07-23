@@ -22,7 +22,7 @@ namespace DomainDetective {
     /// that reference an SVG logo file and an optional certificate. This class
     /// validates presence and accessibility of those resources.
     /// </remarks>
-public class BimiAnalysis {
+public partial class BimiAnalysis {
         /// <summary>Gets the concatenated BIMI record text.</summary>
         public string? BimiRecord { get; private set; }
         /// <summary>Gets a value indicating whether a BIMI record was found.</summary>
@@ -76,26 +76,7 @@ public class BimiAnalysis {
         public async Task AnalyzeBimiRecords(IEnumerable<DnsAnswer> dnsResults, InternalLogger logger, CancellationToken cancellationToken = default) {
             await Task.Yield();
 
-            BimiRecord = null;
-            BimiRecordExists = false;
-            StartsCorrectly = false;
-            Location = null;
-            Authority = null;
-            LocationUsesHttps = false;
-            AuthorityUsesHttps = false;
-            DeclinedToPublish = false;
-            InvalidLocation = false;
-            SvgFetched = false;
-            SvgValid = false;
-            SvgInvalidReason = null;
-            SvgSizeValid = false;
-            DimensionsValid = false;
-            ViewBoxValid = false;
-            ValidVmc = false;
-            VmcSignedByKnownRoot = false;
-            VmcContainsLogo = false;
-            VmcCertificate = null;
-            FailureReason = null;
+            ResetState();
 
             if (dnsResults == null) {
                 logger?.WriteVerbose("DNS query returned no results.");
@@ -112,37 +93,7 @@ public class BimiAnalysis {
             BimiRecord = string.Join(" ", recordList.Select(r => r.Data));
             logger.WriteVerbose($"Analyzing BIMI record {BimiRecord}");
 
-            StartsCorrectly = BimiRecord?.StartsWith("v=BIMI1", StringComparison.OrdinalIgnoreCase) == true;
-
-            foreach (var part in (BimiRecord ?? string.Empty).Split(';')) {
-                var kv = part.Split(new[] { '=' }, 2);
-                if (kv.Length != 2) {
-                    continue;
-                }
-
-                var key = kv[0].Trim();
-                var value = kv[1].Trim();
-
-                switch (key) {
-                    case "l":
-                        Location = value;
-                        InvalidLocation = !(value.StartsWith("https://", StringComparison.OrdinalIgnoreCase)
-                            && (value.EndsWith(".svg", StringComparison.OrdinalIgnoreCase)
-                                || value.EndsWith(".svgz", StringComparison.OrdinalIgnoreCase)));
-                        if (InvalidLocation) {
-                            logger?.WriteWarning("Invalid BIMI indicator location {0}", value);
-                        }
-                        break;
-                    case "a":
-                        Authority = value;
-                        break;
-                }
-            }
-
-            LocationUsesHttps = string.IsNullOrEmpty(Location) || Location.StartsWith("https://", StringComparison.OrdinalIgnoreCase);
-            AuthorityUsesHttps = string.IsNullOrEmpty(Authority) || Authority.StartsWith("https://", StringComparison.OrdinalIgnoreCase);
-
-            DeclinedToPublish = string.IsNullOrEmpty(Location) && string.IsNullOrEmpty(Authority);
+            ParseBimiHeader(BimiRecord!, logger);
 
             if (!string.IsNullOrEmpty(Location) && !InvalidLocation) {
                 if (!LocationUsesHttps) {
@@ -181,21 +132,19 @@ public class BimiAnalysis {
             _client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0");
         }
 
-        private HttpClient GetClient(out bool dispose)
+        private (HttpClient client, bool dispose) GetOrCreateClient()
         {
             if (HttpHandlerFactory != null)
             {
-                dispose = true;
-                return new HttpClient(HttpHandlerFactory(), disposeHandler: true);
+                return (new HttpClient(HttpHandlerFactory(), disposeHandler: true), true);
             }
 
-            dispose = false;
-            return _client;
+            return (_client, false);
         }
 
         private async Task<(string? content, int size)> DownloadIndicator(string url, InternalLogger logger, CancellationToken cancellationToken) {
             try {
-                var client = GetClient(out var dispose);
+                var (client, dispose) = GetOrCreateClient();
                 try {
                     using var response = await client.GetAsync(url, cancellationToken);
                 if (!response.IsSuccessStatusCode) {
@@ -236,7 +185,7 @@ public class BimiAnalysis {
 
         private async Task<(bool valid, bool signedByKnownRoot, bool hasLogo)> DownloadAndValidateVmc(string url, InternalLogger logger, CancellationToken cancellationToken) {
             try {
-                var client = GetClient(out var dispose);
+                var (client, dispose) = GetOrCreateClient();
                 try {
                     using var response = await client.GetAsync(url, cancellationToken);
                 if (!response.IsSuccessStatusCode) {
