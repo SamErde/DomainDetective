@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Management.Automation;
 using System.Net.Http;
+using System.Threading.Tasks;
 using DomainDetective;
 using Spectre.Console;
 
@@ -14,7 +15,7 @@ namespace DomainDetective.PowerShell {
     /// </example>
     [Cmdlet(VerbsCommon.New, "DmarcRecord")]
     [OutputType(typeof(string))]
-    public sealed class CmdletNewDmarcRecord : PSCmdlet {
+    public sealed class CmdletNewDmarcRecord : AsyncPSCmdlet {
         /// <summary>Main DMARC policy.</summary>
         [Parameter(Position = 0)]
         [ValidateSet("none", "quarantine", "reject")]
@@ -75,16 +76,17 @@ namespace DomainDetective.PowerShell {
         /// <summary>
         /// Prompts for parameters when <see cref="StepByStep"/> is specified.
         /// </summary>
-        protected override void BeginProcessing() {
+        protected override Task BeginProcessingAsync() {
             if (StepByStep) {
                 PromptForParameters();
             }
+            return Task.CompletedTask;
         }
 
         /// <summary>
         /// Builds and outputs the final DMARC record string.
         /// </summary>
-        protected override void EndProcessing() {
+        protected override async Task EndProcessingAsync() {
             var parts = new List<string> { "v=DMARC1", $"p={Policy}" };
             if (!string.IsNullOrWhiteSpace(SubPolicy)) {
                 parts.Add($"sp={SubPolicy}");
@@ -114,11 +116,11 @@ namespace DomainDetective.PowerShell {
             WriteObject(record);
             AnsiConsole.MarkupLine($"[green]{Markup.Escape(record)}[/]");
             if (Publish) {
-                PublishRecord(record);
+                await PublishRecordAsync(record).ConfigureAwait(false);
             }
         }
 
-        private void PublishRecord(string record) {
+        private async Task PublishRecordAsync(string record) {
             if (DnsApiUrl == null || string.IsNullOrWhiteSpace(DomainName)) {
                 WriteWarning("DnsApiUrl and DomainName are required for publishing.");
                 return;
@@ -129,7 +131,7 @@ namespace DomainDetective.PowerShell {
                     ["domain"] = DomainName,
                     ["record"] = record
                 };
-                var response = client.PostAsync(DnsApiUrl, new FormUrlEncodedContent(data)).GetAwaiter().GetResult();
+                using var response = await client.PostAsync(DnsApiUrl, new FormUrlEncodedContent(data)).ConfigureAwait(false);
                 if (!response.IsSuccessStatusCode) {
                     WriteWarning($"Publish failed: {response.StatusCode}");
                 }
