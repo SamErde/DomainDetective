@@ -52,6 +52,9 @@ internal static class Program {
             config.AddCommand<SearchDomainCommand>("SearchDomain")
                 .WithDescription("Search for available domains")
                 .WithExample(new[] { "SearchDomain", "mykeyword" });
+            config.AddCommand<SearchEngineInfoCommand>("SearchEngineInfo")
+                .WithDescription("Query search engine APIs")
+                .WithExample(new[] { "SearchEngineInfo", "example", "--engine", "google" });
             config.AddCommand<SuggestDomainCommand>("SuggestDomain")
                 .WithDescription("Suggest available domains")
                 .WithExample(new[] { "SuggestDomain", "example.com" });
