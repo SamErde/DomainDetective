@@ -27,6 +27,7 @@ public class PortAvailabilityAnalysis
     public Dictionary<string, PortResult> ServerResults { get; } = new();
     /// <summary>Maximum time to wait for a connection.</summary>
     public TimeSpan Timeout { get; set; } = TimeSpan.FromSeconds(5);
+    internal Func<TcpClient> TcpClientFactory { get; set; } = static () => new TcpClient();
 
     /// <summary>Checks a single host and port.</summary>
     public async Task AnalyzeServer(string host, int port, InternalLogger logger, CancellationToken cancellationToken = default)
@@ -51,35 +52,27 @@ public class PortAvailabilityAnalysis
 
     private async Task<PortResult> CheckPort(string host, int port, InternalLogger logger, CancellationToken token)
     {
-        TcpClient? client = null;
+        using var client = TcpClientFactory();
+        client.SendTimeout = (int)Timeout.TotalMilliseconds;
+        client.ReceiveTimeout = (int)Timeout.TotalMilliseconds;
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(token);
+        cts.CancelAfter(Timeout);
+        var sw = Stopwatch.StartNew();
         try
         {
-            client = new TcpClient();
-            client.SendTimeout = (int)Timeout.TotalMilliseconds;
-            client.ReceiveTimeout = (int)Timeout.TotalMilliseconds;
-            using var cts = CancellationTokenSource.CreateLinkedTokenSource(token);
-            cts.CancelAfter(Timeout);
-            var sw = Stopwatch.StartNew();
-            try
-            {
 #if NET6_0_OR_GREATER
-                await client.ConnectAsync(host, port, cts.Token);
+        await client.ConnectAsync(host, port, cts.Token);
 #else
-                await client.ConnectAsync(host, port).WaitWithCancellation(cts.Token);
+        await client.ConnectAsync(host, port).WaitWithCancellation(cts.Token);
 #endif
-                sw.Stop();
-                return new PortResult { Success = true, Latency = sw.Elapsed };
-            }
-            catch (Exception ex) when (ex is SocketException || ex is OperationCanceledException)
-            {
-                sw.Stop();
-                logger?.WriteVerbose("Port {0}:{1} unreachable - {2}", host, port, ex.Message);
-                return new PortResult { Success = false, Latency = sw.Elapsed };
-            }
+        sw.Stop();
+        return new PortResult { Success = true, Latency = sw.Elapsed };
         }
-        finally
+        catch (Exception ex) when (ex is SocketException || ex is OperationCanceledException)
         {
-            client?.Dispose();
+        sw.Stop();
+        logger?.WriteVerbose("Port {0}:{1} unreachable - {2}", host, port, ex.Message);
+        return new PortResult { Success = false, Latency = sw.Elapsed };
         }
     }
 }
