@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 
 namespace DomainDetective.Tests {
@@ -24,6 +25,31 @@ namespace DomainDetective.Tests {
             health.RdapAnalysis.QueryOverride = _ => Task.FromResult(json);
             await health.QueryRDAP("example.org");
             Assert.Equal("example.org", health.RdapAnalysis.DomainName.ToLowerInvariant());
+        }
+
+        [Fact]
+        public async Task CachedResultReusedUntilExpiration() {
+            RdapAnalysis.ClearCache();
+            int hitCount = 0;
+            string json = "{\"ldhName\":\"example.net\"}";
+            var analysis = new RdapAnalysis {
+                CacheDuration = TimeSpan.FromMilliseconds(500),
+                QueryOverride = _ => { hitCount++; return Task.FromResult(json); }
+            };
+
+            await analysis.Analyze("example.net", new InternalLogger());
+            await analysis.Analyze("example.net", new InternalLogger());
+
+            Assert.Equal(1, hitCount);
+
+            await Task.Delay(600);
+            var analysis2 = new RdapAnalysis {
+                CacheDuration = TimeSpan.FromMilliseconds(500),
+                QueryOverride = _ => { hitCount++; return Task.FromResult(json); }
+            };
+            await analysis2.Analyze("example.net", new InternalLogger());
+
+            Assert.Equal(2, hitCount);
         }
     }
 }

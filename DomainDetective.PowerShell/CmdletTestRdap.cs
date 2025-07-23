@@ -1,4 +1,5 @@
 using DnsClientX;
+using System;
 using System.Management.Automation;
 using System.Threading.Tasks;
 
@@ -21,6 +22,10 @@ namespace DomainDetective.PowerShell {
         [Parameter(Mandatory = false, Position = 1, ParameterSetName = "ServerName")]
         public DnsEndpoint DnsEndpoint = DnsEndpoint.System;
 
+        /// <para>How long RDAP results are cached.</para>
+        [Parameter]
+        public TimeSpan CacheDuration = TimeSpan.FromHours(1);
+
         private InternalLogger _logger;
         private DomainHealthCheck _healthCheck;
 
@@ -30,6 +35,7 @@ namespace DomainDetective.PowerShell {
             var psLogger = new InternalLoggerPowerShell(_logger, WriteVerbose, WriteWarning, WriteDebug, WriteError, WriteProgress, WriteInformation);
             psLogger.ResetActivityIdCounter();
             _healthCheck = new DomainHealthCheck(DnsEndpoint, _logger);
+            _healthCheck.RdapAnalysis.CacheDuration = CacheDuration;
             return Task.CompletedTask;
         }
 
