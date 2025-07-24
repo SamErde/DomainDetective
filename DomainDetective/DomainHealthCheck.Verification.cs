@@ -232,6 +232,7 @@ namespace DomainDetective {
                 DkimValid = dkimValid,
                 HasMxRecord = MXAnalysis?.MxRecordExists ?? false,
                 DnsSecValid = DnsSecAnalysis?.ChainValid ?? false,
+                DnsSecKeyExpiresSoon = DnsSecAnalysis?.KeyExpiresSoon ?? false,
                 IsPublicSuffix = IsPublicSuffix,
                 ExpiryDate = WhoisAnalysis.ExpiryDate,
                 ExpiresSoon = WhoisAnalysis.ExpiresSoon,

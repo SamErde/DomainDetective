@@ -24,12 +24,15 @@ namespace DomainDetective {
     /// </remarks>
     public class DnsSecAnalysis {
         private readonly List<string> _mismatchSummary = new();
+        private readonly List<string> _warnings = new();
 
         /// <summary>
         /// Gets a list describing mismatches encountered while validating the
         /// DNSSEC chain.
         /// </summary>
         public IReadOnlyList<string> MismatchSummary => _mismatchSummary;
+        /// <summary>Collection of warning messages.</summary>
+        public IReadOnlyList<string> Warnings => _warnings;
         /// <summary>Gets the DS records returned for the domain.</summary>
         public IReadOnlyList<string> DsRecords { get; private set; } = new List<string>();
 
@@ -60,8 +63,14 @@ namespace DomainDetective {
         /// <summary>Gets the key tag of the root trust anchor.</summary>
         public int RootKeyTag { get; private set; }
 
-        /// <summary>Threshold for raising RRSIG expiration warnings.</summary>
-        public TimeSpan RrsigExpirationWarningThreshold { get; set; } = TimeSpan.FromDays(14);
+        /// <summary>Threshold for raising key expiration warnings.</summary>
+        public TimeSpan KeyExpirationWarningThreshold { get; set; } = TimeSpan.FromDays(30);
+
+        /// <summary>Indicates whether any key expires soon.</summary>
+        public bool KeyExpiresSoon { get; private set; }
+
+        /// <summary>Expiration date for the root trust anchor.</summary>
+        public DateTimeOffset? RootAnchorExpiration { get; private set; }
 
         /// <summary>
         /// Performs DNSSEC validation for the specified domain.
@@ -82,6 +91,9 @@ namespace DomainDetective {
             var client = _client;
 
             _mismatchSummary.Clear();
+            _warnings.Clear();
+            KeyExpiresSoon = false;
+            RootAnchorExpiration = null;
             bool chainValid = true;
             bool first = true;
             string current = domainName;
@@ -111,9 +123,16 @@ namespace DomainDetective {
                             RrsigInfo sig = ParseRrsig(data);
                             zoneSigInfos.Add(sig);
                             if (sig.Expiration != DateTimeOffset.MinValue &&
-                                sig.Expiration - DateTimeOffset.UtcNow <= RrsigExpirationWarningThreshold) {
+                                sig.Expiration - DateTimeOffset.UtcNow <= KeyExpirationWarningThreshold) {
                                 double days = (sig.Expiration - DateTimeOffset.UtcNow).TotalDays;
-                                logger?.WriteWarning("RRSIG for {0} expires in {1:F0} days", current, Math.Ceiling(days));
+                                string message = string.Format(
+                                    CultureInfo.InvariantCulture,
+                                    "RRSIG for {0} expires in {1:F0} days",
+                                    current,
+                                    Math.Ceiling(days));
+                                logger?.WriteWarning(message);
+                                _warnings.Add(message);
+                                KeyExpiresSoon = true;
                             }
                         }
                     }
@@ -186,12 +205,26 @@ namespace DomainDetective {
                 first = false;
             }
 
-            var anchors = await DownloadTrustAnchors(logger).ConfigureAwait(false);
+            var anchorResult = await DownloadTrustAnchors(logger).ConfigureAwait(false);
+            var anchors = anchorResult.anchors;
+            RootAnchorExpiration = anchorResult.expiration;
             if (anchors.Count > 0 && rootKeyTag == 0) {
                 string[] parts = anchors[0].Split(' ');
                 if (parts.Length > 0 && int.TryParse(parts[0], out int tag)) {
                     rootKeyTag = tag;
                 }
+            }
+
+            if (RootAnchorExpiration.HasValue &&
+                RootAnchorExpiration.Value - DateTimeOffset.UtcNow <= KeyExpirationWarningThreshold) {
+                double days = (RootAnchorExpiration.Value - DateTimeOffset.UtcNow).TotalDays;
+                string message = string.Format(
+                    CultureInfo.InvariantCulture,
+                    "Root trust anchor expires in {0:F0} days",
+                    Math.Ceiling(days));
+                logger?.WriteWarning(message);
+                _warnings.Add(message);
+                KeyExpiresSoon = true;
             }
 
             ChainValid = chainValid;
@@ -539,7 +572,7 @@ namespace DomainDetective {
         /// </summary>
         /// <param name="logger">Optional logger for diagnostics.</param>
         /// <returns>List of DS record strings for the root zone.</returns>
-        public static async Task<IReadOnlyList<string>> DownloadTrustAnchors(InternalLogger logger = null) {
+        public static async Task<(IReadOnlyList<string> anchors, DateTimeOffset? expiration)> DownloadTrustAnchors(InternalLogger logger = null) {
             const string url = "https://data.iana.org/root-anchors/root-anchors.xml";
             string cacheDir = Path.Combine(Path.GetTempPath(), "DomainDetective");
             string cacheFile = Path.Combine(cacheDir, "root-anchors.xml");
@@ -560,30 +593,37 @@ namespace DomainDetective {
                     var cached = File.ReadAllText(cacheFile);
                     return ParseTrustAnchors(cached);
                 }
-                return Array.Empty<string>();
+                return (Array.Empty<string>(), null);
             }
         }
 
-        private static IReadOnlyList<string> ParseTrustAnchors(string xml) {
+        private static (IReadOnlyList<string> anchors, DateTimeOffset? expiration) ParseTrustAnchors(string xml) {
             if (string.IsNullOrWhiteSpace(xml) || !IsXmlWellFormed(xml)) {
-                return Array.Empty<string>();
+                return (Array.Empty<string>(), null);
             }
 
             try {
                 var doc = XDocument.Parse(xml);
                 List<string> anchors = new();
+                DateTimeOffset? earliest = null;
                 foreach (var kd in doc.Descendants("KeyDigest")) {
                     var keyTag = kd.Element("KeyTag")?.Value;
                     var algorithm = kd.Element("Algorithm")?.Value;
                     var digestType = kd.Element("DigestType")?.Value;
                     var digest = kd.Element("Digest")?.Value;
+                    var validUntil = kd.Attribute("validUntil")?.Value;
                     if (!string.IsNullOrEmpty(keyTag) && !string.IsNullOrEmpty(algorithm) && !string.IsNullOrEmpty(digestType) && !string.IsNullOrEmpty(digest)) {
                         anchors.Add($"{keyTag} {algorithm} {digestType} {digest}");
                     }
+                    if (DateTimeOffset.TryParse(validUntil, out var exp)) {
+                        if (earliest == null || exp < earliest) {
+                            earliest = exp;
+                        }
+                    }
                 }
-                return anchors;
+                return (anchors, earliest);
             } catch {
-                return Array.Empty<string>();
+                return (Array.Empty<string>(), null);
             }
         }
 
