@@ -2,22 +2,70 @@ namespace DomainDetective.Tests;
 
 using System.Net;
 using System.Net.Sockets;
+using System.Collections.Generic;
+using System.Threading;
+
+internal sealed class PortReservation {
+    public Mutex Mutex { get; }
+    public SynchronizationContext? Context { get; }
+    public int ThreadId { get; }
+
+    public PortReservation(Mutex mutex, SynchronizationContext? context, int threadId) {
+        Mutex = mutex;
+        Context = context;
+        ThreadId = threadId;
+    }
+}
 
 internal static class PortHelper {
     private static readonly object PortLock = new();
     private static readonly HashSet<int> UsedPorts = new();
+    private static readonly Dictionary<int, PortReservation> Reservations = new();
 
     public static int GetFreePort() {
         lock (PortLock) {
-            int port;
-            do {
+            while (true) {
                 var listener = new TcpListener(IPAddress.Loopback, 0);
                 listener.Start();
-                port = ((IPEndPoint)listener.LocalEndpoint).Port;
+                var port = ((IPEndPoint)listener.LocalEndpoint).Port;
                 listener.Stop();
-            } while (!UsedPorts.Add(port));
 
-            return port;
+                if (!UsedPorts.Add(port)) {
+                    continue;
+                }
+
+                var mutex = new Mutex(false, $"DomainDetective_{port}");
+                if (!mutex.WaitOne(0)) {
+                    mutex.Dispose();
+                    UsedPorts.Remove(port);
+                    continue;
+                }
+
+                Reservations[port] = new PortReservation(
+                    mutex,
+                    SynchronizationContext.Current,
+                    Environment.CurrentManagedThreadId);
+                return port;
+            }
+        }
+    }
+
+    public static void ReleasePort(int port) {
+        lock (PortLock) {
+            if (Reservations.TryGetValue(port, out var reservation)) {
+                if (reservation.ThreadId == Environment.CurrentManagedThreadId) {
+                    reservation.Mutex.ReleaseMutex();
+                } else if (reservation.Context != null && reservation.Context != SynchronizationContext.Current) {
+                    reservation.Context.Send(_ => reservation.Mutex.ReleaseMutex(), null);
+                } else {
+                    reservation.Mutex.ReleaseMutex();
+                }
+
+                reservation.Mutex.Dispose();
+                Reservations.Remove(port);
+            }
+
+            UsedPorts.Remove(port);
         }
     }
 }

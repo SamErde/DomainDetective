@@ -14,9 +14,11 @@ namespace DomainDetective.Tests {
                 throw SkipException.ForSkip("HttpListener not supported");
             }
             using var listener = new HttpListener();
-            var prefix = $"http://localhost:{GetFreePort()}/";
+            var port = GetFreePort();
+            var prefix = $"http://localhost:{port}/";
             listener.Prefixes.Add(prefix);
             listener.Start();
+            PortHelper.ReleasePort(port);
             var pin1 = Convert.ToBase64String(Enumerable.Repeat((byte)1, 32).ToArray());
             var pin2 = Convert.ToBase64String(Enumerable.Repeat((byte)2, 32).ToArray());
             var header = $"pin-sha256=\"{pin1}\"; pin-sha256=\"{pin2}\"; max-age=1000";
@@ -50,9 +52,11 @@ namespace DomainDetective.Tests {
                 throw SkipException.ForSkip("HttpListener not supported");
             }
             using var listener = new HttpListener();
-            var prefix = $"http://localhost:{GetFreePort()}/";
+            var port = GetFreePort();
+            var prefix = $"http://localhost:{port}/";
             listener.Prefixes.Add(prefix);
             listener.Start();
+            PortHelper.ReleasePort(port);
             var header = "pin-sha256=\"invalidbase64\"; max-age=1000";
             var task = Task.Run(async () => {
                 var ctx = await listener.GetContextAsync();
@@ -77,9 +81,11 @@ namespace DomainDetective.Tests {
                 throw SkipException.ForSkip("HttpListener not supported");
             }
             using var listener = new HttpListener();
-            var prefix = $"http://localhost:{GetFreePort()}/";
+            var port = GetFreePort();
+            var prefix = $"http://localhost:{port}/";
             listener.Prefixes.Add(prefix);
             listener.Start();
+            PortHelper.ReleasePort(port);
             var pin1 = Convert.ToBase64String(Enumerable.Repeat((byte)1, 32).ToArray());
             var pin2 = Convert.ToBase64String(Enumerable.Repeat((byte)2, 32).ToArray());
             var header = $"pin-sha256=\"{pin1}\"; pin-sha256=\"{pin2}\"; max-age=10; includeSubDomains";
@@ -107,9 +113,11 @@ namespace DomainDetective.Tests {
                 throw SkipException.ForSkip("HttpListener not supported");
             }
             using var listener = new HttpListener();
-            var prefix = $"http://localhost:{GetFreePort()}/";
+            var port = GetFreePort();
+            var prefix = $"http://localhost:{port}/";
             listener.Prefixes.Add(prefix);
             listener.Start();
+            PortHelper.ReleasePort(port);
             var pin = Convert.ToBase64String(Enumerable.Repeat((byte)6, 32).ToArray());
             var header = $"pin-sha256=\"{pin}\"; max-age=100";
             var task = Task.Run(async () => {
@@ -137,9 +145,11 @@ namespace DomainDetective.Tests {
                 throw SkipException.ForSkip("HttpListener not supported");
             }
             using var listener = new HttpListener();
-            var prefix = $"http://localhost:{GetFreePort()}/";
+            var port = GetFreePort();
+            var prefix = $"http://localhost:{port}/";
             listener.Prefixes.Add(prefix);
             listener.Start();
+            PortHelper.ReleasePort(port);
             var pin1 = Convert.ToBase64String(Enumerable.Repeat((byte)7, 32).ToArray());
             var pin2 = Convert.ToBase64String(Enumerable.Repeat((byte)8, 32).ToArray());
             var header = $"pin-sha256=\"{pin1}\"; pin-sha256=\"{pin2}\"; max-age=200";
@@ -168,9 +178,11 @@ namespace DomainDetective.Tests {
                 throw SkipException.ForSkip("HttpListener not supported");
             }
             using var listener = new HttpListener();
-            var prefix = $"http://localhost:{GetFreePort()}/";
+            var port = GetFreePort();
+            var prefix = $"http://localhost:{port}/";
             listener.Prefixes.Add(prefix);
             listener.Start();
+            PortHelper.ReleasePort(port);
             var task = Task.Run(async () => {
                 var ctx = await listener.GetContextAsync();
                 ctx.Response.StatusCode = 200;
@@ -193,9 +205,11 @@ namespace DomainDetective.Tests {
                 throw SkipException.ForSkip("HttpListener not supported");
             }
             using var listener = new HttpListener();
-            var prefix = $"http://localhost:{GetFreePort()}/";
+            var port = GetFreePort();
+            var prefix = $"http://localhost:{port}/";
             listener.Prefixes.Add(prefix);
             listener.Start();
+            PortHelper.ReleasePort(port);
 
             var pin1 = Convert.ToBase64String(Enumerable.Repeat((byte)9, 32).ToArray());
             var pin2 = Convert.ToBase64String(Enumerable.Repeat((byte)10, 32).ToArray());
@@ -234,9 +248,11 @@ namespace DomainDetective.Tests {
                 throw SkipException.ForSkip("HttpListener not supported");
             }
             using var listener = new HttpListener();
-            var prefix = $"http://localhost:{GetFreePort()}/";
+            var port = GetFreePort();
+            var prefix = $"http://localhost:{port}/";
             listener.Prefixes.Add(prefix);
             listener.Start();
+            PortHelper.ReleasePort(port);
 
             int hitCount = 0;
             var task = Task.Run(async () => {

@@ -135,6 +135,7 @@ namespace DomainDetective.Tests {
             await analysis.Scan("127.0.0.1", new[] { port }, new InternalLogger());
             Assert.False(analysis.Results[port].TcpOpen);
             Assert.False(string.IsNullOrEmpty(analysis.Results[port].Error));
+            PortHelper.ReleasePort(port);
         }
 
         [Fact]
@@ -220,6 +221,7 @@ namespace DomainDetective.Tests {
             } finally {
                 udp.Close();
                 await task;
+                PortHelper.ReleasePort(port);
             }
         }
 

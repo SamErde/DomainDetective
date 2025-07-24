@@ -33,6 +33,7 @@ namespace DomainDetective.Tests {
             await analysis.AnalyzeServer("127.0.0.1", port, new InternalLogger());
             var result = analysis.ServerResults[$"127.0.0.1:{port}"];
             Assert.False(result.Success);
+            PortHelper.ReleasePort(port);
         }
 
         [Fact]

@@ -15,6 +15,7 @@ namespace DomainDetective.Tests {
             var prefix = $"http://localhost:{port}/";
             listener.Prefixes.Add(prefix);
             listener.Start();
+            PortHelper.ReleasePort(port);
             var serverTask = Task.Run(async () => {
                 var ctx = await listener.GetContextAsync();
                 ctx.Response.StatusCode = 200;

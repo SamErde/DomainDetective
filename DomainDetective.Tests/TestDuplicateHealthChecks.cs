@@ -13,9 +13,11 @@ namespace DomainDetective.Tests {
                 throw SkipException.ForSkip("HttpListener not supported");
             }
             using var listener = new HttpListener();
-            var prefix = $"http://localhost:{GetFreePort()}/";
+            var port = GetFreePort();
+            var prefix = $"http://localhost:{port}/";
             listener.Prefixes.Add(prefix);
             listener.Start();
+            PortHelper.ReleasePort(port);
             var pin = Convert.ToBase64String(Enumerable.Repeat((byte)5, 32).ToArray());
             var header = $"pin-sha256=\"{pin}\"; pin-sha256=\"{pin}\"; max-age=123";
             var count = 0;
