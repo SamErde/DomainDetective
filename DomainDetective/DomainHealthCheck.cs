@@ -132,6 +132,12 @@ namespace DomainDetective {
         public SecurityTXTAnalysis SecurityTXTAnalysis { get; private set; } = new SecurityTXTAnalysis();
 
         /// <summary>
+        /// Gets the robots.txt analysis.
+        /// </summary>
+        /// <value>Information parsed from robots.txt.</value>
+        public RobotsTxtAnalysis RobotsTxtAnalysis { get; private set; } = new RobotsTxtAnalysis();
+
+        /// <summary>
         /// Gets the SOA analysis.
         /// </summary>
         /// <value>Start of authority record details.</value>
