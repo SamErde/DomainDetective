@@ -73,6 +73,7 @@ internal sealed class CheckDomainCommand : AsyncCommand<CheckDomainSettings> {
             selected.Count > 0 ? selected.ToArray() : null,
             settings.CheckHttp,
             settings.CheckTakeover,
+            settings.AutodiscoverEndpoints,
             settings.Json,
             settings.Summary,
             settings.SubdomainPolicy,

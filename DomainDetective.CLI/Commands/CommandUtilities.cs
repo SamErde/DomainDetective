@@ -135,12 +135,14 @@ internal static class CommandUtilities {
         var checkHttp = AnsiConsole.Confirm("Perform plain HTTP check?");
         var subPolicy = AnsiConsole.Confirm("Evaluate subdomain policy?");
 
+        var autodiscoverEndpoints = AnsiConsole.Confirm("Show Autodiscover HTTP endpoints?");
+
         var checkTakeover = AnsiConsole.Confirm("Check for takeover CNAMEs?");
-        await RunChecks(domains, checks, checkHttp, checkTakeover, outputJson, summaryOnly, subPolicy, false, null, true, false, null, cancellationToken);
+        await RunChecks(domains, checks, checkHttp, checkTakeover, autodiscoverEndpoints, outputJson, summaryOnly, subPolicy, false, null, true, false, null, cancellationToken);
         return 0;
     }
 
-internal static async Task RunChecks(string[] domains, HealthCheckType[]? checks, bool checkHttp, bool checkTakeover, bool outputJson, bool summaryOnly, bool subdomainPolicy, bool unicodeOutput, int[]? danePorts, bool showProgress, bool skipRevocation, PortScanProfile[]? portScanProfiles, CancellationToken cancellationToken) {
+internal static async Task RunChecks(string[] domains, HealthCheckType[]? checks, bool checkHttp, bool checkTakeover, bool autodiscoverEndpoints, bool outputJson, bool summaryOnly, bool subdomainPolicy, bool unicodeOutput, int[]? danePorts, bool showProgress, bool skipRevocation, PortScanProfile[]? portScanProfiles, CancellationToken cancellationToken) {
         foreach (var domain in domains) {
             var logger = new InternalLogger { IsProgress = showProgress };
             var hc = new DomainHealthCheck(internalLogger: logger) { Verbose = false, UseSubdomainPolicy = subdomainPolicy, UnicodeOutput = unicodeOutput, Progress = showProgress };
@@ -229,6 +231,9 @@ internal static async Task RunChecks(string[] domains, HealthCheckType[]? checks
                     var desc = DomainHealthCheck.GetCheckDescription(check);
                     var header = desc != null ? $"{check} for {domain} - {desc.Summary}" : $"{check} for {domain}";
                     CliHelpers.ShowPropertiesTable(header, data, unicodeOutput);
+                    if (check == HealthCheckType.AUTODISCOVER && autodiscoverEndpoints) {
+                        CliHelpers.ShowPropertiesTable($"AUTODISCOVER ENDPOINTS for {domain}", hc.AutodiscoverHttpAnalysis.Endpoints, unicodeOutput);
+                    }
                 }
             }
             if (checkHttp) {

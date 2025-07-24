@@ -20,6 +20,11 @@ namespace DomainDetective.PowerShell {
         [Parameter(Mandatory = false, Position = 1, ParameterSetName = "ServerName")]
         public DnsEndpoint DnsEndpoint = DnsEndpoint.System;
 
+        /// <para>Include HTTP endpoint results.</para>
+        /// <para>Outputs Autodiscover endpoint analysis.</para>
+        [Parameter]
+        public SwitchParameter IncludeEndpoints;
+
         private InternalLogger _logger;
         private DomainHealthCheck _healthCheck;
 
@@ -43,6 +48,9 @@ namespace DomainDetective.PowerShell {
             _logger.WriteVerbose("Querying Autodiscover for domain: {0}", DomainName);
             await _healthCheck.VerifyAutodiscover(DomainName);
             WriteObject(_healthCheck.AutodiscoverAnalysis);
+            if (IncludeEndpoints) {
+                WriteObject(_healthCheck.AutodiscoverHttpAnalysis.Endpoints, true);
+            }
         }
     }
 }

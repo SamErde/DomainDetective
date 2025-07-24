@@ -12,6 +12,6 @@ public static partial class Program {
         healthCheck.Verbose = false;
         await healthCheck.VerifyAutodiscover("example.com");
         Helpers.ShowPropertiesTable("Autodiscover DNS", healthCheck.AutodiscoverAnalysis);
-        Helpers.ShowPropertiesTable("Autodiscover Endpoints", healthCheck.AutodiscoverAnalysis.Endpoints);
+        Helpers.ShowPropertiesTable("Autodiscover Endpoints", healthCheck.AutodiscoverHttpAnalysis.Endpoints);
     }
 }
