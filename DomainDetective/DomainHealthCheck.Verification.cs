@@ -125,7 +125,7 @@ namespace DomainDetective {
                 [HealthCheckType.OPENRELAY] = () => VerifyOpenRelay(domainName, 25, cancellationToken),
                 [HealthCheckType.OPENRESOLVER] = () => VerifyOpenResolver(domainName, cancellationToken),
                 [HealthCheckType.STARTTLS] = () => VerifySTARTTLS(domainName, 25, cancellationToken),
-                [HealthCheckType.SMTPTLS] = () => VerifySMTPTLS(domainName, cancellationToken),
+                [HealthCheckType.SMTPTLS] = () => VerifySMTPTLS(domainName, 25, cancellationToken),
                 [HealthCheckType.IMAPTLS] = () => VerifyIMAPTLS(domainName, cancellationToken),
                 [HealthCheckType.POP3TLS] = () => VerifyPOP3TLS(domainName, cancellationToken),
                 [HealthCheckType.SMTPBANNER] = () => VerifySMTPBanner(domainName, 25, cancellationToken),
