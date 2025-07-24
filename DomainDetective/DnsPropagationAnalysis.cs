@@ -545,7 +545,7 @@ namespace DomainDetective {
         /// their country and location.
         /// </returns>
         public static Dictionary<string, List<DnsComparisonEntry>> CompareResults(IEnumerable<DnsPropagationResult> results) {
-            var comparison = new Dictionary<string, List<DnsComparisonEntry>>();
+            var comparison = new Dictionary<string, List<DnsComparisonEntry>>(StringComparer.OrdinalIgnoreCase);
             foreach (var res in results.Where(r => r.Success && r.Records != null)) {
                 var normalizedRecords = res.Records
                     .Select(r =>
