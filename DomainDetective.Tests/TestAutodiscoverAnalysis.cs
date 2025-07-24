@@ -25,6 +25,8 @@ namespace DomainDetective.Tests {
             Assert.Equal(443, analysis.SrvPort);
             Assert.True(analysis.AutoconfigCnameExists);
             Assert.Equal("mail.example.com", analysis.AutoconfigTarget);
+            Assert.NotNull(analysis.Endpoints);
+            Assert.Empty(analysis.Endpoints);
         }
 
         [Fact]
@@ -35,6 +37,7 @@ namespace DomainDetective.Tests {
             Assert.False(analysis.SrvRecordExists);
             Assert.False(analysis.AutoconfigCnameExists);
             Assert.False(analysis.AutodiscoverCnameExists);
+            Assert.Empty(analysis.Endpoints);
         }
 
     }

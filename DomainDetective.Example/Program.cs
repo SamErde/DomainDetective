@@ -64,6 +64,7 @@ public static partial class Program {
         await ExampleAnalyseOpenRelay();
         await ExampleAnalyseOpenResolver();
         await ExampleAnalyseSecurityTXT();
+        await ExampleAnalyseAutodiscover();
         await ExampleAnalyseDnsPropagation();
         await ExampleValidateServerAsn();
         await ExampleAnalyseDnsPropagationRegions();
