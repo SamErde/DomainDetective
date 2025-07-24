@@ -22,10 +22,16 @@ namespace DomainDetective.Tests {
                 System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public
             )!;
             prop.SetValue(healthCheck.DnsSecAnalysis, true);
+            var warnProp = typeof(DnsSecAnalysis).GetProperty(
+                "KeyExpiresSoon",
+                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public
+            )!;
+            warnProp.SetValue(healthCheck.DnsSecAnalysis, true);
 
             var summary = healthCheck.BuildSummary();
 
             Assert.True(summary.DnsSecValid);
+            Assert.True(summary.DnsSecKeyExpiresSoon);
 
         }
 

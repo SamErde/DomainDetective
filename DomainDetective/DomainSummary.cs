@@ -47,6 +47,9 @@ namespace DomainDetective {
         /// <summary>True when DNSSEC validation succeeded.</summary>
         public bool DnsSecValid { get; init; }
 
+        /// <summary>True when DNSSEC keys expire soon.</summary>
+        public bool DnsSecKeyExpiresSoon { get; init; }
+
         /// <summary>
         /// Indicates whether the analyzed domain is itself a public suffix as
         /// defined by <see href="https://datatracker.ietf.org/doc/html/rfc8499"/>

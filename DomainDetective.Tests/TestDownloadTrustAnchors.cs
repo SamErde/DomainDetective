@@ -8,8 +8,8 @@ namespace DomainDetective.Tests {
     public class TestDownloadTrustAnchors {
         [Fact]
         public async Task FetchesAnchors() {
-            var anchors = await DnsSecAnalysis.DownloadTrustAnchors();
-            Assert.NotEmpty(anchors);
+            var result = await DnsSecAnalysis.DownloadTrustAnchors();
+            Assert.NotEmpty(result.anchors);
         }
 
         [Fact]
@@ -21,8 +21,8 @@ namespace DomainDetective.Tests {
             File.SetLastWriteTimeUtc(cacheFile, DateTime.UtcNow);
 
             try {
-                var anchors = await DnsSecAnalysis.DownloadTrustAnchors();
-                Assert.Empty(anchors);
+                var result = await DnsSecAnalysis.DownloadTrustAnchors();
+                Assert.Empty(result.anchors);
             } finally {
                 File.Delete(cacheFile);
             }
