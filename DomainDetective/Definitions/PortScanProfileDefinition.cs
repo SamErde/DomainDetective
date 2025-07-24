@@ -7,6 +7,7 @@ namespace DomainDetective;
 /// </summary>
 public static class PortScanProfileDefinition
 {
+    private static readonly object _lock = new();
     /// <summary>Predefined service port profiles.</summary>
     public enum PortScanProfile
     {
@@ -30,12 +31,24 @@ public static class PortScanProfileDefinition
     };
 
     /// <summary>Gets the ports for the given profile.</summary>
-    public static IReadOnlyList<int> GetPorts(PortScanProfile profile) =>
-        ProfilePorts.TryGetValue(profile, out var ports) ? ports : Array.Empty<int>();
+    public static IReadOnlyList<int> GetPorts(PortScanProfile profile)
+    {
+        lock (_lock)
+        {
+            return ProfilePorts.TryGetValue(profile, out var ports)
+                ? ports.AsSpan().ToArray()
+                : Array.Empty<int>();
+        }
+    }
 
     /// <summary>Overrides ports for a profile (tests only).</summary>
-    internal static void OverrideProfilePorts(PortScanProfile profile, int[] ports) =>
-        ProfilePorts[profile] = ports;
+    internal static void OverrideProfilePorts(PortScanProfile profile, int[] ports)
+    {
+        lock (_lock)
+        {
+            ProfilePorts[profile] = ports;
+        }
+    }
 
     /// <summary>Default port list.</summary>
     public static IReadOnlyList<int> DefaultPorts => _topPorts;
