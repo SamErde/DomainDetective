@@ -450,6 +450,10 @@ namespace DomainDetective {
         /// <param name="url">Optional URL to fetch the list from.</param>
         /// <param name="force">Ignore the cache and download fresh data.</param>
         public async Task RefreshPublicSuffixListAsync(string url = DefaultPublicSuffixListUrl, bool force = false) {
+            if (string.IsNullOrEmpty(CacheDirectory)) {
+                throw new InvalidOperationException("CacheDirectory cannot be null or empty.");
+            }
+
             Directory.CreateDirectory(CacheDirectory);
             var cacheFile = Path.Combine(CacheDirectory, "public_suffix_list.dat");
 

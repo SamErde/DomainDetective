@@ -39,5 +39,12 @@ namespace DomainDetective.Tests {
                 Directory.Delete(dir, true);
             }
         }
+
+        [Fact]
+        public async Task ThrowsIfCacheDirectoryEmpty() {
+            var hc = new DomainHealthCheck { CacheDirectory = string.Empty };
+            await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+                await hc.RefreshPublicSuffixListAsync(force: true));
+        }
     }
 }
