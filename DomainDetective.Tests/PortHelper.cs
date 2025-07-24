@@ -5,10 +5,16 @@ using System.Net.Sockets;
 using System.Collections.Generic;
 using System.Threading;
 
+internal sealed class PortReservation {
+    public required Mutex Mutex { get; init; }
+    public SynchronizationContext? Context { get; init; }
+    public int ThreadId { get; init; }
+}
+
 internal static class PortHelper {
     private static readonly object PortLock = new();
     private static readonly HashSet<int> UsedPorts = new();
-    private static readonly Dictionary<int, Mutex> Mutexes = new();
+    private static readonly Dictionary<int, PortReservation> Reservations = new();
 
     public static int GetFreePort() {
         lock (PortLock) {
@@ -29,7 +35,11 @@ internal static class PortHelper {
                     continue;
                 }
 
-                Mutexes[port] = mutex;
+                Reservations[port] = new PortReservation {
+                    Mutex = mutex,
+                    Context = SynchronizationContext.Current,
+                    ThreadId = Environment.CurrentManagedThreadId
+                };
                 return port;
             }
         }
@@ -37,10 +47,17 @@ internal static class PortHelper {
 
     public static void ReleasePort(int port) {
         lock (PortLock) {
-            if (Mutexes.TryGetValue(port, out var mutex)) {
-                mutex.ReleaseMutex();
-                mutex.Dispose();
-                Mutexes.Remove(port);
+            if (Reservations.TryGetValue(port, out var reservation)) {
+                if (reservation.ThreadId == Environment.CurrentManagedThreadId) {
+                    reservation.Mutex.ReleaseMutex();
+                } else if (reservation.Context != null && reservation.Context != SynchronizationContext.Current) {
+                    reservation.Context.Send(_ => reservation.Mutex.ReleaseMutex(), null);
+                } else {
+                    reservation.Mutex.ReleaseMutex();
+                }
+
+                reservation.Mutex.Dispose();
+                Reservations.Remove(port);
             }
 
             UsedPorts.Remove(port);
