@@ -156,6 +156,9 @@ internal static async Task RunChecks(string[] domains, HealthCheckType[]? checks
                         if (e.ProgressActivity == "PortScan" && e.ProgressTotalSteps.HasValue && e.ProgressCurrentSteps.HasValue) {
                             portTask ??= ctx.AddTask($"Port scan for {domain}", maxValue: e.ProgressTotalSteps.Value);
                             portTask.Value = e.ProgressCurrentSteps.Value;
+                            if (!string.IsNullOrEmpty(e.ProgressCurrentOperation)) {
+                                portTask.Description = $"Port {e.ProgressCurrentOperation}";
+                            }
                         } else if (e.ProgressActivity == "HealthCheck" && e.ProgressTotalSteps.HasValue && e.ProgressCurrentSteps.HasValue) {
                             hcTask ??= ctx.AddTask($"Health checks for {domain}", maxValue: e.ProgressTotalSteps.Value);
                             hcTask.Value = e.ProgressCurrentSteps.Value;
