@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
-namespace DomainDetective;
+namespace DomainDetective {
 
 /// <summary>
 /// Performs Autodiscover endpoint checks over HTTP/HTTPS.
@@ -113,4 +113,5 @@ public class AutodiscoverHttpAnalysis {
             XmlValid = valid
         };
     }
+}
 }
