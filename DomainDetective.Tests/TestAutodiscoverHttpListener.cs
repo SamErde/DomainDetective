@@ -21,8 +21,10 @@ public class TestAutodiscoverHttpListener {
             var uri = request.RequestUri!;
             var builder = new UriBuilder(uri) {
                 Scheme = "http",
+                Host = "localhost",
                 Port = uri.Port
             };
+            request.Headers.Host = "localhost";
             request.RequestUri = builder.Uri;
             return base.SendAsync(request, cancellationToken);
         }
@@ -35,7 +37,7 @@ public class TestAutodiscoverHttpListener {
         }
         using var listener = new HttpListener();
         var port = PortHelper.GetFreePort();
-        var prefix = $"http://*:{port}/autodiscover/";
+        var prefix = $"http://localhost:{port}/autodiscover/";
         listener.Prefixes.Add(prefix);
         listener.Start();
         PortHelper.ReleasePort(port);
@@ -49,7 +51,7 @@ public class TestAutodiscoverHttpListener {
 
         try {
             var analysis = new AutodiscoverHttpAnalysis {
-                HttpHandlerFactory = () => new RewriteHandler(new HttpClientHandler())
+                HttpHandlerFactory = () => new RewriteHandler(new HttpClientHandler { AllowAutoRedirect = false })
             };
             await analysis.Analyze($"localhost:{port}", new InternalLogger());
             Assert.Single(analysis.Endpoints);
@@ -71,7 +73,7 @@ public class TestAutodiscoverHttpListener {
         }
         using var listener = new HttpListener();
         var port = PortHelper.GetFreePort();
-        var prefix = $"http://*:{port}/autodiscover/";
+        var prefix = $"http://localhost:{port}/autodiscover/";
         listener.Prefixes.Add(prefix);
         listener.Start();
         PortHelper.ReleasePort(port);
@@ -89,7 +91,7 @@ public class TestAutodiscoverHttpListener {
 
         try {
             var analysis = new AutodiscoverHttpAnalysis {
-                HttpHandlerFactory = () => new RewriteHandler(new HttpClientHandler())
+                HttpHandlerFactory = () => new RewriteHandler(new HttpClientHandler { AllowAutoRedirect = false })
             };
             await analysis.Analyze($"localhost:{port}", new InternalLogger());
             Assert.Single(analysis.Endpoints);
@@ -108,7 +110,7 @@ public class TestAutodiscoverHttpListener {
         var port = PortHelper.GetFreePort();
         PortHelper.ReleasePort(port);
         var analysis = new AutodiscoverHttpAnalysis {
-            HttpHandlerFactory = () => new RewriteHandler(new HttpClientHandler())
+            HttpHandlerFactory = () => new RewriteHandler(new HttpClientHandler { AllowAutoRedirect = false })
         };
         await analysis.Analyze($"localhost:{port}", new InternalLogger());
         Assert.Equal(4, analysis.Endpoints.Count);
