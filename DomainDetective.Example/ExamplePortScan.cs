@@ -11,7 +11,7 @@ public static partial class Program
     public static async Task ExamplePortScan()
     {
         var analysis = new PortScanAnalysis { Timeout = TimeSpan.FromSeconds(1) };
-        await analysis.Scan("scanme.nmap.org", new[] { 22, 80 }, new InternalLogger());
+        await analysis.Scan("scanme.nmap.org", PortScanProfileDefinition.PortScanProfile.RADIUS, new InternalLogger());
         Helpers.ShowPropertiesTable("Port Scan Results", analysis.Results);
     }
 }
