@@ -17,6 +17,7 @@ namespace DomainDetective.CLI;
 /// </summary>
 internal static class CommandUtilities {
     internal static readonly string[] CheckNames = Enum.GetNames<HealthCheckType>();
+    internal static readonly string[] PortProfileNames = Enum.GetNames<PortScanProfile>();
 
     [RequiresDynamicCode("Calls System.Text.Json.JsonSerializer.Serialize<TValue>(TValue, JsonSerializerOptions)")]
     [RequiresUnreferencedCode("Calls System.Text.Json.JsonSerializer.Serialize<TValue>(TValue, JsonSerializerOptions)")]

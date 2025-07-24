@@ -23,7 +23,8 @@ internal static class Program {
             config.AddCommand<CheckDomainCommand>("check")
                 .WithDescription("Run domain health checks")
                 .WithExample(new[] { "check", "example.com", "--json" })
-                .WithExample(new[] { "check", "example.com", "--checks", "autodiscover" });
+                .WithExample(new[] { "check", "example.com", "--checks", "autodiscover" })
+                .WithExample(new[] { "check", "example.com", "--port-profiles", "radius" });
             config.AddCommand<AnalyzeMessageHeaderCommand>("AnalyzeMessageHeader")
                 .WithDescription("Analyze message header")
                 .WithExample(new[] { "AnalyzeMessageHeader", "--file", "./headers.txt", "--json" });

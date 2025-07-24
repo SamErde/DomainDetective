@@ -21,4 +21,12 @@ public class TestPortScanProfileDefinition
         Assert.Contains(9999, ntp);
         PortScanProfileDefinition.OverrideProfilePorts(PortScanProfileDefinition.PortScanProfile.NTP, new[] { 123 });
     }
+
+    [Fact]
+    public void IncludesRadiusPorts()
+    {
+        var ports = PortScanProfileDefinition.GetPorts(PortScanProfileDefinition.PortScanProfile.RADIUS);
+        Assert.Contains(1812, ports);
+        Assert.Contains(1813, ports);
+    }
 }
