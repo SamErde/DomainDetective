@@ -23,6 +23,10 @@ internal sealed class CheckDomainSettings : CommandSettings {
     [CommandOption("--check-takeover")]
     public bool CheckTakeover { get; set; }
 
+    /// <summary>Output Autodiscover HTTP endpoints.</summary>
+    [CommandOption("--autodiscover-endpoints")]
+    public bool AutodiscoverEndpoints { get; set; }
+
     /// <summary>Show condensed summary instead of full results.</summary>
     [CommandOption("--summary")]
     public bool Summary { get; set; }

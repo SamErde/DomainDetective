@@ -10,4 +10,11 @@ public class TestCheckDomainSettings
         var settings = new CheckDomainSettings();
         Assert.False(settings.CheckTakeover);
     }
+
+    [Fact]
+    public void DefaultAutodiscoverEndpointsOptionFalse()
+    {
+        var settings = new CheckDomainSettings();
+        Assert.False(settings.AutodiscoverEndpoints);
+    }
 }
