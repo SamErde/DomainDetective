@@ -239,6 +239,12 @@ namespace DomainDetective {
         public AutodiscoverAnalysis AutodiscoverAnalysis { get; private set; } = new AutodiscoverAnalysis();
 
         /// <summary>
+        /// Gets the Autodiscover HTTP analysis.
+        /// </summary>
+        /// <value>Results of Autodiscover endpoint checks.</value>
+        public AutodiscoverHttpAnalysis AutodiscoverHttpAnalysis { get; private set; } = new AutodiscoverHttpAnalysis();
+
+        /// <summary>
         /// Gets the HTTP analysis.
         /// </summary>
         /// <value>HTTP endpoint validation results.</value>
