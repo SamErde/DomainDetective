@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Xunit.Sdk;
 
 namespace DomainDetective.Tests {
+    [Collection("HttpListener")]
     public class TestDuplicateHealthChecks {
         [Fact]
         public async Task DuplicatesExecuteOnce() {

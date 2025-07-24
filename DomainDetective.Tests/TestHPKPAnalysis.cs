@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Xunit.Sdk;
 
 namespace DomainDetective.Tests {
+    [Collection("HttpListener")]
     public class TestHPKPAnalysis {
         [Fact]
         public async Task DetectsHeaderAndValidPins() {

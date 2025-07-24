@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Xunit.Sdk;
 
 namespace DomainDetective.Tests {
+    [Collection("HttpListener")]
     public class TestPlainHttpHealthCheck {
         [Fact]
         public async Task VerifyPlainHttpDetectsStatusWithoutHsts() {

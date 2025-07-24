@@ -8,6 +8,7 @@ using Xunit.Sdk;
 
 namespace DomainDetective.Tests;
 
+[Collection("HttpListener")]
 public class TestCmdletNewDmarcRecord {
     [Fact]
     public async Task PublishesRecordSuccessfully() {
