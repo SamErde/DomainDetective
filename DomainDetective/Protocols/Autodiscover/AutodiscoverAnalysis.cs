@@ -1,5 +1,6 @@
 using DnsClientX;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,6 +20,10 @@ namespace DomainDetective {
 
         /// <summary>Optional DNS query override.</summary>
         public Func<string, DnsRecordType, Task<DnsAnswer[]>>? QueryDnsOverride { private get; set; }
+
+        private readonly List<AutodiscoverEndpointResult> _endpoints = new();
+        /// <summary>Results of endpoint checks in the order attempted.</summary>
+        public IReadOnlyList<AutodiscoverEndpointResult> Endpoints => _endpoints;
         /// <summary>Gets a value indicating whether the _autodiscover._tcp SRV record exists.</summary>
         public bool SrvRecordExists { get; private set; }
         /// <summary>Gets the SRV target host if present.</summary>
