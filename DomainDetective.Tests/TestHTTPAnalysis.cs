@@ -9,6 +9,7 @@ using DomainDetective;
 using Xunit.Sdk;
 
 namespace DomainDetective.Tests {
+    [Collection("HttpListener")]
     public class TestHTTPAnalysis {
         [Fact]
         public async Task DetectStatusCodeAndHsts() {

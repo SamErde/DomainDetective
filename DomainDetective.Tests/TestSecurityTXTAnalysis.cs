@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Xunit.Sdk;
 
 namespace DomainDetective.Tests {
+    [Collection("HttpListener")]
     public class TestSecurityTXTAnalysis {
         [Fact]
         public async Task ValidSecurityTxtIsParsed() {

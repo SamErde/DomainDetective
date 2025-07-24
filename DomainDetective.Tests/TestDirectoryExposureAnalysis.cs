@@ -4,6 +4,7 @@ using Xunit.Sdk;
 
 namespace DomainDetective.Tests;
 
+[Collection("HttpListener")]
 public class TestDirectoryExposureAnalysis
 {
     [Fact]

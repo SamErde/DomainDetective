@@ -7,6 +7,7 @@ using Xunit;
 using Xunit.Sdk;
 
 namespace DomainDetective.Tests {
+    [Collection("HttpListener")]
     public class TestMTASTSAnalysis {
         [Fact]
         public void ParseValidPolicy() {
