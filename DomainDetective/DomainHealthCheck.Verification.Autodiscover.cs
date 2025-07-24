@@ -12,6 +12,8 @@ namespace DomainDetective {
             domainName = NormalizeDomain(domainName);
             AutodiscoverAnalysis = new AutodiscoverAnalysis();
             await AutodiscoverAnalysis.Analyze(domainName, DnsConfiguration, _logger, cancellationToken);
+            AutodiscoverHttpAnalysis = new AutodiscoverHttpAnalysis();
+            await AutodiscoverHttpAnalysis.Analyze(domainName, _logger, cancellationToken);
         }
     }
 }
