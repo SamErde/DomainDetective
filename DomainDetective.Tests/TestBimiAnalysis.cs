@@ -309,6 +309,45 @@ namespace DomainDetective.Tests {
             Assert.True(analysis.SvgValid);
         }
 
+        [Fact]
+        public async Task SvgMissingAttributesReported() {
+            var svg = File.ReadAllText(Path.Combine("Data", "bimi-missing-attrs.svg"));
+            var mock = new MockHttpMessageHandler();
+            mock.When("https://example.com/logo.svg").Respond("image/svg+xml", svg);
+
+            var answers = new List<DnsAnswer> {
+                new DnsAnswer {
+                    DataRaw = "v=BIMI1; l=https://example.com/logo.svg",
+                    Type = DnsRecordType.TXT
+                }
+            };
+
+            var analysis = new BimiAnalysis { HttpHandlerFactory = () => mock };
+            await analysis.AnalyzeBimiRecords(answers, new InternalLogger());
+
+            Assert.True(analysis.SvgFetched);
+            Assert.False(analysis.SvgAttributesPresent);
+        }
+
+        [Fact]
+        public async Task SkipDownloadOptionPreventsRetrieval() {
+            var svg = File.ReadAllText(Path.Combine("Data", "bimi-valid.svg"));
+            var mock = new MockHttpMessageHandler();
+            mock.When("https://example.com/logo.svg").Respond("image/svg+xml", svg);
+
+            var answers = new List<DnsAnswer> {
+                new DnsAnswer {
+                    DataRaw = "v=BIMI1; l=https://example.com/logo.svg",
+                    Type = DnsRecordType.TXT
+                }
+            };
+
+            var analysis = new BimiAnalysis { HttpHandlerFactory = () => mock, SkipIndicatorDownload = true };
+            await analysis.AnalyzeBimiRecords(answers, new InternalLogger());
+
+            Assert.False(analysis.SvgFetched);
+        }
+
         private sealed class RedirectMockHandler : DelegatingHandler {
             public RedirectMockHandler(HttpMessageHandler inner)
                 : base(inner) { }

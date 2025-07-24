@@ -21,6 +21,7 @@ namespace DomainDetective {
             SvgSizeValid = false;
             DimensionsValid = false;
             ViewBoxValid = false;
+            SvgAttributesPresent = false;
             ValidVmc = false;
             VmcSignedByKnownRoot = false;
             VmcContainsLogo = false;

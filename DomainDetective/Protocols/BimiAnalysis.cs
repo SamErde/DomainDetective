@@ -53,6 +53,8 @@ public partial class BimiAnalysis {
         public bool DimensionsValid { get; private set; }
         /// <summary>Gets a value indicating whether the SVG viewBox is valid.</summary>
         public bool ViewBoxValid { get; private set; }
+        /// <summary>Gets a value indicating whether required SVG attributes are present.</summary>
+        public bool SvgAttributesPresent { get; private set; }
         /// <summary>Gets a value indicating whether the downloaded VMC is valid.</summary>
         public bool ValidVmc { get; private set; }
         /// <summary>Gets a value indicating whether the VMC certificate is signed by a trusted CA.</summary>
@@ -66,6 +68,9 @@ public partial class BimiAnalysis {
 
         /// <summary>Factory for creating custom HTTP handlers.</summary>
         internal Func<HttpMessageHandler>? HttpHandlerFactory { get; set; }
+
+        /// <summary>Skip downloading the BIMI indicator image.</summary>
+        public bool SkipIndicatorDownload { get; set; }
 
         /// <summary>
         /// Processes BIMI DNS records and populates analysis properties.
@@ -100,13 +105,17 @@ public partial class BimiAnalysis {
                     logger?.WriteWarning("BIMI indicator location does not use HTTPS: {0}", Location);
                 }
 
-                var (svg, size) = await DownloadIndicator(Location, logger, cancellationToken);
-                if (svg != null) {
-                    SvgFetched = true;
-                    SvgValid = ValidateSvg(svg, size, logger);
-                    logger?.WriteVerbose("Successfully downloaded BIMI indicator from {0}", Location);
+                if (!SkipIndicatorDownload) {
+                    var (svg, size) = await DownloadIndicator(Location, logger, cancellationToken);
+                    if (svg != null) {
+                        SvgFetched = true;
+                        SvgValid = ValidateSvg(svg, size, logger);
+                        logger?.WriteVerbose("Successfully downloaded BIMI indicator from {0}", Location);
+                    } else {
+                        logger?.WriteWarning("Failed to download BIMI indicator from {0}", Location);
+                    }
                 } else {
-                    logger?.WriteWarning("Failed to download BIMI indicator from {0}", Location);
+                    logger?.WriteVerbose("Skipping BIMI indicator download");
                 }
             }
 
@@ -255,14 +264,22 @@ public partial class BimiAnalysis {
                     return false;
                 }
 
-                var widthStr = root.Attribute("width")?.Value;
-                var heightStr = root.Attribute("height")?.Value;
+                var widthAttr = root.Attribute("width");
+                var heightAttr = root.Attribute("height");
+                var viewBoxAttr = root.Attribute("viewBox");
+                SvgAttributesPresent = widthAttr != null && heightAttr != null && viewBoxAttr != null;
+                if (!SvgAttributesPresent) {
+                    logger?.WriteWarning("BIMI SVG missing width, height or viewBox");
+                }
+
+                var widthStr = widthAttr?.Value;
+                var heightStr = heightAttr?.Value;
                 DimensionsValid = int.TryParse(widthStr, out var w) && int.TryParse(heightStr, out var h) && w == 64 && h == 64;
                 if (!DimensionsValid) {
                     logger?.WriteWarning("BIMI SVG width and height must be 64x64");
                 }
 
-                var viewBox = root.Attribute("viewBox")?.Value;
+                var viewBox = viewBoxAttr?.Value;
                 ViewBoxValid = viewBox == "0 0 64 64";
                 if (!ViewBoxValid) {
                     logger?.WriteWarning("BIMI SVG viewBox must be '0 0 64 64'");
