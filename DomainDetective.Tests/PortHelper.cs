@@ -8,7 +8,7 @@ using System.Threading;
 internal static class PortHelper {
     private static readonly object PortLock = new();
     private static readonly HashSet<int> UsedPorts = new();
-    private static readonly Dictionary<int, Mutex> Mutexes = new();
+    private static readonly Dictionary<int, Semaphore> Semaphores = new();
 
     public static int GetFreePort() {
         lock (PortLock) {
@@ -22,14 +22,14 @@ internal static class PortHelper {
                     continue;
                 }
 
-                var mutex = new Mutex(false, $"DomainDetective_{port}");
-                if (!mutex.WaitOne(0)) {
-                    mutex.Dispose();
+                var semaphore = new Semaphore(1, 1, $"DomainDetective_{port}", out _);
+                if (!semaphore.WaitOne(0)) {
+                    semaphore.Dispose();
                     UsedPorts.Remove(port);
                     continue;
                 }
 
-                Mutexes[port] = mutex;
+                Semaphores[port] = semaphore;
                 return port;
             }
         }
@@ -37,10 +37,10 @@ internal static class PortHelper {
 
     public static void ReleasePort(int port) {
         lock (PortLock) {
-            if (Mutexes.TryGetValue(port, out var mutex)) {
-                mutex.ReleaseMutex();
-                mutex.Dispose();
-                Mutexes.Remove(port);
+            if (Semaphores.TryGetValue(port, out var semaphore)) {
+                semaphore.Release();
+                semaphore.Dispose();
+                Semaphores.Remove(port);
             }
 
             UsedPorts.Remove(port);
