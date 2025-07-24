@@ -117,7 +117,7 @@ namespace DomainDetective {
                 [HealthCheckType.DNSBL] = () => VerifyDNSBL(domainName, cancellationToken),
                 [HealthCheckType.MTASTS] = () => VerifyMTASTS(domainName, cancellationToken),
                 [HealthCheckType.TLSRPT] = () => VerifyTLSRPT(domainName, cancellationToken),
-                [HealthCheckType.BIMI] = () => VerifyBIMI(domainName, cancellationToken),
+                [HealthCheckType.BIMI] = () => VerifyBIMI(domainName, cancellationToken: cancellationToken),
                 [HealthCheckType.AUTODISCOVER] = () => VerifyAutodiscover(domainName, cancellationToken),
                 [HealthCheckType.CERT] = () => VerifyWebsiteCertificate(domainName, cancellationToken: cancellationToken),
                 [HealthCheckType.SECURITYTXT] = () => VerifySecurityTxtAsync(domainName, cancellationToken),
