@@ -92,6 +92,7 @@ namespace DomainDetective.Tests {
 
             Assert.False(string.IsNullOrEmpty(analysis.FailureReason));
             Assert.False(analysis.SvgFetched);
+            PortHelper.ReleasePort(port);
         }
 
         [Fact]

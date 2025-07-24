@@ -80,6 +80,7 @@ namespace DomainDetective.Tests {
             var prefix = $"http://localhost:{port}/";
             listener.Prefixes.Add(prefix);
             listener.Start();
+            PortHelper.ReleasePort(port);
 
             const string policy = "version: STSv1\nmode: enforce\nmx: mail.example.com\nmax_age: 86400";
             var serverTask = Task.Run(async () => {
@@ -130,6 +131,7 @@ namespace DomainDetective.Tests {
             var prefix = $"http://localhost:{port}/";
             listener.Prefixes.Add(prefix);
             listener.Start();
+            PortHelper.ReleasePort(port);
 
             var serverTask = Task.Run(async () => {
                 var ctx = await listener.GetContextAsync();
@@ -282,7 +284,7 @@ namespace DomainDetective.Tests {
             var prefix = $"http://localhost:{port}/";
             listener.Prefixes.Add(prefix);
             listener.Start();
-
+            PortHelper.ReleasePort(port);
             const string policy = "version: STSv1\nmode: enforce\nmx: mail.example.com\nmax_age: 86400";
             int hitCount = 0;
             var serverTask = Task.Run(async () => {
@@ -336,6 +338,7 @@ namespace DomainDetective.Tests {
             listener.Prefixes.Add(prefix);
             listener.Start();
 
+            PortHelper.ReleasePort(port);
             const string policy = "version: STSv1\nmode: enforce\nmx: mail.example.com\nmax_age: 1";
             int hitCount = 0;
             var serverTask = Task.Run(async () => {

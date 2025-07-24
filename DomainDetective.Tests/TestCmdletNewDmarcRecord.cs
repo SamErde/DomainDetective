@@ -15,9 +15,11 @@ public class TestCmdletNewDmarcRecord {
             throw SkipException.ForSkip("HttpListener not supported");
         }
         using var listener = new HttpListener();
-        var prefix = $"http://localhost:{PortHelper.GetFreePort()}/";
+        var port = PortHelper.GetFreePort();
+        var prefix = $"http://localhost:{port}/";
         listener.Prefixes.Add(prefix);
         listener.Start();
+        PortHelper.ReleasePort(port);
         string? body = null;
         var serverTask = Task.Run(async () => {
             var ctx = await listener.GetContextAsync();
@@ -55,9 +57,11 @@ public class TestCmdletNewDmarcRecord {
             throw SkipException.ForSkip("HttpListener not supported");
         }
         using var listener = new HttpListener();
-        var prefix = $"http://localhost:{PortHelper.GetFreePort()}/";
+        var port2 = PortHelper.GetFreePort();
+        var prefix = $"http://localhost:{port2}/";
         listener.Prefixes.Add(prefix);
         listener.Start();
+        PortHelper.ReleasePort(port2);
         var serverTask = Task.Run(async () => {
             var ctx = await listener.GetContextAsync();
             ctx.Response.StatusCode = 500;

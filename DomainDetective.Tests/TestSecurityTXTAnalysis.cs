@@ -208,14 +208,17 @@ namespace DomainDetective.Tests {
                 throw SkipException.ForSkip("HttpListener not supported");
             }
             while (true) {
-                prefix = $"http://127.0.0.1:{GetFreePort()}/";
+                var port = GetFreePort();
+                prefix = $"http://127.0.0.1:{port}/";
                 var l = new HttpListener();
                 l.Prefixes.Add(prefix);
                 try {
                     l.Start();
+                    PortHelper.ReleasePort(port);
                     return l;
                 } catch (HttpListenerException) {
                     l.Close();
+                    PortHelper.ReleasePort(port);
                 }
             }
         }
