@@ -112,7 +112,7 @@ public class RobotsTxtAnalysis
             var resp = await _client.GetAsync(url, token).ConfigureAwait(false);
             if (resp.IsSuccessStatusCode)
             {
-                return await resp.Content.ReadAsStringAsync(token).ConfigureAwait(false);
+                return await resp.Content.ReadAsStringAsync().ConfigureAwait(false);
             }
         }
         catch (Exception ex)
