@@ -1,5 +1,6 @@
 using DnsClientX;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -27,20 +28,17 @@ namespace DomainDetective.Monitoring {
         public INotificationSender? Notifier { get; set; }
 
         /// <summary>Configure a webhook notification.</summary>
-        public void UseWebhook(string url)
-        {
+        public void UseWebhook(string url) {
             Notifier = NotificationSenderFactory.CreateWebhook(url);
         }
 
         /// <summary>Configure an email notification.</summary>
-        public void UseEmail(string smtpHost, int port, bool useSsl, string from, string to, string? username = null, string? password = null)
-        {
+        public void UseEmail(string smtpHost, int port, bool useSsl, string from, string to, string? username = null, string? password = null) {
             Notifier = NotificationSenderFactory.CreateEmail(smtpHost, port, useSsl, from, to, username, password);
         }
 
         /// <summary>Configure a custom notification handler.</summary>
-        public void UseCustom(Func<string, CancellationToken, Task> handler)
-        {
+        public void UseCustom(Func<string, CancellationToken, Task> handler) {
             Notifier = NotificationSenderFactory.CreateCustom(handler);
         }
 
@@ -54,7 +52,7 @@ namespace DomainDetective.Monitoring {
         public LocationId? Location { get; set; }
 
         /// <summary>Additional user supplied servers.</summary>
-        public List<PublicDnsEntry> CustomServers { get; } = new();
+        public ConcurrentBag<PublicDnsEntry> CustomServers { get; } = new();
 
         /// <summary>Maximum concurrent DNS queries.</summary>
         public int MaxParallelism { get; set; }
