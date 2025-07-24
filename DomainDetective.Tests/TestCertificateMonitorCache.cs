@@ -5,7 +5,7 @@ using Xunit;
 namespace DomainDetective.Tests {
     public class TestCertificateMonitorCache {
         [Fact]
-        public void RemovesExpiredFiles() {
+        public async Task RemovesExpiredFiles() {
             var dir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
             Directory.CreateDirectory(dir);
             var oldFile = Path.Combine(dir, "old.txt");
@@ -19,7 +19,7 @@ namespace DomainDetective.Tests {
                 CacheRetention = TimeSpan.FromDays(1)
             };
             monitor.Start(Array.Empty<string>(), TimeSpan.FromDays(1));
-            monitor.Stop();
+            await monitor.StopAsync();
 
             Assert.False(File.Exists(oldFile));
             Assert.True(File.Exists(newFile));
