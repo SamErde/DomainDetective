@@ -45,6 +45,8 @@ public enum HealthCheckType {
     CERT,
     /// <summary>Check for security.txt presence.</summary>
     SECURITYTXT,
+    /// <summary>Check for robots.txt presence.</summary>
+    ROBOTS,
     /// <summary>Inspect SOA records.</summary>
     SOA,
     /// <summary>Detect open SMTP relay.</summary>

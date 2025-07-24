@@ -107,6 +107,11 @@ public static class CheckDescriptions {
                 "Verify SecurityTXT.",
                 null,
                 "Host a valid security.txt file."),
+            // Verify robots.txt
+            [HealthCheckType.ROBOTS] = new(
+                "Verify robots.txt.",
+                null,
+                "Publish a proper robots.txt file."),
             // Verify SOA Records
             [HealthCheckType.SOA] = new(
                 "Verify SOA records.",
