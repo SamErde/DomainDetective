@@ -3,7 +3,7 @@ Describe 'Test-DaneRecord cmdlet' {
         Import-Module "$PSScriptRoot/../DomainDetective.psd1" -Force
         $job = Start-Job -ScriptBlock {
             Import-Module "$using:PSScriptRoot/../DomainDetective.psd1" -Force
-            Test-TlsDane -DomainName 'example.com' -DnsEndpoint System -Verbose
+            Test-TlsDane -DomainName 'does-not-exist.invalid' -DnsEndpoint System -Verbose
         }
         Start-Sleep -Milliseconds 500
         Stop-Job $job
