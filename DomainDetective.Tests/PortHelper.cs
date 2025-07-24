@@ -6,9 +6,15 @@ using System.Collections.Generic;
 using System.Threading;
 
 internal sealed class PortReservation {
-    public required Mutex Mutex { get; init; }
-    public SynchronizationContext? Context { get; init; }
-    public int ThreadId { get; init; }
+    public Mutex Mutex { get; }
+    public SynchronizationContext? Context { get; }
+    public int ThreadId { get; }
+
+    public PortReservation(Mutex mutex, SynchronizationContext? context, int threadId) {
+        Mutex = mutex;
+        Context = context;
+        ThreadId = threadId;
+    }
 }
 
 internal static class PortHelper {
@@ -35,11 +41,10 @@ internal static class PortHelper {
                     continue;
                 }
 
-                Reservations[port] = new PortReservation {
-                    Mutex = mutex,
-                    Context = SynchronizationContext.Current,
-                    ThreadId = Environment.CurrentManagedThreadId
-                };
+                Reservations[port] = new PortReservation(
+                    mutex,
+                    SynchronizationContext.Current,
+                    Environment.CurrentManagedThreadId);
                 return port;
             }
         }
