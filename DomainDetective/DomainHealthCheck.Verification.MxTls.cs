@@ -24,16 +24,23 @@ namespace DomainDetective {
         /// <summary>
         /// Checks all MX hosts for SMTP TLS configuration.
         /// </summary>
-        public async Task VerifySMTPTLS(string domainName, CancellationToken cancellationToken = default) {
+        public async Task VerifySMTPTLS(string domainName, int port, CancellationToken cancellationToken = default) {
             if (string.IsNullOrWhiteSpace(domainName)) {
                 throw new ArgumentNullException(nameof(domainName));
             }
             domainName = NormalizeDomain(domainName);
             UpdateIsPublicSuffix(domainName);
+            ValidatePort(port);
             var mxRecordsForTls = await DnsConfiguration.QueryDNS(domainName, DnsRecordType.MX, cancellationToken: cancellationToken);
             var tlsHosts = CertificateAnalysis.ExtractMxHosts(mxRecordsForTls);
-            await SmtpTlsAnalysis.AnalyzeServers(tlsHosts, 25, _logger, cancellationToken);
+            await SmtpTlsAnalysis.AnalyzeServers(tlsHosts, port, _logger, cancellationToken);
         }
+
+        /// <summary>
+        /// Checks all MX hosts for SMTP TLS configuration using the default port.
+        /// </summary>
+        public Task VerifySMTPTLS(string domainName, CancellationToken cancellationToken = default)
+            => VerifySMTPTLS(domainName, 25, cancellationToken);
 
         /// <summary>
         /// Checks all MX hosts for IMAP TLS configuration.
