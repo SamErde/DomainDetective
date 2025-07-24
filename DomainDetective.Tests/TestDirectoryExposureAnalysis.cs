@@ -14,9 +14,11 @@ public class TestDirectoryExposureAnalysis
             throw SkipException.ForSkip("HttpListener not supported");
         }
         using var listener = new HttpListener();
-        var prefix = $"http://localhost:{GetFreePort()}/";
+        var port = GetFreePort();
+        var prefix = $"http://localhost:{port}/";
         listener.Prefixes.Add(prefix);
         listener.Start();
+        PortHelper.ReleasePort(port);
         var serverTask = Task.Run(async () =>
         {
             while (listener.IsListening)
@@ -55,9 +57,11 @@ public class TestDirectoryExposureAnalysis
             throw SkipException.ForSkip("HttpListener not supported");
         }
         using var listener = new HttpListener();
-        var prefix = $"http://localhost:{GetFreePort()}/";
+        var port2 = GetFreePort();
+        var prefix = $"http://localhost:{port2}/";
         listener.Prefixes.Add(prefix);
         listener.Start();
+        PortHelper.ReleasePort(port2);
         var serverTask = Task.Run(async () =>
         {
             var ctx = await listener.GetContextAsync();

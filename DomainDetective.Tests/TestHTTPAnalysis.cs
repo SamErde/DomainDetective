@@ -16,9 +16,11 @@ namespace DomainDetective.Tests {
                 throw SkipException.ForSkip("HttpListener not supported");
             }
             using var listener = new HttpListener();
-            var prefix = $"http://localhost:{GetFreePort()}/";
+            var port = GetFreePort();
+            var prefix = $"http://localhost:{port}/";
             listener.Prefixes.Add(prefix);
             listener.Start();
+            PortHelper.ReleasePort(port);
             var serverTask = Task.Run(async () => {
                 var ctx = await listener.GetContextAsync();
                 ctx.Response.StatusCode = 200;
@@ -93,9 +95,11 @@ namespace DomainDetective.Tests {
                 throw SkipException.ForSkip("HttpListener not supported");
             }
             using var listener = new HttpListener();
-            var prefix = $"http://localhost:{GetFreePort()}/";
+            var port = GetFreePort();
+            var prefix = $"http://localhost:{port}/";
             listener.Prefixes.Add(prefix);
             listener.Start();
+            PortHelper.ReleasePort(port);
             var serverTask = Task.Run(async () => {
                 var ctx = await listener.GetContextAsync();
                 ctx.Response.StatusCode = 404;
@@ -117,8 +121,10 @@ namespace DomainDetective.Tests {
         [Fact]
         public async Task UnreachableHostSetsIsReachableFalse() {
             var analysis = new HttpAnalysis();
-            var url = $"http://localhost:{GetFreePort()}/";
+            var port = GetFreePort();
+            var url = $"http://localhost:{port}/";
             await analysis.AnalyzeUrl(url, false, new InternalLogger());
+            PortHelper.ReleasePort(port);
             Assert.False(analysis.IsReachable);
             Assert.False(string.IsNullOrEmpty(analysis.FailureReason));
             Assert.Null(analysis.ProtocolVersion);
@@ -130,9 +136,11 @@ namespace DomainDetective.Tests {
                 throw SkipException.ForSkip("HttpListener not supported");
             }
             using var listener = new HttpListener();
-            var prefix = $"http://localhost:{GetFreePort()}/";
+            var port = GetFreePort();
+            var prefix = $"http://localhost:{port}/";
             listener.Prefixes.Add(prefix);
             listener.Start();
+            PortHelper.ReleasePort(port);
             var serverTask = Task.Run(async () => {
                 var ctx = await listener.GetContextAsync();
                 ctx.Response.StatusCode = 200;
@@ -166,14 +174,18 @@ namespace DomainDetective.Tests {
                 throw SkipException.ForSkip("HttpListener not supported");
             }
             using var listener1 = new HttpListener();
-            var prefix1 = $"http://localhost:{GetFreePort()}/";
+            var port1 = GetFreePort();
+            var prefix1 = $"http://localhost:{port1}/";
             listener1.Prefixes.Add(prefix1);
             listener1.Start();
+            PortHelper.ReleasePort(port1);
 
             using var listener2 = new HttpListener();
-            var prefix2 = $"http://localhost:{GetFreePort()}/";
+            var port2 = GetFreePort();
+            var prefix2 = $"http://localhost:{port2}/";
             listener2.Prefixes.Add(prefix2);
             listener2.Start();
+            PortHelper.ReleasePort(port2);
 
             var task1 = Task.Run(async () => {
                 var ctx = await listener1.GetContextAsync();
@@ -208,9 +220,11 @@ namespace DomainDetective.Tests {
                 throw SkipException.ForSkip("HttpListener not supported");
             }
             using var listener = new HttpListener();
-            var prefix = $"http://localhost:{GetFreePort()}/";
+            var port = GetFreePort();
+            var prefix = $"http://localhost:{port}/";
             listener.Prefixes.Add(prefix);
             listener.Start();
+            PortHelper.ReleasePort(port);
             var serverTask = Task.Run(async () => {
                 var ctx = await listener.GetContextAsync();
                 ctx.Response.StatusCode = 200;
@@ -236,9 +250,11 @@ namespace DomainDetective.Tests {
                 throw SkipException.ForSkip("HttpListener not supported");
             }
             using var listener = new HttpListener();
-            var prefix = $"http://localhost:{GetFreePort()}/";
+            var port = GetFreePort();
+            var prefix = $"http://localhost:{port}/";
             listener.Prefixes.Add(prefix);
             listener.Start();
+            PortHelper.ReleasePort(port);
 
             using var cts = new CancellationTokenSource();
             var serverTask = Task.Run(async () => {
@@ -274,14 +290,18 @@ namespace DomainDetective.Tests {
                 throw SkipException.ForSkip("HttpListener not supported");
             }
             using var listener1 = new HttpListener();
-            var prefix1 = $"http://localhost:{GetFreePort()}/";
+            var port1 = GetFreePort();
+            var prefix1 = $"http://localhost:{port1}/";
             listener1.Prefixes.Add(prefix1);
             listener1.Start();
+            PortHelper.ReleasePort(port1);
 
             using var listener2 = new HttpListener();
-            var prefix2 = $"http://localhost:{GetFreePort()}/";
+            var port2 = GetFreePort();
+            var prefix2 = $"http://localhost:{port2}/";
             listener2.Prefixes.Add(prefix2);
             listener2.Start();
+            PortHelper.ReleasePort(port2);
 
             var task1 = Task.Run(async () => {
                 var ctx = await listener1.GetContextAsync();
@@ -315,9 +335,11 @@ namespace DomainDetective.Tests {
                 throw SkipException.ForSkip("HttpListener not supported");
             }
             using var listener = new HttpListener();
-            var prefix = $"http://localhost:{GetFreePort()}/";
+            var port = GetFreePort();
+            var prefix = $"http://localhost:{port}/";
             listener.Prefixes.Add(prefix);
             listener.Start();
+            PortHelper.ReleasePort(port);
             var tcs = new TaskCompletionSource<object?>();
             var serverTask = Task.Run(async () => {
                 try {
@@ -348,9 +370,11 @@ namespace DomainDetective.Tests {
                 throw SkipException.ForSkip("HttpListener not supported");
             }
             using var listener = new HttpListener();
-            var prefix = $"http://localhost:{GetFreePort()}/";
+            var port = GetFreePort();
+            var prefix = $"http://localhost:{port}/";
             listener.Prefixes.Add(prefix);
             listener.Start();
+            PortHelper.ReleasePort(port);
             var serverTask = Task.Run(async () => {
                 var ctx = await listener.GetContextAsync();
                 ctx.Response.StatusCode = 200;
@@ -381,9 +405,11 @@ namespace DomainDetective.Tests {
                 throw SkipException.ForSkip("HttpListener not supported");
             }
             using var listener = new HttpListener();
-            var prefix = $"http://localhost:{GetFreePort()}/";
+            var port = GetFreePort();
+            var prefix = $"http://localhost:{port}/";
             listener.Prefixes.Add(prefix);
             listener.Start();
+            PortHelper.ReleasePort(port);
             var serverTask = Task.Run(async () => {
                 var ctx = await listener.GetContextAsync();
                 ctx.Response.StatusCode = 200;
@@ -409,9 +435,11 @@ namespace DomainDetective.Tests {
                 throw SkipException.ForSkip("HttpListener not supported");
             }
             using var listener = new HttpListener();
-            var prefix = $"http://localhost:{GetFreePort()}/";
+            var port = GetFreePort();
+            var prefix = $"http://localhost:{port}/";
             listener.Prefixes.Add(prefix);
             listener.Start();
+            PortHelper.ReleasePort(port);
             var serverTask = Task.Run(async () => {
                 var ctx = await listener.GetContextAsync();
                 ctx.Response.StatusCode = 200;
@@ -437,9 +465,11 @@ namespace DomainDetective.Tests {
                 throw SkipException.ForSkip("HttpListener not supported");
             }
             using var listener = new HttpListener();
-            var prefix = $"http://localhost:{GetFreePort()}/";
+            var port = GetFreePort();
+            var prefix = $"http://localhost:{port}/";
             listener.Prefixes.Add(prefix);
             listener.Start();
+            PortHelper.ReleasePort(port);
             var serverTask = Task.Run(async () => {
                 var ctx = await listener.GetContextAsync();
                 ctx.Response.StatusCode = 200;
@@ -463,9 +493,11 @@ namespace DomainDetective.Tests {
                 throw SkipException.ForSkip("HttpListener not supported");
             }
             using var listener = new HttpListener();
-            var prefix = $"http://localhost:{GetFreePort()}/";
+            var port = GetFreePort();
+            var prefix = $"http://localhost:{port}/";
             listener.Prefixes.Add(prefix);
             listener.Start();
+            PortHelper.ReleasePort(port);
             var serverTask = Task.Run(async () => {
                 var ctx = await listener.GetContextAsync();
                 ctx.Response.StatusCode = 200;
@@ -491,9 +523,11 @@ namespace DomainDetective.Tests {
                 throw SkipException.ForSkip("HttpListener not supported");
             }
             using var listener = new HttpListener();
-            var prefix = $"http://localhost:{GetFreePort()}/";
+            var port = GetFreePort();
+            var prefix = $"http://localhost:{port}/";
             listener.Prefixes.Add(prefix);
             listener.Start();
+            PortHelper.ReleasePort(port);
             var serverTask = Task.Run(async () => {
                 var ctx = await listener.GetContextAsync();
                 ctx.Response.StatusCode = 200;
@@ -519,9 +553,11 @@ namespace DomainDetective.Tests {
                 throw SkipException.ForSkip("HttpListener not supported");
             }
             using var listener = new HttpListener();
-            var prefix = $"http://localhost:{GetFreePort()}/";
+            var port = GetFreePort();
+            var prefix = $"http://localhost:{port}/";
             listener.Prefixes.Add(prefix);
             listener.Start();
+            PortHelper.ReleasePort(port);
             var serverTask = Task.Run(async () => {
                 var ctx = await listener.GetContextAsync();
                 ctx.Response.StatusCode = 200;
@@ -546,9 +582,11 @@ namespace DomainDetective.Tests {
                 throw SkipException.ForSkip("HttpListener not supported");
             }
             using var listener = new HttpListener();
-            var prefix = $"http://localhost:{GetFreePort()}/";
+            var port = GetFreePort();
+            var prefix = $"http://localhost:{port}/";
             listener.Prefixes.Add(prefix);
             listener.Start();
+            PortHelper.ReleasePort(port);
             var serverTask = Task.Run(async () => {
                 var ctx = await listener.GetContextAsync();
                 ctx.Response.StatusCode = 200;
@@ -576,9 +614,11 @@ namespace DomainDetective.Tests {
                 throw SkipException.ForSkip("HttpListener not supported");
             }
             using var listener = new HttpListener();
-            var prefix = $"http://localhost:{GetFreePort()}/";
+            var port = GetFreePort();
+            var prefix = $"http://localhost:{port}/";
             listener.Prefixes.Add(prefix);
             listener.Start();
+            PortHelper.ReleasePort(port);
             var serverTask = Task.Run(async () => {
                 var ctx = await listener.GetContextAsync();
                 ctx.Response.StatusCode = 200;
@@ -603,9 +643,11 @@ namespace DomainDetective.Tests {
                 throw SkipException.ForSkip("HttpListener not supported");
             }
             using var listener = new HttpListener();
-            var prefix = $"http://localhost:{GetFreePort()}/";
+            var port = GetFreePort();
+            var prefix = $"http://localhost:{port}/";
             listener.Prefixes.Add(prefix);
             listener.Start();
+            PortHelper.ReleasePort(port);
             var serverTask = Task.Run(async () => {
                 var ctx = await listener.GetContextAsync();
                 ctx.Response.StatusCode = 200;
@@ -634,9 +676,11 @@ namespace DomainDetective.Tests {
                 throw SkipException.ForSkip("HttpListener not supported");
             }
             using var listener = new HttpListener();
-            var prefix = $"http://localhost:{GetFreePort()}/";
+            var port = GetFreePort();
+            var prefix = $"http://localhost:{port}/";
             listener.Prefixes.Add(prefix);
             listener.Start();
+            PortHelper.ReleasePort(port);
             var serverTask = Task.Run(async () => {
                 var ctx = await listener.GetContextAsync();
                 ctx.Response.StatusCode = 200;
@@ -667,9 +711,11 @@ namespace DomainDetective.Tests {
                 throw SkipException.ForSkip("HttpListener not supported");
             }
             using var listener = new HttpListener();
-            var prefix = $"http://localhost:{GetFreePort()}/";
+            var port = GetFreePort();
+            var prefix = $"http://localhost:{port}/";
             listener.Prefixes.Add(prefix);
             listener.Start();
+            PortHelper.ReleasePort(port);
             var serverTask = Task.Run(async () => {
                 var ctx = await listener.GetContextAsync();
                 ctx.Response.StatusCode = 200;
@@ -694,9 +740,11 @@ namespace DomainDetective.Tests {
                 throw SkipException.ForSkip("HttpListener not supported");
             }
             using var listener = new HttpListener();
-            var prefix = $"http://localhost:{GetFreePort()}/";
+            var port = GetFreePort();
+            var prefix = $"http://localhost:{port}/";
             listener.Prefixes.Add(prefix);
             listener.Start();
+            PortHelper.ReleasePort(port);
             var serverTask = Task.Run(async () => {
                 var ctx = await listener.GetContextAsync();
                 ctx.Response.StatusCode = 200;
