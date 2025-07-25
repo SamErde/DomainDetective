@@ -106,6 +106,8 @@ namespace DomainDetective {
                     await _loopTask.ConfigureAwait(false);
                 } catch (TaskCanceledException) {
                     // ignore cancellation
+                } catch (OperationCanceledException) {
+                    // ignore cancellation
                 }
             }
             _timer?.Dispose();
