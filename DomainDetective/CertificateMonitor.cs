@@ -95,7 +95,21 @@ namespace DomainDetective {
 
         /// <summary>Stops periodic monitoring.</summary>
         public void Stop() {
+            StopAsync().GetAwaiter().GetResult();
+        }
+
+        /// <summary>Stops periodic monitoring asynchronously.</summary>
+        public async Task StopAsync() {
             _cts?.Cancel();
+            if (_loopTask != null) {
+                try {
+                    await _loopTask.ConfigureAwait(false);
+                } catch (TaskCanceledException) {
+                    // ignore cancellation
+                } catch (OperationCanceledException) {
+                    // ignore cancellation
+                }
+            }
             _timer?.Dispose();
             _timer = null;
             _cts?.Dispose();
