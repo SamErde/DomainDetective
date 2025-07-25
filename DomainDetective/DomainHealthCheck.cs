@@ -449,6 +449,7 @@ namespace DomainDetective {
             EdnsSupportAnalysis.DnsConfiguration = DnsConfiguration;
             FlatteningServiceAnalysis.DnsConfiguration = DnsConfiguration;
             TakeoverCnameAnalysis.DnsConfiguration = DnsConfiguration;
+            AutodiscoverAnalysis.DnsConfiguration = DnsConfiguration;
 
             _logger.WriteVerbose("DomainHealthCheck initialized.");
             _logger.WriteVerbose("DnsEndpoint: {0}", DnsEndpoint);
