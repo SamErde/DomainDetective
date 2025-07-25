@@ -9,6 +9,7 @@ using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text;
 using System.Globalization;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using System.Xml;
@@ -87,7 +88,7 @@ namespace DomainDetective {
             _client.DefaultRequestHeaders.Add("Accept", "application/dns-json");
         }
 
-        public async Task Analyze(string domainName, InternalLogger logger, DnsConfiguration dnsConfiguration = null) {
+        public async Task Analyze(string domainName, InternalLogger logger, DnsConfiguration dnsConfiguration = null, CancellationToken ct = default) {
             var client = _client;
 
             _mismatchSummary.Clear();
@@ -105,7 +106,9 @@ namespace DomainDetective {
 
             while (true) {
                 var dnskeyUri = $"https://cloudflare-dns.com/dns-query?name={current}&type=DNSKEY&do=1";
-                var dnskeyJson = await client.GetStringAsync(dnskeyUri);
+                using var dnskeyResponse = await client.GetAsync(dnskeyUri, ct).ConfigureAwait(false);
+                dnskeyResponse.EnsureSuccessStatusCode();
+                var dnskeyJson = await dnskeyResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
                 var dnskeyDoc = JsonDocument.Parse(dnskeyJson);
                 bool keyAd = dnskeyDoc.RootElement.TryGetProperty("AD", out var adElem) && adElem.GetBoolean();
 
@@ -138,7 +141,7 @@ namespace DomainDetective {
                     }
                 }
 
-                var dsResult = await FetchDsRecords(current, client);
+                var dsResult = await FetchDsRecords(current, client, ct);
                 dsTtls.Add(dsResult.ttl);
 
                 List<string> currentDsRecords = dsResult.records ?? new List<string>();
@@ -205,7 +208,7 @@ namespace DomainDetective {
                 first = false;
             }
 
-            var anchorResult = await DownloadTrustAnchors(logger).ConfigureAwait(false);
+            var anchorResult = await DownloadTrustAnchors(logger, ct).ConfigureAwait(false);
             var anchors = anchorResult.anchors;
             RootAnchorExpiration = anchorResult.expiration;
             if (anchors.Count > 0 && rootKeyTag == 0) {
@@ -234,9 +237,11 @@ namespace DomainDetective {
             logger?.WriteVerbose("DNSSEC validation for {0}: {1}, chain valid: {2}", domainName, AuthenticData, ChainValid);
         }
 
-        private static async Task<(List<string> records, int ttl, bool ad)> FetchDsRecords(string domain, HttpClient client) {
+        private static async Task<(List<string> records, int ttl, bool ad)> FetchDsRecords(string domain, HttpClient client, CancellationToken ct) {
             var dsUri = $"https://cloudflare-dns.com/dns-query?name={domain}&type=DS&do=1";
-            var dsJson = await client.GetStringAsync(dsUri);
+            using var dsResponse = await client.GetAsync(dsUri, ct).ConfigureAwait(false);
+            dsResponse.EnsureSuccessStatusCode();
+            var dsJson = await dsResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
             var dsDoc = JsonDocument.Parse(dsJson);
             bool ad = dsDoc.RootElement.TryGetProperty("AD", out var adElem) && adElem.GetBoolean();
             List<string> records = new();
@@ -572,22 +577,43 @@ namespace DomainDetective {
         /// </summary>
         /// <param name="logger">Optional logger for diagnostics.</param>
         /// <returns>List of DS record strings for the root zone.</returns>
-        public static async Task<(IReadOnlyList<string> anchors, DateTimeOffset? expiration)> DownloadTrustAnchors(InternalLogger logger = null) {
+        public static async Task<(IReadOnlyList<string> anchors, DateTimeOffset? expiration)> DownloadTrustAnchors(
+            InternalLogger logger = null,
+            CancellationToken cancellationToken = default) {
             const string url = "https://data.iana.org/root-anchors/root-anchors.xml";
             string cacheDir = Path.Combine(Path.GetTempPath(), "DomainDetective");
             string cacheFile = Path.Combine(cacheDir, "root-anchors.xml");
 
+            bool fileCreated = false;
             try {
-                if (File.Exists(cacheFile) && DateTime.UtcNow - File.GetLastWriteTimeUtc(cacheFile) < TimeSpan.FromDays(7)) {
+                if (File.Exists(cacheFile) &&
+                    DateTime.UtcNow - File.GetLastWriteTimeUtc(cacheFile) < TimeSpan.FromDays(7)) {
                     var cached = File.ReadAllText(cacheFile);
                     return ParseTrustAnchors(cached);
                 }
 
                 Directory.CreateDirectory(cacheDir);
-                var xml = await _client.GetStringAsync(url).ConfigureAwait(false);
+#if NET6_0_OR_GREATER
+                using var response = await _client.GetAsync(url, cancellationToken).ConfigureAwait(false);
+                response.EnsureSuccessStatusCode();
+                var xml = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+#else
+                using var response = await _client.GetAsync(url, cancellationToken).ConfigureAwait(false);
+                response.EnsureSuccessStatusCode();
+                var xml = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+#endif
                 File.WriteAllText(cacheFile, xml, Encoding.UTF8);
+                fileCreated = true;
                 return ParseTrustAnchors(xml);
+            } catch (OperationCanceledException) {
+                if (fileCreated && File.Exists(cacheFile)) {
+                    File.Delete(cacheFile);
+                }
+                throw;
             } catch (Exception ex) {
+                if (fileCreated && File.Exists(cacheFile)) {
+                    File.Delete(cacheFile);
+                }
                 logger?.WriteVerbose("Trust anchor download failed: {0}", ex.Message);
                 if (File.Exists(cacheFile)) {
                     var cached = File.ReadAllText(cacheFile);
@@ -645,12 +671,14 @@ namespace DomainDetective {
         /// <param name="domain">Domain name to query.</param>
         /// <param name="type">Record type to validate.</param>
         /// <returns><c>true</c> when the record is signed and validated; otherwise <c>false</c>.</returns>
-        public async Task<bool> ValidateRecord(string domain, DnsRecordType type) {
+        public async Task<bool> ValidateRecord(string domain, DnsRecordType type, CancellationToken ct = default) {
             var client = _client;
 
             var queryUri = $"https://cloudflare-dns.com/dns-query?name={domain}&type={(int)type}&do=1";
-            var response = await client.GetStringAsync(queryUri);
-            using var doc = JsonDocument.Parse(response);
+            using var response = await client.GetAsync(queryUri, ct).ConfigureAwait(false);
+            response.EnsureSuccessStatusCode();
+            var body = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            using var doc = JsonDocument.Parse(body);
             bool ad = doc.RootElement.TryGetProperty("AD", out var adElem) && adElem.GetBoolean();
 
             bool hasSig = false;
