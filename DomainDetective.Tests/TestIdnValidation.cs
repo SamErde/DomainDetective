@@ -32,7 +32,28 @@ public class TestIdnValidation
         var method = typeof(DomainHealthCheck)
             .GetMethod("ValidateHostName", BindingFlags.NonPublic | BindingFlags.Static)!;
         var ex = Assert.Throws<TargetInvocationException>(() => method.Invoke(null, new object[] { "example.123" }));
-        Assert.IsType<ArgumentException>(ex.InnerException);
+        var inner = Assert.IsType<ArgumentException>(ex.InnerException);
+        Assert.Contains("example.123", inner.Message);
+    }
+
+    [Fact]
+    public void ValidateHostNameRejectsPath()
+    {
+        var method = typeof(DomainHealthCheck)
+            .GetMethod("ValidateHostName", BindingFlags.NonPublic | BindingFlags.Static)!;
+        var ex = Assert.Throws<TargetInvocationException>(() => method.Invoke(null, new object[] { "example.com/path" }));
+        var inner = Assert.IsType<ArgumentException>(ex.InnerException);
+        Assert.Contains("example.com/path", inner.Message);
+    }
+
+    [Fact]
+    public void ValidateHostNameRejectsBadPort()
+    {
+        var method = typeof(DomainHealthCheck)
+            .GetMethod("ValidateHostName", BindingFlags.NonPublic | BindingFlags.Static)!;
+        var ex = Assert.Throws<TargetInvocationException>(() => method.Invoke(null, new object[] { "example.com:65536" }));
+        var inner = Assert.IsType<ArgumentException>(ex.InnerException);
+        Assert.Contains("65536", inner.Message);
     }
 
     [Fact]

@@ -287,7 +287,7 @@ namespace DomainDetective {
                 try {
                     hostName = DomainHelper.ValidateIdn(hostName);
                 } catch (ArgumentException) {
-                    throw new ArgumentException("Invalid host name.", nameof(domainName));
+                    throw new ArgumentException($"Invalid host name '{trimmed}'.", nameof(domainName));
                 }
 
                 var rebuilt = portIndex > 0 && trimmed.IndexOf(':') == portIndex
@@ -295,13 +295,13 @@ namespace DomainDetective {
                     : hostName;
 
                 if (!Uri.TryCreate($"http://{rebuilt}", UriKind.Absolute, out uri)) {
-                    throw new ArgumentException("Invalid host name.", nameof(domainName));
+                    throw new ArgumentException($"Invalid host name '{trimmed}'.", nameof(domainName));
                 }
             }
 
             if (!string.IsNullOrEmpty(uri.PathAndQuery) && uri.PathAndQuery != "/" ||
                 !string.IsNullOrEmpty(uri.Fragment)) {
-                throw new ArgumentException("Invalid host name.", nameof(domainName));
+                throw new ArgumentException($"Invalid host name '{trimmed}'.", nameof(domainName));
             }
 
             var host = uri.IdnHost;
@@ -310,14 +310,14 @@ namespace DomainDetective {
                 if (labels.Length == 0 ||
                     !Helpers.DomainHelper.IsValidTld(labels[labels.Length - 1])) {
                     throw new ArgumentException(
-                        "Invalid host name.",
+                        $"Invalid host name '{trimmed}'.",
                         nameof(domainName));
                 }
             }
 
             if (!uri.IsDefaultPort) {
                 if (uri.Port <= 0 || uri.Port > 65535) {
-                    throw new ArgumentException("Invalid port.", nameof(domainName));
+                    throw new ArgumentException($"Invalid port '{uri.Port}'.", nameof(domainName));
                 }
                 return $"{NormalizeDomain(host)}:{uri.Port}";
             }
