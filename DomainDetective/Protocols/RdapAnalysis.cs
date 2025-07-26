@@ -78,8 +78,39 @@ public class RdapAnalysis
             RdapDomain? rdapResult;
             if (QueryOverride != null)
             {
-                var json = await QueryOverride(domain).ConfigureAwait(false);
-                rdapResult = JsonSerializer.Deserialize<RdapDomain>(json, RdapJson.Options);
+                try
+                {
+                    var json = await QueryOverride(domain).ConfigureAwait(false);
+                    rdapResult = JsonSerializer.Deserialize<RdapDomain>(json, RdapJson.Options);
+                }
+                catch (HttpRequestException ex)
+                {
+                    var url = $"{RdapClient.BaseUrl}/domain/{domain}";
+#if NET6_0_OR_GREATER
+                    var codeText = ex.StatusCode.HasValue
+                        ? $"{(int)ex.StatusCode.Value} ({ex.StatusCode})"
+                        : ex.Message;
+                    logger?.WriteError("RDAP request to {0} failed with status {1}", url, codeText);
+                    if (ex.StatusCode == HttpStatusCode.NotFound)
+                    {
+                        rdapResult = null;
+                    }
+                    else
+                    {
+                        throw;
+                    }
+#else
+                    logger?.WriteError("RDAP request to {0} failed: {1}", url, ex.Message);
+                    if (ex.Message.Contains("404"))
+                    {
+                        rdapResult = null;
+                    }
+                    else
+                    {
+                        throw;
+                    }
+#endif
+                }
             }
             else
             {
