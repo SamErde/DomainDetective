@@ -1,13 +1,12 @@
 using System;
 using System.Net;
-using System.Text;
 using System.Threading.Tasks;
-using Xunit.Sdk;
 
 namespace DomainDetective.Tests {
     public class TestRdapAnalysis {
         [Fact]
         public async Task ParsesRdapResponse() {
+            RdapAnalysis.ClearCache();
             const string json = "{\"ldhName\":\"example.com\",\"status\":[\"active\"],\"nameservers\":[{\"ldhName\":\"ns1.example.net\"},{\"ldhName\":\"ns2.example.net\"}],\"events\":[{\"eventAction\":\"registration\",\"eventDate\":\"2000-01-01T00:00:00Z\"},{\"eventAction\":\"expiration\",\"eventDate\":\"2030-01-01T00:00:00Z\"}],\"entities\":[{\"handle\":\"123\",\"roles\":[\"registrar\"],\"vcardArray\":[\"vcard\",[[\"fn\",{},\"text\",\"Registrar Inc\"]]]}]}";
             var analysis = new RdapAnalysis { QueryOverride = _ => Task.FromResult(json) };
             await analysis.Analyze("example.com", new InternalLogger());
@@ -57,6 +56,7 @@ namespace DomainDetective.Tests {
 
         [Fact]
         public async Task NotFoundResponseLogged() {
+            RdapAnalysis.ClearCache();
             var logger = new InternalLogger();
             LogEventArgs? error = null;
             logger.OnErrorMessage += (_, e) => error = e;
@@ -79,6 +79,7 @@ namespace DomainDetective.Tests {
 
         [Fact]
         public async Task ServerErrorThrowsAndLogs() {
+            RdapAnalysis.ClearCache();
             var logger = new InternalLogger();
             LogEventArgs? error = null;
             logger.OnErrorMessage += (_, e) => error = e;
