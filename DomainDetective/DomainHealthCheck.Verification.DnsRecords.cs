@@ -23,7 +23,7 @@ namespace DomainDetective {
                 return;
             }
             DnsSecAnalysis = new DnsSecAnalysis();
-            await DnsSecAnalysis.Analyze(domainName, _logger, DnsConfiguration);
+            await DnsSecAnalysis.Analyze(domainName, _logger, DnsConfiguration, cancellationToken);
         }
 
 
