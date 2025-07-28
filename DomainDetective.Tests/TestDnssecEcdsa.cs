@@ -56,11 +56,25 @@ namespace DomainDetective.Tests {
             }
             if (signature[pos++] != 0x02) { throw new InvalidOperationException(); }
             int rLen = signature[pos++];
+            if (rLen >= 0x80) {
+                int lenBytes = rLen & 0x7F;
+                rLen = 0;
+                for (int i = 0; i < lenBytes; i++) {
+                    rLen = (rLen << 8) | signature[pos++];
+                }
+            }
             byte[] r = new byte[rLen];
             Buffer.BlockCopy(signature, pos, r, 0, rLen);
             pos += rLen;
             if (signature[pos++] != 0x02) { throw new InvalidOperationException(); }
             int sLen = signature[pos++];
+            if (sLen >= 0x80) {
+                int lenBytes = sLen & 0x7F;
+                sLen = 0;
+                for (int i = 0; i < lenBytes; i++) {
+                    sLen = (sLen << 8) | signature[pos++];
+                }
+            }
             byte[] s = new byte[sLen];
             Buffer.BlockCopy(signature, pos, s, 0, sLen);
 

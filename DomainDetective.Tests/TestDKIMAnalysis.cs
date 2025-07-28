@@ -298,5 +298,23 @@ namespace DomainDetective.Tests {
             Assert.Contains("h=sha1:sha256", result.DeprecatedTags);
             Assert.Contains(warnings, w => w.FullMessage.Contains("deprecated"));
         }
+
+        [Fact]
+        public async Task LogsWarningsAcrossInstances() {
+            const string record = "v=DKIM1; g=*; k=rsa; p=QUJD";
+
+            var logger = new InternalLogger();
+            var warnings = new List<LogEventArgs>();
+            logger.OnWarningMessage += (_, e) => warnings.Add(e);
+
+            var first = new DomainHealthCheck(internalLogger: logger);
+            await first.CheckDKIM(record);
+
+            var second = new DomainHealthCheck(internalLogger: logger);
+            await second.CheckDKIM(record);
+
+            var count = warnings.Count(w => w.FullMessage.Contains("deprecated"));
+            Assert.Equal(2, count);
+        }
     }
 }

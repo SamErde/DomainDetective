@@ -12,9 +12,7 @@ namespace DomainDetective.Tests;
 public class TestCmdletNewDmarcRecord {
     [Fact]
     public async Task PublishesRecordSuccessfully() {
-        if (!HttpListener.IsSupported) {
-            throw SkipException.ForSkip("HttpListener not supported");
-        }
+        Skip.If(!HttpListener.IsSupported, "HttpListener not supported");
         using var listener = new HttpListener();
         var port = PortHelper.GetFreePort();
         var prefix = $"http://localhost:{port}/";
@@ -54,9 +52,7 @@ public class TestCmdletNewDmarcRecord {
 
     [Fact]
     public async Task WarnsWhenPublishFails() {
-        if (!HttpListener.IsSupported) {
-            throw SkipException.ForSkip("HttpListener not supported");
-        }
+        Skip.If(!HttpListener.IsSupported, "HttpListener not supported");
         using var listener = new HttpListener();
         var port2 = PortHelper.GetFreePort();
         var prefix = $"http://localhost:{port2}/";

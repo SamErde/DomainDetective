@@ -8,10 +8,11 @@ namespace DomainDetective.Tests {
             var healthCheck = new DomainHealthCheck(DnsEndpoint.CloudflareWireFormat) {
                 Verbose = false
             };
-            await healthCheck.Verify("evotec.pl", [HealthCheckType.DMARC, HealthCheckType.SPF, HealthCheckType.DKIM, HealthCheckType.CAA], ["selector1", "selector2"]);
-            if (healthCheck.DmarcAnalysis.PolicyShort == null) {
-                throw SkipException.ForSkip("DNS queries unavailable");
-            }
+            await healthCheck.Verify(
+                "evotec.pl",
+                [HealthCheckType.DMARC, HealthCheckType.SPF, HealthCheckType.DKIM, HealthCheckType.CAA],
+                ["selector1", "selector2"]);
+            Skip.If(healthCheck.DmarcAnalysis.PolicyShort == null, "DNS queries unavailable");
 
             Assert.Equal(100, healthCheck.DmarcAnalysis.Pct);
             Assert.Equal("reject", healthCheck.DmarcAnalysis.PolicyShort);
