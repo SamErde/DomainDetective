@@ -37,16 +37,15 @@ namespace DomainDetective.Tests {
 
         [Fact]
         public async Task DetectsIpv6TcpAndUdpOpenPorts() {
-            if (!Socket.OSSupportsIPv6) {
-                throw SkipException.ForSkip("IPv6 not supported on this platform");
-            }
+            Skip.If(!Socket.OSSupportsIPv6, "IPv6 not supported on this platform");
             var tcpListener = new TcpListener(IPAddress.IPv6Loopback, 0);
             tcpListener.Start();
             var tcpPort = ((IPEndPoint)tcpListener.LocalEndpoint).Port;
-            if (!await PortScanAnalysis.IsIPv6Reachable("localhost", tcpPort)) {
+            var ipv6Reachable = await PortScanAnalysis.IsIPv6Reachable("localhost", tcpPort);
+            if (!ipv6Reachable) {
                 tcpListener.Stop();
-                throw SkipException.ForSkip("IPv6 not reachable on this platform");
             }
+            Skip.If(!ipv6Reachable, "IPv6 not reachable on this platform");
             var tcpAccept = tcpListener.AcceptTcpClientAsync();
 
             using var udpServer = new UdpClient(new IPEndPoint(IPAddress.IPv6Loopback, 0));
@@ -71,9 +70,7 @@ namespace DomainDetective.Tests {
 
         [Fact]
         public async Task ConfirmsIpv6Reachability() {
-            if (!Socket.OSSupportsIPv6) {
-                throw SkipException.ForSkip("IPv6 not supported on this platform");
-            }
+            Skip.If(!Socket.OSSupportsIPv6, "IPv6 not supported on this platform");
             var listener = new TcpListener(IPAddress.IPv6Loopback, 0);
             listener.Start();
             var port = ((IPEndPoint)listener.LocalEndpoint).Port;
@@ -82,9 +79,7 @@ namespace DomainDetective.Tests {
             try {
                 var reachable = await PortScanAnalysis.IsIPv6Reachable("localhost", port);
                 using var _ = await accept;
-                if (!reachable) {
-                    throw SkipException.ForSkip("IPv6 not reachable on this platform");
-                }
+                Skip.If(!reachable, "IPv6 not reachable on this platform");
                 Assert.True(reachable);
             } finally {
                 listener.Stop();
