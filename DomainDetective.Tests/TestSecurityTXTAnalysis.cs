@@ -205,9 +205,7 @@ namespace DomainDetective.Tests {
         }
 
         private static HttpListener StartListener(out string prefix) {
-            if (!HttpListener.IsSupported) {
-                throw SkipException.ForSkip("HttpListener not supported");
-            }
+            Skip.If(!HttpListener.IsSupported, "HttpListener not supported");
             while (true) {
                 var port = GetFreePort();
                 prefix = $"http://127.0.0.1:{port}/";

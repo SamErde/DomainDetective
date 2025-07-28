@@ -10,9 +10,7 @@ namespace DomainDetective.Tests {
     public class TestHPKPHealthCheck {
         [Fact]
         public async Task VerifyViaHealthCheck() {
-            if (!HttpListener.IsSupported) {
-                throw SkipException.ForSkip("HttpListener not supported");
-            }
+            Skip.If(!HttpListener.IsSupported, "HttpListener not supported");
             using var listener = new HttpListener();
             var port = GetFreePort();
             var prefix = $"http://localhost:{port}/";

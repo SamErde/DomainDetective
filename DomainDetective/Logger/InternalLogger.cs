@@ -83,6 +83,15 @@ namespace DomainDetective {
             IsVerbose = isVerbose;
         }
 
+        /// <summary>
+        /// Clears cached messages to allow duplicates to be logged again.
+        /// </summary>
+        public void ClearLoggedMessages() {
+            lock (_lock) {
+                _loggedMessages.Clear();
+            }
+        }
+
         public void WriteProgress(string activity, string currentOperation, double percentCompleted, int? currentSteps = null, int? totalSteps = null) {
             lock (_lock) {
                 var roundedPercent = (int)Math.Round(percentCompleted);
