@@ -24,8 +24,14 @@ namespace DomainDetective {
                 throw new ArgumentNullException(nameof(domainName));
             }
             domainName = ValidateHostName(domainName);
-            UpdateIsPublicSuffix(domainName);
-            await HttpAnalysis.AnalyzeUrl($"http://{domainName}", false, _logger, cancellationToken: cancellationToken);
+            if (!Uri.TryCreate($"http://{domainName}", UriKind.Absolute, out var uri)) {
+                throw new ArgumentException($"Invalid host name '{domainName}'.", nameof(domainName));
+            }
+
+            var host = ValidateHostName(uri.Host);
+            var hostWithPort = uri.IsDefaultPort ? host : $"{host}:{uri.Port}";
+            UpdateIsPublicSuffix(host);
+            await HttpAnalysis.AnalyzeUrl($"http://{hostWithPort}", false, _logger, cancellationToken: cancellationToken);
         }
     }
 }
