@@ -69,9 +69,17 @@ namespace DomainDetective {
                     var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
                     _cacheDirectory = Path.Combine(home, ".domain-detective");
                 }
+                if (!string.IsNullOrEmpty(_cacheDirectory) && !Directory.Exists(_cacheDirectory)) {
+                    Directory.CreateDirectory(_cacheDirectory);
+                }
                 return _cacheDirectory;
             }
-            set => _cacheDirectory = value;
+            set {
+                _cacheDirectory = value;
+                if (!string.IsNullOrEmpty(_cacheDirectory) && !Directory.Exists(_cacheDirectory)) {
+                    Directory.CreateDirectory(_cacheDirectory);
+                }
+            }
         }
 
         private string? _cacheDirectory;
