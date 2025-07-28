@@ -5,9 +5,27 @@ Describe 'Test-DaneRecord cmdlet' {
             Import-Module "$using:PSScriptRoot/../DomainDetective.psd1" -Force
             Test-TlsDane -DomainName 'does-not-exist.invalid' -DnsEndpoint System -Verbose
         }
-        Start-Sleep -Milliseconds 500
+        $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
+        while ($job.State -eq 'NotStarted' -and $stopwatch.ElapsedMilliseconds -lt 1000) {
+            Start-Sleep -Milliseconds 10
+        }
         Stop-Job $job
         Wait-Job $job
         $job.ChildJobs[0].State | Should -Be 'Stopped'
+    }
+
+    It 'cancels using PowerShell.Stop()' {
+        Import-Module "$PSScriptRoot/../DomainDetective.psd1" -Force
+        $ps = [powershell]::Create()
+        $ps.AddScript("Import-Module '$PSScriptRoot/../DomainDetective.psd1' -Force; Test-TlsDane -DomainName 'does-not-exist.invalid' -DnsEndpoint System -Verbose") | Out-Null
+        $handle = $ps.BeginInvoke()
+        $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
+        while ($ps.InvocationStateInfo.State -eq 'NotStarted' -and $stopwatch.ElapsedMilliseconds -lt 1000) {
+            Start-Sleep -Milliseconds 10
+        }
+        $ps.Stop()
+        $null = $handle.AsyncWaitHandle.WaitOne()
+        $ps.InvocationStateInfo.State | Should -Be 'Stopped'
+        $ps.Dispose()
     }
 }
