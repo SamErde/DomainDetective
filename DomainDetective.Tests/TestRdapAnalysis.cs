@@ -1,5 +1,6 @@
 using System;
 using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace DomainDetective.Tests {
@@ -62,10 +63,14 @@ namespace DomainDetective.Tests {
             logger.OnErrorMessage += (_, e) => error = e;
 
             var analysis = new RdapAnalysis {
+#if NET6_0_OR_GREATER
                 QueryOverride = _ => throw new HttpRequestException(
                     "NotFound",
                     null,
                     HttpStatusCode.NotFound),
+#else
+                QueryOverride = _ => throw new HttpRequestException("404"),
+#endif
                 RdapClient = new RdapClient("http://localhost")
             };
 
@@ -85,10 +90,14 @@ namespace DomainDetective.Tests {
             logger.OnErrorMessage += (_, e) => error = e;
 
             var analysis = new RdapAnalysis {
+#if NET6_0_OR_GREATER
                 QueryOverride = _ => throw new HttpRequestException(
                     "ServerError",
                     null,
                     HttpStatusCode.InternalServerError),
+#else
+                QueryOverride = _ => throw new HttpRequestException("500"),
+#endif
                 RdapClient = new RdapClient("http://localhost")
             };
 
