@@ -13,11 +13,12 @@ namespace DomainDetective {
         /// <param name="daneRecord">TLSA record text.</param>
         /// <param name="cancellationToken">Token to cancel the operation.</param>
         public async Task CheckDANE(string daneRecord, CancellationToken cancellationToken = default) {
+            cancellationToken.ThrowIfCancellationRequested();
             await DaneAnalysis.AnalyzeDANERecords(new List<DnsAnswer> {
                 new DnsAnswer {
                     DataRaw = daneRecord
                 }
-            }, _logger);
+            }, _logger, cancellationToken);
         }
 
         /// <summary>
@@ -26,10 +27,11 @@ namespace DomainDetective {
         /// <param name="daneRecords">Collection of TLSA record texts.</param>
         /// <param name="cancellationToken">Token to cancel the operation.</param>
         public async Task CheckDANE(IEnumerable<string> daneRecords, CancellationToken cancellationToken = default) {
+            cancellationToken.ThrowIfCancellationRequested();
             var answers = daneRecords.Select(record => new DnsAnswer {
                 DataRaw = record
             }).ToList();
-            await DaneAnalysis.AnalyzeDANERecords(answers, _logger);
+            await DaneAnalysis.AnalyzeDANERecords(answers, _logger, cancellationToken);
         }
 
         /// <summary>
@@ -65,7 +67,8 @@ namespace DomainDetective {
             }
 
             if (allDaneRecords.Count > 0) {
-                await DaneAnalysis.AnalyzeDANERecords(allDaneRecords, _logger);
+                cancellationToken.ThrowIfCancellationRequested();
+                await DaneAnalysis.AnalyzeDANERecords(allDaneRecords, _logger, cancellationToken);
             } else {
                 _logger.WriteWarning("No DANE records found.");
             }
@@ -98,7 +101,8 @@ namespace DomainDetective {
             }
 
             if (allDaneRecords.Count > 0) {
-                await DaneAnalysis.AnalyzeDANERecords(allDaneRecords, _logger);
+                cancellationToken.ThrowIfCancellationRequested();
+                await DaneAnalysis.AnalyzeDANERecords(allDaneRecords, _logger, cancellationToken);
             } else {
                 _logger.WriteWarning("No DANE records found.");
             }
@@ -172,7 +176,8 @@ namespace DomainDetective {
 
             }
             if (allDaneRecords.Count > 0) {
-                await DaneAnalysis.AnalyzeDANERecords(allDaneRecords, _logger);
+                cancellationToken.ThrowIfCancellationRequested();
+                await DaneAnalysis.AnalyzeDANERecords(allDaneRecords, _logger, cancellationToken);
             } else {
                 _logger.WriteWarning("No DANE records found.");
             }

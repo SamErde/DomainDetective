@@ -150,9 +150,12 @@ internal static async Task RunChecks(string[] domains, HealthCheckType[]? checks
             hc.CertificateAnalysis.SkipRevocation = skipRevocation;
 
             if (showProgress) {
-                await AnsiConsole.Progress().StartAsync(async ctx => {
-                    ProgressTask? portTask = null;
-                    ProgressTask? hcTask = null;
+                ProgressContext? ctxRef = null;
+                try {
+                    await AnsiConsole.Progress().StartAsync(async ctx => {
+                        ctxRef = ctx;
+                        ProgressTask? portTask = null;
+                        ProgressTask? hcTask = null;
                     void Handler(object? _, LogEventArgs e) {
                         if (e.ProgressActivity == "PortScan" && e.ProgressTotalSteps.HasValue && e.ProgressCurrentSteps.HasValue) {
                             portTask ??= ctx.AddTask($"Port scan for {domain}", maxValue: e.ProgressTotalSteps.Value);
@@ -178,7 +181,10 @@ internal static async Task RunChecks(string[] domains, HealthCheckType[]? checks
                     } finally {
                         logger.OnProgressMessage -= Handler;
                     }
-                });
+                    });
+                } finally {
+                    ctxRef?.Dispose();
+                }
             } else {
                 await hc.Verify(domain, checks, null, null, danePorts, portScanProfiles, cancellationToken);
                 if (checkHttp) {

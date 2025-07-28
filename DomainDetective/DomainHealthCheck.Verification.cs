@@ -164,7 +164,7 @@ namespace DomainDetective {
                     await action();
                 } else {
                     _logger.WriteError("Unknown health check type: {0}", healthCheckType);
-                    throw new NotSupportedException($"Health check type not implemented: {healthCheckType}");
+                    throw new NotSupportedException($"Health check type not implemented: {(int)healthCheckType}");
                 }
 
                 processedChecks++;
