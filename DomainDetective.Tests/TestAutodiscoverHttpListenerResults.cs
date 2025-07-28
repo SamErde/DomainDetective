@@ -31,9 +31,7 @@ public class TestAutodiscoverHttpListenerResults {
 
     [Fact]
     public async Task FirstUrlReturnsProperOrdering() {
-        if (!HttpListener.IsSupported) {
-            throw SkipException.ForSkip("HttpListener not supported");
-        }
+        Skip.If(!HttpListener.IsSupported, "HttpListener not supported");
         using var listener = new HttpListener();
         var port = PortHelper.GetFreePort();
         var prefix = $"http://localhost:{port}/autodiscover/";
@@ -68,9 +66,7 @@ public class TestAutodiscoverHttpListenerResults {
 
     [Fact]
     public async Task RedirectResultContainsEntireChain() {
-        if (!HttpListener.IsSupported) {
-            throw SkipException.ForSkip("HttpListener not supported");
-        }
+        Skip.If(!HttpListener.IsSupported, "HttpListener not supported");
         using var listener = new HttpListener();
         var port = PortHelper.GetFreePort();
         var prefix = $"http://localhost:{port}/autodiscover/";

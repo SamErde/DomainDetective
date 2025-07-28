@@ -53,12 +53,16 @@ internal static class PortHelper {
     public static void ReleasePort(int port) {
         lock (PortLock) {
             if (Reservations.TryGetValue(port, out var reservation)) {
-                if (reservation.ThreadId == Environment.CurrentManagedThreadId) {
-                    reservation.Mutex.ReleaseMutex();
-                } else if (reservation.Context != null && reservation.Context != SynchronizationContext.Current) {
-                    reservation.Context.Send(_ => reservation.Mutex.ReleaseMutex(), null);
-                } else {
-                    reservation.Mutex.ReleaseMutex();
+                try {
+                    if (reservation.ThreadId == Environment.CurrentManagedThreadId) {
+                        reservation.Mutex.ReleaseMutex();
+                    } else if (reservation.Context != null && reservation.Context != SynchronizationContext.Current) {
+                        reservation.Context.Send(_ => reservation.Mutex.ReleaseMutex(), null);
+                    } else if (reservation.Context != null) {
+                        reservation.Context.Post(_ => reservation.Mutex.ReleaseMutex(), null);
+                    }
+                } catch (ApplicationException) {
+                    // Ignore if mutex ownership has been lost
                 }
 
                 reservation.Mutex.Dispose();

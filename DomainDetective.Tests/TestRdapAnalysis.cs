@@ -1,10 +1,13 @@
 using System;
+using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace DomainDetective.Tests {
     public class TestRdapAnalysis {
         [Fact]
         public async Task ParsesRdapResponse() {
+            RdapAnalysis.ClearCache();
             const string json = "{\"ldhName\":\"example.com\",\"status\":[\"active\"],\"nameservers\":[{\"ldhName\":\"ns1.example.net\"},{\"ldhName\":\"ns2.example.net\"}],\"events\":[{\"eventAction\":\"registration\",\"eventDate\":\"2000-01-01T00:00:00Z\"},{\"eventAction\":\"expiration\",\"eventDate\":\"2030-01-01T00:00:00Z\"}],\"entities\":[{\"handle\":\"123\",\"roles\":[\"registrar\"],\"vcardArray\":[\"vcard\",[[\"fn\",{},\"text\",\"Registrar Inc\"]]]}]}";
             var analysis = new RdapAnalysis { QueryOverride = _ => Task.FromResult(json) };
             await analysis.Analyze("example.com", new InternalLogger());
@@ -50,6 +53,60 @@ namespace DomainDetective.Tests {
             await analysis2.Analyze("example.net", new InternalLogger());
 
             Assert.Equal(2, hitCount);
+        }
+
+        [Fact]
+        public async Task NotFoundResponseLogged() {
+            RdapAnalysis.ClearCache();
+            var logger = new InternalLogger();
+            LogEventArgs? error = null;
+            logger.OnErrorMessage += (_, e) => error = e;
+
+            var analysis = new RdapAnalysis {
+#if NET6_0_OR_GREATER
+                QueryOverride = _ => throw new HttpRequestException(
+                    "NotFound",
+                    null,
+                    HttpStatusCode.NotFound),
+#else
+                QueryOverride = _ => throw new HttpRequestException("404"),
+#endif
+                RdapClient = new RdapClient("http://localhost")
+            };
+
+            await analysis.Analyze("example.com", logger);
+
+            Assert.Null(analysis.DomainData);
+            Assert.NotNull(error);
+            Assert.Contains("404", error!.FullMessage);
+            Assert.Contains("http://localhost/domain/example.com", error.FullMessage);
+        }
+
+        [Fact]
+        public async Task ServerErrorThrowsAndLogs() {
+            RdapAnalysis.ClearCache();
+            var logger = new InternalLogger();
+            LogEventArgs? error = null;
+            logger.OnErrorMessage += (_, e) => error = e;
+
+            var analysis = new RdapAnalysis {
+#if NET6_0_OR_GREATER
+                QueryOverride = _ => throw new HttpRequestException(
+                    "ServerError",
+                    null,
+                    HttpStatusCode.InternalServerError),
+#else
+                QueryOverride = _ => throw new HttpRequestException("500"),
+#endif
+                RdapClient = new RdapClient("http://localhost")
+            };
+
+            await Assert.ThrowsAsync<HttpRequestException>(
+                () => analysis.Analyze("example.com", logger));
+
+            Assert.NotNull(error);
+            Assert.Contains("500", error!.FullMessage);
+            Assert.Contains("http://localhost/domain/example.com", error.FullMessage);
         }
     }
 }
