@@ -13,6 +13,10 @@ namespace DomainDetective.Tests {
             Assert.Equal(2, monitor.Results.Count);
             Assert.True(monitor.ValidCount >= 1);
             Assert.True(monitor.FailedCount >= 1);
+
+            var reachable = monitor.Results.Find(r => r.Analysis.IsReachable);
+            Assert.NotNull(reachable);
+            Assert.Equal(reachable!.Analysis.TlsProtocol, reachable.Protocol);
         }
 
         [Fact]
