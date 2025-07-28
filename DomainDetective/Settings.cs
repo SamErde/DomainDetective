@@ -5,7 +5,7 @@ namespace DomainDetective {
     /// </summary>
     /// <para>Part of the DomainDetective project.</para>
     public class Settings {
-        protected static InternalLogger _logger = new InternalLogger();
+        protected InternalLogger _logger = new InternalLogger();
 
         /// <summary>
         /// Gets or sets a value indicating whether error messages are written.
