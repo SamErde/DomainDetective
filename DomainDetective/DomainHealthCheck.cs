@@ -387,6 +387,7 @@ namespace DomainDetective {
             if (internalLogger != null) {
                 _logger = internalLogger;
             }
+            _logger.ClearLoggedMessages();
             DnsEndpoint = dnsEndpoint;
             DnsSelectionStrategy = DnsSelectionStrategy.First;
 
