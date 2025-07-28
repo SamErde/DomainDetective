@@ -53,7 +53,7 @@ namespace DomainDetective.PowerShell {
         protected override async Task ProcessRecordAsync() {
             _logger.WriteVerbose("Querying DANE record for domain: {0}", DomainName);
             var ports = Ports != null && Ports.Length > 0 ? Ports : new[] { (int)ServiceType.SMTP };
-            await healthCheck.VerifyDANE(DomainName, ports, CancelToken);
+            await healthCheck.VerifyDANE(DomainName, ports, cancellationToken: CancelToken);
             WriteObject(healthCheck.DaneAnalysis);
         }
     }

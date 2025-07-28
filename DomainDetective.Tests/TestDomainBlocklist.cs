@@ -44,9 +44,7 @@ namespace DomainDetective.Tests {
 
             await analysis.IsDomainListedAsync("dbltest.com", new InternalLogger());
             var resultSpamhaus = analysis.Results["dbltest.com"];
-            if (!resultSpamhaus.ListedBlacklist.Contains("dbl.spamhaus.org")) {
-                throw SkipException.ForSkip("Spamhaus DNSBL not reachable");
-            }
+            Skip.If(!resultSpamhaus.ListedBlacklist.Contains("dbl.spamhaus.org"), "Spamhaus DNSBL not reachable");
             Assert.True(resultSpamhaus.IsBlacklisted);
 
             await analysis.IsDomainListedAsync("test.uribl.com", new InternalLogger());

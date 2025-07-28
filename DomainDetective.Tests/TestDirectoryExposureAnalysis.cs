@@ -10,10 +10,7 @@ public class TestDirectoryExposureAnalysis
     [Fact]
     public async Task DetectsAccessibleDirectories()
     {
-        if (!HttpListener.IsSupported)
-        {
-            throw SkipException.ForSkip("HttpListener not supported");
-        }
+        Skip.If(!HttpListener.IsSupported, "HttpListener not supported");
         using var listener = new HttpListener();
         var port = GetFreePort();
         var prefix = $"http://localhost:{port}/";
@@ -53,10 +50,7 @@ public class TestDirectoryExposureAnalysis
     [Fact]
     public async Task NoExposedDirectoriesWhenNoneAccessible()
     {
-        if (!HttpListener.IsSupported)
-        {
-            throw SkipException.ForSkip("HttpListener not supported");
-        }
+        Skip.If(!HttpListener.IsSupported, "HttpListener not supported");
         using var listener = new HttpListener();
         var port2 = GetFreePort();
         var prefix = $"http://localhost:{port2}/";
