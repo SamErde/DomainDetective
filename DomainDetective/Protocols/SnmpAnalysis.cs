@@ -55,11 +55,12 @@ public class SnmpAnalysis
             using var udp = new UdpClient();
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(token);
             cts.CancelAfter(timeout);
+            udp.Connect(host, port);
 #if NET8_0_OR_GREATER
-            await udp.SendAsync(Probe, host, port, cts.Token);
+            await udp.SendAsync(Probe, cts.Token);
             var result = await udp.ReceiveAsync(cts.Token);
 #else
-            await udp.SendAsync(Probe, Probe.Length, host, port).WaitWithCancellation(cts.Token);
+            await udp.SendAsync(Probe, Probe.Length).WaitWithCancellation(cts.Token);
             var result = await udp.ReceiveAsync().WaitWithCancellation(cts.Token);
 #endif
             return result.Buffer.Length > 0;
