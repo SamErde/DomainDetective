@@ -8,7 +8,7 @@ namespace DomainDetective.Tests {
             var healthCheck = new DomainHealthCheck();
             var ex = await Assert.ThrowsAsync<NotSupportedException>(async () =>
                 await healthCheck.Verify("example.com", new[] { (HealthCheckType)999 }));
-            Assert.Contains("999", ex.Message);
+            Assert.Equal("Health check type not implemented: 999", ex.Message);
         }
     }
 }
