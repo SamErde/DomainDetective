@@ -2,6 +2,7 @@ using DnsClientX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace DomainDetective {
@@ -33,8 +34,10 @@ namespace DomainDetective {
         }
 
 
-        public async Task AnalyzeDANERecords(IEnumerable<DnsAnswer> dnsResults, InternalLogger logger) {
+        public async Task AnalyzeDANERecords(IEnumerable<DnsAnswer> dnsResults, InternalLogger logger, CancellationToken cancellationToken = default) {
             Reset();
+
+            cancellationToken.ThrowIfCancellationRequested();
 
             if (dnsResults == null) {
                 logger?.WriteVerbose("DNS query returned no results.");
@@ -52,6 +55,7 @@ namespace DomainDetective {
             NumberOfRecords = daneRecordList.Count;
 
             foreach (var record in daneRecordList) {
+                cancellationToken.ThrowIfCancellationRequested();
                 var analysis = new DANERecordAnalysis();
                 analysis.DomainName = record.Name;
                 analysis.DANERecord = record.Data;
@@ -163,6 +167,7 @@ namespace DomainDetective {
                 AnalysisResults.Add(analysis);
             }
 
+            cancellationToken.ThrowIfCancellationRequested();
             HasInvalidRecords = AnalysisResults.Any(x => !x.ValidDANERecord);
         }
 
