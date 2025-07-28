@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
+using System.Security.Authentication;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -29,6 +30,8 @@ namespace DomainDetective {
             public bool Expired { get; init; }
             /// <summary>Whether the certificate chain contained all intermediates.</summary>
             public bool ChainComplete { get; init; }
+            /// <summary>The negotiated TLS protocol.</summary>
+            public SslProtocols Protocol { get; init; }
             /// <summary>Captured analysis details.</summary>
             public CertificateAnalysis Analysis { get; init; }
         }
@@ -133,7 +136,10 @@ namespace DomainDetective {
                 if (showProgress) {
                     logger.WriteProgress("CertificateMonitor", host, processed * 100d / list.Count, processed, list.Count);
                 }
-                var analysis = new CertificateAnalysis();
+                var analysis = new CertificateAnalysis
+                {
+                    CaptureTlsDetails = true
+                };
                 await analysis.AnalyzeUrl(host, port, logger, cancellationToken);
                 var entry = new Entry {
                     Host = host,
@@ -141,6 +147,7 @@ namespace DomainDetective {
                     Valid = analysis.IsValid,
                     Expired = analysis.IsExpired,
                     ChainComplete = analysis.Chain.Count > 1 && analysis.IsValid,
+                    Protocol = analysis.TlsProtocol,
                     Analysis = analysis
                 };
                 Results.Add(entry);
