@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace DomainDetective.Tests {
@@ -248,6 +249,30 @@ namespace DomainDetective.Tests {
         }
 
         [Fact]
+        public async Task CheckDaneHonorsCancellation() {
+            var healthCheck = new DomainHealthCheck();
+            using var cts = new CancellationTokenSource();
+            cts.Cancel();
+
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(async () =>
+                await healthCheck.CheckDANE("3 1 1 " + new string('A', 64), cts.Token));
+        }
+
+        [Fact]
+        public async Task VerifyDaneHonorsCancellation() {
+            var healthCheck = new DomainHealthCheck { Verbose = false };
+            using var cts = new CancellationTokenSource();
+            healthCheck.DnsConfiguration.QueryDnsOverride = (name, type) =>
+                Task.Delay(Timeout.Infinite, cts.Token).ContinueWith(_ => Array.Empty<DnsAnswer>(), cts.Token);
+            healthCheck.DaneDnsOverride = healthCheck.DnsConfiguration.QueryDnsOverride;
+
+            var task = healthCheck.VerifyDANE("example.com", new[] { 443 }, cts.Token);
+            cts.Cancel();
+
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() => task);
+        }
+
+        [Fact]
         public async Task HttpsRecommendedCombinationIsFlagged() {
             var answers = new List<DnsAnswer> {
                 new DnsAnswer {
@@ -258,7 +283,7 @@ namespace DomainDetective.Tests {
             };
 
             var analysis = new DANEAnalysis();
-            await analysis.AnalyzeDANERecords(answers, new InternalLogger());
+            await analysis.AnalyzeDANERecords(answers, new InternalLogger(), CancellationToken.None);
 
             Assert.True(analysis.AnalysisResults[0].IsValidChoiceForHttps);
         }
@@ -277,7 +302,7 @@ namespace DomainDetective.Tests {
             var logger = new InternalLogger();
             var warnings = new List<LogEventArgs>();
             logger.OnWarningMessage += (_, e) => warnings.Add(e);
-            await analysis.AnalyzeDANERecords(answers, logger);
+            await analysis.AnalyzeDANERecords(answers, logger, CancellationToken.None);
 
             Assert.False(analysis.AnalysisResults[0].IsValidChoiceForHttps);
             Assert.Contains(warnings, w => w.FullMessage.Contains("not recommended for HTTPS"));
@@ -294,7 +319,7 @@ namespace DomainDetective.Tests {
             };
 
             var analysis = new DANEAnalysis();
-            await analysis.AnalyzeDANERecords(answers, new InternalLogger());
+            await analysis.AnalyzeDANERecords(answers, new InternalLogger(), CancellationToken.None);
 
             var result = analysis.AnalysisResults[0];
             Assert.True(result.ValidDANERecord);
@@ -312,7 +337,7 @@ namespace DomainDetective.Tests {
             };
 
             var analysis = new DANEAnalysis();
-            await analysis.AnalyzeDANERecords(answers, new InternalLogger());
+            await analysis.AnalyzeDANERecords(answers, new InternalLogger(), CancellationToken.None);
 
             Assert.False(analysis.AnalysisResults[0].ValidDANERecord);
         }
@@ -331,7 +356,7 @@ namespace DomainDetective.Tests {
             var logger = new InternalLogger();
             var warnings = new List<LogEventArgs>();
             logger.OnWarningMessage += (_, e) => warnings.Add(e);
-            await analysis.AnalyzeDANERecords(answers, logger);
+            await analysis.AnalyzeDANERecords(answers, logger, CancellationToken.None);
 
             Assert.Contains(warnings, w => w.FullMessage.Contains("selector value"));
             Assert.Contains(warnings, w => w.FullMessage.Contains("matching type"));
@@ -351,7 +376,7 @@ namespace DomainDetective.Tests {
             var logger = new InternalLogger();
             var warnings = new List<LogEventArgs>();
             logger.OnWarningMessage += (_, e) => warnings.Add(e);
-            await analysis.AnalyzeDANERecords(answers, logger);
+            await analysis.AnalyzeDANERecords(answers, logger, CancellationToken.None);
 
             Assert.Contains(warnings, w => w.FullMessage.Contains("usage '4' is invalid"));
         }
@@ -360,7 +385,7 @@ namespace DomainDetective.Tests {
         public async Task ServiceTypeDefaultsToHttps() {
             var record = "3 1 1 " + new string('A', 64);
             var analysis = new DANEAnalysis();
-            await analysis.AnalyzeDANERecords(new[] { new DnsAnswer { DataRaw = record } }, new InternalLogger());
+            await analysis.AnalyzeDANERecords(new[] { new DnsAnswer { DataRaw = record } }, new InternalLogger(), CancellationToken.None);
 
             Assert.Equal(ServiceType.HTTPS, analysis.AnalysisResults[0].ServiceType);
         }
@@ -376,7 +401,7 @@ namespace DomainDetective.Tests {
             };
 
             var analysis = new DANEAnalysis();
-            await analysis.AnalyzeDANERecords(answers, new InternalLogger());
+            await analysis.AnalyzeDANERecords(answers, new InternalLogger(), CancellationToken.None);
 
             var result = analysis.AnalysisResults[0];
             Assert.True(result.ValidDANERecord);
@@ -394,7 +419,7 @@ namespace DomainDetective.Tests {
             };
 
             var analysis = new DANEAnalysis();
-            await analysis.AnalyzeDANERecords(answers, new InternalLogger());
+            await analysis.AnalyzeDANERecords(answers, new InternalLogger(), CancellationToken.None);
 
             var result = analysis.AnalysisResults[0];
             Assert.True(result.ValidDANERecord);
@@ -412,7 +437,7 @@ namespace DomainDetective.Tests {
             };
 
             var analysis = new DANEAnalysis();
-            await analysis.AnalyzeDANERecords(answers, new InternalLogger());
+            await analysis.AnalyzeDANERecords(answers, new InternalLogger(), CancellationToken.None);
 
             var result = analysis.AnalysisResults[0];
             Assert.True(result.ValidDANERecord);

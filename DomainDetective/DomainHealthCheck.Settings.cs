@@ -39,7 +39,20 @@ namespace DomainDetective {
 
         /// <summary>Optional override for the MTA-STS policy URL.</summary>
         /// <value>A URL to use instead of querying DNS.</value>
-        public string MtaStsPolicyUrlOverride { get; set; }
+        public string? MtaStsPolicyUrlOverride {
+            get => _mtaStsPolicyUrlOverride;
+            set {
+                if (value is null) {
+                    _mtaStsPolicyUrlOverride = null;
+                } else if (!Uri.TryCreate(value, UriKind.Absolute, out _)) {
+                    throw new ArgumentException("Value must be an absolute URI", nameof(value));
+                } else {
+                    _mtaStsPolicyUrlOverride = value;
+                }
+            }
+        }
+
+        private string? _mtaStsPolicyUrlOverride;
 
         /// <summary>API key for Google Safe Browsing.</summary>
         public string? GoogleSafeBrowsingApiKey { get; set; }
@@ -69,9 +82,17 @@ namespace DomainDetective {
                     var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
                     _cacheDirectory = Path.Combine(home, ".domain-detective");
                 }
+                if (!string.IsNullOrEmpty(_cacheDirectory) && !Directory.Exists(_cacheDirectory)) {
+                    Directory.CreateDirectory(_cacheDirectory);
+                }
                 return _cacheDirectory;
             }
-            set => _cacheDirectory = value;
+            set {
+                _cacheDirectory = value;
+                if (!string.IsNullOrEmpty(_cacheDirectory) && !Directory.Exists(_cacheDirectory)) {
+                    Directory.CreateDirectory(_cacheDirectory);
+                }
+            }
         }
 
         private string? _cacheDirectory;

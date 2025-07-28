@@ -30,9 +30,13 @@ namespace DomainDetective {
             }
 
             foreach (var selector in selectors) {
+                var trimmedSelector = selector?.Trim();
+                if (string.IsNullOrEmpty(trimmedSelector)) {
+                    continue;
+                }
                 cancellationToken.ThrowIfCancellationRequested();
-                var dkim = await DnsConfiguration.QueryDNS(name: $"{selector}._domainkey.{domainName}", recordType: DnsRecordType.TXT, filter: "DKIM1", cancellationToken: cancellationToken);
-                await DKIMAnalysis.AnalyzeDkimRecords(selector, dkim, logger: _logger);
+                var dkim = await DnsConfiguration.QueryDNS(name: $"{trimmedSelector}._domainkey.{domainName}", recordType: DnsRecordType.TXT, filter: "DKIM1", cancellationToken: cancellationToken);
+                await DKIMAnalysis.AnalyzeDkimRecords(trimmedSelector, dkim, logger: _logger);
             }
         }
 
