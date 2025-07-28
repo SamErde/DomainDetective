@@ -9,12 +9,14 @@ namespace DomainDetective.Tests {
         public async Task ProducesSummaryCounts() {
             var monitor = new CertificateMonitor();
             await monitor.Analyze(new[] { "https://www.google.com", "https://nonexistent.invalid" });
-            if (monitor.Results.TrueForAll(r => !r.Analysis.IsReachable)) {
-                throw SkipException.ForSkip("Hosts not reachable");
-            }
+            Skip.If(monitor.Results.TrueForAll(r => !r.Analysis.IsReachable), "Hosts not reachable");
             Assert.Equal(2, monitor.Results.Count);
             Assert.True(monitor.ValidCount >= 1);
             Assert.True(monitor.FailedCount >= 1);
+
+            var reachable = monitor.Results.Find(r => r.Analysis.IsReachable);
+            Assert.NotNull(reachable);
+            Assert.Equal(reachable!.Analysis.TlsProtocol, reachable.Protocol);
         }
 
         [Fact]

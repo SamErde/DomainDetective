@@ -43,7 +43,10 @@ public class RdapAnalysis
 
     internal Func<string, Task<string>>? QueryOverride { get; set; }
 
-    private static readonly RdapClient _rdapClient = new();
+    /// <summary>
+    /// RDAP client used for queries. Exposed internally for testing.
+    /// </summary>
+    internal RdapClient RdapClient { get; set; } = new();
 
     /// <summary>
     /// Retrieves RDAP information for <paramref name="domain"/>.
@@ -75,18 +78,19 @@ public class RdapAnalysis
             RdapDomain? rdapResult;
             if (QueryOverride != null)
             {
-                var json = await QueryOverride(domain).ConfigureAwait(false);
-                rdapResult = JsonSerializer.Deserialize<RdapDomain>(json, RdapJson.Options);
-            }
-            else
-            {
                 try
                 {
-                    rdapResult = await _rdapClient.QueryDomainAsync(domain, cancellationToken).ConfigureAwait(false);
+                    var json = await QueryOverride(domain).ConfigureAwait(false);
+                    rdapResult = JsonSerializer.Deserialize<RdapDomain>(json, RdapJson.Options);
                 }
                 catch (HttpRequestException ex)
                 {
+                    var url = $"{RdapClient.BaseUrl}/domain/{domain}";
 #if NET6_0_OR_GREATER
+                    var codeText = ex.StatusCode.HasValue
+                        ? $"{(int)ex.StatusCode.Value} ({ex.StatusCode})"
+                        : ex.Message;
+                    logger?.WriteError("RDAP request to {0} failed with status {1}", url, codeText);
                     if (ex.StatusCode == HttpStatusCode.NotFound)
                     {
                         rdapResult = null;
@@ -96,6 +100,42 @@ public class RdapAnalysis
                         throw;
                     }
 #else
+                    logger?.WriteError("RDAP request to {0} failed: {1}", url, ex.Message);
+                    if (ex.Message.Contains("404"))
+                    {
+                        rdapResult = null;
+                    }
+                    else
+                    {
+                        throw;
+                    }
+#endif
+                }
+            }
+            else
+            {
+                try
+                {
+                    rdapResult = await RdapClient.QueryDomainAsync(domain, cancellationToken).ConfigureAwait(false);
+                }
+                catch (HttpRequestException ex)
+                {
+                    var url = $"{RdapClient.BaseUrl}/domain/{domain}";
+#if NET6_0_OR_GREATER
+                    var codeText = ex.StatusCode.HasValue
+                        ? $"{(int)ex.StatusCode.Value} ({ex.StatusCode})"
+                        : ex.Message;
+                    logger?.WriteError("RDAP request to {0} failed with status {1}", url, codeText);
+                    if (ex.StatusCode == HttpStatusCode.NotFound)
+                    {
+                        rdapResult = null;
+                    }
+                    else
+                    {
+                        throw;
+                    }
+#else
+                    logger?.WriteError("RDAP request to {0} failed: {1}", url, ex.Message);
                     if (ex.Message.Contains("404"))
                     {
                         rdapResult = null;
