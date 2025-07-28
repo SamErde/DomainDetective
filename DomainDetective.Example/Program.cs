@@ -89,6 +89,9 @@ public static partial class Program {
         await ExampleSuggestDomain();
         await ExampleSearchEngine();
 
+        // HTML Report Examples
+        await ReportingHtmlExample.Run();
+
         //await ExampleQueryDNS();
         //await ExampleAnalyseByStringWHOIS();
     }

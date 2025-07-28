@@ -1,4 +1,4 @@
-using DomainDetective.Reports;
+using DomainDetective;
 using System;
 using System.IO;
 using System.Linq;

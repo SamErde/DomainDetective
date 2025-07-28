@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFrameworks>net472;netstandard2.0;net8.0</TargetFrameworks>
+        <LangVersion>Latest</LangVersion>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="QuestPDF" Version="2025.7.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\DomainDetective\DomainDetective.csproj" />
+        <ProjectReference Include="..\DomainDetective.Reports\DomainDetective.Reports.csproj" />
+    </ItemGroup>
+
+</Project>

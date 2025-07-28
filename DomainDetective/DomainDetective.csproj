@@ -10,6 +10,11 @@
         <PackageReference Include="MailKit" Version="4.13.0" />
         <PackageReference Include="PgpCore" Version="6.5.2" />
     </ItemGroup>
+    
+    <ItemGroup Condition="'$(TargetFramework)' == 'net472'">
+        <Reference Include="System.IO.Compression" />
+        <Reference Include="System.IO.Compression.FileSystem" />
+    </ItemGroup>
 
     <ItemGroup>
         <Folder Include="Dictionaries\" />

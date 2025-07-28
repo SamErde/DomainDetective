@@ -1,4 +1,4 @@
-using DomainDetective.Reports;
+using DomainDetective;
 using System.Management.Automation;
 
 namespace DomainDetective.PowerShell {

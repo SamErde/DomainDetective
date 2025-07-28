@@ -1,4 +1,4 @@
-namespace DomainDetective.Reports;
+namespace DomainDetective;
 
 /// <summary>Summarized DMARC feedback statistics for a domain.</summary>
 public sealed class DmarcFeedbackSummary {
