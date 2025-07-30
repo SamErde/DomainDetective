@@ -7,19 +7,19 @@ using DomainDetective.Reports.Html;
 namespace DomainDetective.PowerShell;
 
 /// <summary>
-/// Exports a domain security report in various formats
+/// Displays a domain security report in various formats
 /// </summary>
 /// <example>
 /// <code>
-/// Export-DomainReport -Domain "example.com" -Format Html -Path "report.html"
-/// Export-DomainReport -Domain "example.com" -Format Html -Template Executive -OpenInBrowser
-/// Export-DomainReport -Domain "example.com" -Format Word -IncludeRawData
+/// Show-DDDomainReport -Domain "example.com" -Format Html -Path "report.html"
+/// Show-DDDomainReport -Domain "example.com" -Format Html -Template Executive -OpenInBrowser
+/// Show-DDDomainReport -Domain "example.com" -Format Word -IncludeRawData
 /// </code>
 /// </example>
-[Cmdlet(VerbsData.Export, "DomainReport")]
+[Cmdlet(VerbsCommon.Show, "DDDomainReport")]
 [OutputType(typeof(ReportResult))]
-[Alias("New-DomainReport", "Generate-DomainReport")]
-public sealed class CmdletExportDomainReport : AsyncPSCmdlet {
+[Alias("Export-DomainReport", "New-DomainReport", "Generate-DomainReport")]
+public sealed class CmdletShowDDDomainReport : AsyncPSCmdlet {
     /// <summary>
     /// Domain name to analyze and report on
     /// </summary>
