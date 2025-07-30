@@ -13,7 +13,7 @@ User guide for generating reports via CLI, PowerShell, and C# library.
 
 ## Main TODO
 The comprehensive TODO for the reporting system is located at:
-**[TODO-MASTER.MD](TODO.MD)**
+**[TODO.MD](TODO.MD)**
 
 This includes:
 - Detailed implementation phases
