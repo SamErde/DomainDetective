@@ -236,16 +236,26 @@ public class DomainSecurityReport {
                     card.Body(body => {
                         body.DataGrid(grid => {
                             grid.AddItem("SPF Record", _healthCheck.SpfAnalysis?.SpfRecordExists == true ? "Found" : "Not found");
-                            grid.AddItem("SPF Valid", 
+                            grid.AddItem("SPF Valid",
                                 _healthCheck.SpfAnalysis?.StartsCorrectly == true ? "Yes" : "No");
-                            
+
                             grid.AddItem("DMARC Policy", _healthCheck.DmarcAnalysis?.Policy ?? "Not found");
                             grid.AddItem("DMARC Valid",
                                 _healthCheck.DmarcAnalysis?.DmarcRecordExists == true ? "Yes" : "No");
-                            
-                            grid.AddItem("DKIM Valid", 
+
+                            grid.AddItem("DKIM Valid",
                                 _healthCheck.DKIMAnalysis?.AnalysisResults?.Count > 0 ? "Yes" : "No");
                         });
+
+                        if (_healthCheck.SpfAnalysis?.SpfRecordExists == true) {
+                            var tree = _healthCheck.SpfAnalysis.GetFlattenedSpfTree().GetAwaiter().GetResult();
+                            body.DataGrid(tg => {
+                                tg.AddItem("Flattened SPF", string.Join("\n", tree));
+                                foreach (var warn in _healthCheck.SpfAnalysis.Warnings) {
+                                    tg.AddItem("Warning", warn);
+                                }
+                            });
+                        }
                     });
                 });
             });
