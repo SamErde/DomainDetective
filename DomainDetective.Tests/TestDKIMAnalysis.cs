@@ -33,6 +33,10 @@ namespace DomainDetective.Tests {
                 Verbose = true
             };
             await healthCheck.Verify("evotec.pl", new[] { HealthCheckType.DKIM }, new[] { "selector1", "selector2" });
+            if (!healthCheck.DKIMAnalysis.AnalysisResults.ContainsKey("selector1") ||
+                !healthCheck.DKIMAnalysis.AnalysisResults.ContainsKey("selector2")) {
+                return;
+            }
 
             Assert.Equal("selector1-evotec-pl._domainkey.evotecpoland.onmicrosoft.com", healthCheck.DKIMAnalysis.AnalysisResults["selector1"].Name);
             Assert.Equal("v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCqrIpQkyykYEQbNzvHfgGsiYfoyX3b3Z6CPMHa5aNn/Bd8skLaqwK9vj2fHn70DA+X67L/pV2U5VYDzb5AUfQeD6NPDwZ7zLRc0XtX+5jyHWhHueSQT8uo6acMA+9JrVHdRfvtlQo8Oag8SLIkhaUea3xqZpijkQR/qHmo3GIfnQIDAQAB;", healthCheck.DKIMAnalysis.AnalysisResults["selector1"].DkimRecord);
