@@ -24,8 +24,15 @@ public static class DmarcReportParser {
         XDocument doc = XDocument.Load(stream);
         var table = new Dictionary<string, DmarcFeedbackSummary>(StringComparer.OrdinalIgnoreCase);
         foreach (var record in doc.Descendants("record")) {
-            string domain = record.Element("identifiers")?.Element("header_from")?.Value ?? string.Empty;
-            if (string.IsNullOrEmpty(domain)) {
+            string rawDomain = record.Element("identifiers")?.Element("header_from")?.Value ?? string.Empty;
+            if (string.IsNullOrEmpty(rawDomain)) {
+                continue;
+            }
+
+            string domain;
+            try {
+                domain = DomainHelper.ValidateIdn(rawDomain);
+            } catch (ArgumentException) {
                 continue;
             }
 
@@ -34,14 +41,19 @@ public static class DmarcReportParser {
                 table[domain] = summary;
             }
 
-            // Extract disposition and message count
-            string disposition = record.Element("row")?.Element("policy_evaluated")?.Element("disposition")?.Value ?? string.Empty;
+            // Extract evaluation results and message count
+            string dkim = record.Element("row")?.Element("policy_evaluated")?.Element("dkim")?.Value;
+            string spf = record.Element("row")?.Element("policy_evaluated")?.Element("spf")?.Value;
+            string disposition = record.Element("row")?.Element("policy_evaluated")?.Element("disposition")?.Value;
             string countStr = record.Element("row")?.Element("count")?.Value ?? "1";
             if (!int.TryParse(countStr, NumberStyles.Integer, CultureInfo.InvariantCulture, out int count)) {
                 count = 1;
             }
 
-            if (disposition.Equals("none", StringComparison.OrdinalIgnoreCase)) {
+            bool pass = string.Equals(dkim, "pass", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(spf, "pass", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(disposition, "none", StringComparison.OrdinalIgnoreCase);
+            if (pass) {
                 summary.PassCount += count;
             } else {
                 summary.FailCount += count;
