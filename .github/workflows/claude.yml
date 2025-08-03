@@ -18,6 +18,7 @@ jobs:
       (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude')) ||
       (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: read
       pull-requests: read
@@ -28,7 +29,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 1
+          fetch-depth: 0
 
       - name: Run Claude Code
         id: claude
@@ -49,14 +50,15 @@ jobs:
           # Optional: Trigger when specific user is assigned to an issue
           # assignee_trigger: "claude-bot"
           
-          # Optional: Allow Claude to run specific commands
-          # allowed_tools: "Bash(npm install),Bash(npm run build),Bash(npm run test:*),Bash(npm run lint:*)"
-          
-          # Optional: Add custom instructions for Claude to customize its behavior for your project
-          # custom_instructions: |
-          #   Follow our coding standards
-          #   Ensure all new code has tests
-          #   Use TypeScript for new files
+          # Allow .NET build, tests, and formatting
+          allowed_tools: "Bash(dotnet build),Bash(dotnet test),Bash(dotnet format --verify-no-changes)"
+
+          # Add custom instructions for DomainDetective
+          custom_instructions: |
+            - Follow C# coding conventions and .NET best practices
+            - Ensure PowerShell cmdlets follow approved verbs
+            - Run dotnet format for code style consistency
+            - Consider security implications for domain analysis tools
           
           # Optional: Custom environment variables for Claude
           # claude_env: |
