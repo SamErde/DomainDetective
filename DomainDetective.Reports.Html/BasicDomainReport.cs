@@ -94,6 +94,16 @@ public class BasicDomainReport {
                                     grid.AddItem("DNSSEC", hasDsRecords ? "✅ DS Records found" : "⚠️ No DS Records");
                                 }
                             });
+
+                            if (_healthCheck.SpfAnalysis?.SpfRecordExists == true) {
+                                var tree = _healthCheck.SpfAnalysis.GetFlattenedSpfTree().GetAwaiter().GetResult();
+                                body.DataGrid(tg => {
+                                    tg.AddItem("Flattened SPF", string.Join("\n", tree));
+                                    foreach (var warn in _healthCheck.SpfAnalysis.Warnings) {
+                                        tg.AddItem("Warning", warn);
+                                    }
+                                });
+                            }
                         });
                     });
                 });

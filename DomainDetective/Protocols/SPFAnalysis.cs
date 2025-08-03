@@ -661,6 +661,33 @@ namespace DomainDetective {
             return addresses.ToList();
         }
 
+        /// <summary>
+        /// Builds a flattened SPF tree representation with indentation showing include and redirect branches.
+        /// </summary>
+        public async Task<List<string>> GetFlattenedSpfTree(InternalLogger? logger = null) {
+            if (string.IsNullOrEmpty(SpfRecord)) {
+                return new List<string>();
+            }
+
+            _warnings.Clear();
+
+            var lines = new List<string> { "v=spf1" };
+            var visited = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            await BuildTree(TokenizeSpfRecord(SpfRecord), visited, 0, lines, logger);
+
+            var flatTokens = await FlattenTokens(TokenizeSpfRecord(SpfRecord), new HashSet<string>(StringComparer.OrdinalIgnoreCase), logger);
+            var record = string.Join(" ", flatTokens);
+            if (record.Length > 512) {
+                _warnings.Add("Flattened SPF record exceeds 512 characters.");
+                logger?.WriteWarning("Flattened SPF record exceeds 512 characters.");
+            } else if (record.Length > 255) {
+                _warnings.Add("Flattened SPF record exceeds 255 characters.");
+                logger?.WriteWarning("Flattened SPF record exceeds 255 characters.");
+            }
+
+            return lines;
+        }
+
         private async Task<List<string>> FlattenTokens(IEnumerable<string> tokens, HashSet<string> visited, InternalLogger? logger) {
             List<string> result = new();
             foreach (var t in tokens) {
@@ -720,6 +747,59 @@ namespace DomainDetective {
 
             result.Insert(0, "v=spf1");
             return result;
+        }
+
+        private async Task BuildTree(IEnumerable<string> tokens, HashSet<string> visited, int depth, List<string> lines, InternalLogger? logger) {
+            foreach (var t in tokens) {
+                var token = t.Trim('"');
+                if (token.StartsWith("include:", StringComparison.OrdinalIgnoreCase)) {
+                    var domain = token.Substring(8);
+                    lines.Add(new string(' ', depth * 2) + token);
+                    if (!string.IsNullOrEmpty(domain)) {
+                        if (!visited.Add(domain)) {
+                            CycleDetected = true;
+                            _warnings.Add($"Cycle detected when flattening include {domain}");
+                            logger?.WriteWarning($"Cycle detected when flattening include {domain}");
+                            continue;
+                        }
+                        string? includeRecord = null;
+                        if (TestSpfRecords.TryGetValue(domain, out var fakeRecord)) {
+                            includeRecord = fakeRecord;
+                        } else {
+                            var answers = await DnsConfiguration.QueryDNS(domain, DnsRecordType.TXT, "SPF1");
+                            if (answers != null && answers.Length > 0) {
+                                includeRecord = answers[0].Data;
+                            }
+                        }
+                        if (!string.IsNullOrEmpty(includeRecord)) {
+                            await BuildTree(TokenizeSpfRecord(includeRecord), visited, depth + 1, lines, logger);
+                        }
+                        visited.Remove(domain);
+                    }
+                } else if (token.StartsWith("redirect=", StringComparison.OrdinalIgnoreCase)) {
+                    var domain = token.Substring(9);
+                    lines.Add(new string(' ', depth * 2) + token);
+                    if (!string.IsNullOrEmpty(domain)) {
+                        string? redirectRecord = null;
+                        if (TestSpfRecords.TryGetValue(domain, out var fakeRecord)) {
+                            redirectRecord = fakeRecord;
+                        } else {
+                            var answers = await DnsConfiguration.QueryDNS(domain, DnsRecordType.TXT, "SPF1");
+                            if (answers != null && answers.Length > 0) {
+                                redirectRecord = answers[0].Data;
+                            }
+                        }
+                        if (!string.IsNullOrEmpty(redirectRecord)) {
+                            await BuildTree(TokenizeSpfRecord(redirectRecord), visited, depth + 1, lines, logger);
+                        }
+                    }
+                    return;
+                } else {
+                    if (!token.Equals("v=spf1", StringComparison.OrdinalIgnoreCase)) {
+                        lines.Add(new string(' ', depth * 2) + token);
+                    }
+                }
+            }
         }
 
         private async Task<DnsAnswer[]> QueryDns(string name, DnsRecordType type)
