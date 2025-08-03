@@ -1,4 +1,5 @@
 using DnsClientX;
+using DomainDetective.Tests.Fixtures;
 using RichardSzalay.MockHttp;
 using System.IO;
 using System.Net;
@@ -9,7 +10,6 @@ using System.Security.Authentication;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using DomainDetective.Tests.Fixtures;
 
 namespace DomainDetective.Tests {
     public class TestBimiAnalysis {
@@ -260,7 +260,9 @@ namespace DomainDetective.Tests {
 
         [Fact]
         public async Task VmcFromFileServedOverHttp() {
-            var vmcBytes = File.ReadAllBytes(Path.Combine("Data", "vmc.pem"));
+            using var vmc = CreateVmc();
+            var vmcPem = Convert.ToBase64String(vmc.Export(X509ContentType.Cert), Base64FormattingOptions.InsertLineBreaks);
+            var vmcBytes = Encoding.ASCII.GetBytes($"-----BEGIN CERTIFICATE-----\r\n{vmcPem}\r\n-----END CERTIFICATE-----\r\n");
             using var cert = CreateSelfSigned();
             var server = new TcpListenerFixture((l, t) => RunServer(l, cert, path =>
                 path.EndsWith(".svg")
