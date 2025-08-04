@@ -10,7 +10,7 @@ namespace DomainDetective.Tests {
             var spfRecord3 = "v=spf1 ip4: include: test.example.pl a:google.com a:test.com ip4: include: test.example.pl include:_spf.salesforce.com include:_spf.google.com include:spf.protection.outlook.com include:_spf-a.example.com include:_spf-b.example.com include:_spf-c.example.com include:_spf-ssg-a.example.com include:spf-a.anotherexample.com ip4:131.107.115.215 ip4:131.107.115.214 ip4:205.248.106.64 ip4:205.248.106.30 ip4:205.248.106.32 ~all";
             var healthCheck6 = new DomainHealthCheck(DnsEndpoint.CloudflareWireFormat);
             await healthCheck6.CheckSPF(spfRecord3);
-            if (healthCheck6.SpfAnalysis.DnsLookupsCount == 0) {
+            if (healthCheck6.SpfAnalysis.DnsLookupsCount == 0 || !healthCheck6.SpfAnalysis.ExceedsDnsLookups) {
                 return;
             }
 

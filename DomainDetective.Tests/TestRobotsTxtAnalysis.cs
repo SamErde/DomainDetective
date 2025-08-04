@@ -15,12 +15,23 @@ public class TestRobotsTxtAnalysis
         var content = "User-agent: *\nDisallow: /private\nAllow: /public\nSitemap: https://example.com/sitemap.xml";
         var serverTask = Task.Run(async () =>
         {
-            var ctx = await listener.GetContextAsync();
-            ctx.Response.StatusCode = 200;
-            ctx.Response.ContentType = "text/plain";
-            var buffer = Encoding.UTF8.GetBytes(content);
-            await ctx.Response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
-            ctx.Response.Close();
+            try
+            {
+                var ctx = await listener.GetContextAsync();
+                ctx.Response.StatusCode = 200;
+                ctx.Response.ContentType = "text/plain";
+                var buffer = Encoding.UTF8.GetBytes(content);
+                await ctx.Response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
+                ctx.Response.Close();
+            }
+            catch (ObjectDisposedException)
+            {
+                // listener stopped before context was retrieved
+            }
+            catch (HttpListenerException)
+            {
+                // listener stopped before context was retrieved
+            }
         });
 
         try
@@ -44,9 +55,20 @@ public class TestRobotsTxtAnalysis
         using var listener = StartListener(out var prefix);
         var serverTask = Task.Run(async () =>
         {
-            var ctx = await listener.GetContextAsync();
-            ctx.Response.StatusCode = 404;
-            ctx.Response.Close();
+            try
+            {
+                var ctx = await listener.GetContextAsync();
+                ctx.Response.StatusCode = 404;
+                ctx.Response.Close();
+            }
+            catch (ObjectDisposedException)
+            {
+                // listener stopped before context was retrieved
+            }
+            catch (HttpListenerException)
+            {
+                // listener stopped before context was retrieved
+            }
         });
 
         try
@@ -69,12 +91,23 @@ public class TestRobotsTxtAnalysis
         var content = "User-agent: GPTBot\nDisallow: /private";
         var serverTask = Task.Run(async () =>
         {
-            var ctx = await listener.GetContextAsync();
-            ctx.Response.StatusCode = 200;
-            ctx.Response.ContentType = "text/plain";
-            var buffer = Encoding.UTF8.GetBytes(content);
-            await ctx.Response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
-            ctx.Response.Close();
+            try
+            {
+                var ctx = await listener.GetContextAsync();
+                ctx.Response.StatusCode = 200;
+                ctx.Response.ContentType = "text/plain";
+                var buffer = Encoding.UTF8.GetBytes(content);
+                await ctx.Response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
+                ctx.Response.Close();
+            }
+            catch (ObjectDisposedException)
+            {
+                // listener stopped before context was retrieved
+            }
+            catch (HttpListenerException)
+            {
+                // listener stopped before context was retrieved
+            }
         });
 
         try
