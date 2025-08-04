@@ -13,12 +13,18 @@ namespace DomainDetective.Tests {
             var expires = DateTime.UtcNow.AddDays(30).ToString("yyyy-MM-ddTHH:mm:ssZ");
             var content = $"Contact: mailto:admin@example.com\nExpires: {expires}";
             var serverTask = Task.Run(async () => {
-                var ctx = await listener.GetContextAsync();
-                ctx.Response.StatusCode = 200;
-                ctx.Response.ContentType = "text/plain";
-                var buffer = Encoding.UTF8.GetBytes(content);
-                await ctx.Response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
-                ctx.Response.Close();
+                try {
+                    var ctx = await listener.GetContextAsync();
+                    ctx.Response.StatusCode = 200;
+                    ctx.Response.ContentType = "text/plain";
+                    var buffer = Encoding.UTF8.GetBytes(content);
+                    await ctx.Response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
+                    ctx.Response.Close();
+                } catch (ObjectDisposedException) {
+                    // listener stopped before context was retrieved
+                } catch (HttpListenerException) {
+                    // listener stopped before context was retrieved
+                }
             });
 
             try {
@@ -40,12 +46,18 @@ namespace DomainDetective.Tests {
             var expires = DateTime.UtcNow.AddDays(30).ToString("yyyy-MM-ddTHH:mm:ssZ");
             var content = $"Expires: {expires}";
             var serverTask = Task.Run(async () => {
-                var ctx = await listener.GetContextAsync();
-                ctx.Response.StatusCode = 200;
-                ctx.Response.ContentType = "text/plain";
-                var buffer = Encoding.UTF8.GetBytes(content);
-                await ctx.Response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
-                ctx.Response.Close();
+                try {
+                    var ctx = await listener.GetContextAsync();
+                    ctx.Response.StatusCode = 200;
+                    ctx.Response.ContentType = "text/plain";
+                    var buffer = Encoding.UTF8.GetBytes(content);
+                    await ctx.Response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
+                    ctx.Response.Close();
+                } catch (ObjectDisposedException) {
+                    // listener stopped before context was retrieved
+                } catch (HttpListenerException) {
+                    // listener stopped before context was retrieved
+                }
             });
 
             try {
@@ -65,12 +77,18 @@ namespace DomainDetective.Tests {
             var expires = DateTime.UtcNow.AddDays(30).ToString("yyyy-MM-ddTHH:mm:ssZ");
             var content = $"Contact: mailto:admin@example.com\nExpires: {expires}\nExpires: {expires}";
             var serverTask = Task.Run(async () => {
-                var ctx = await listener.GetContextAsync();
-                ctx.Response.StatusCode = 200;
-                ctx.Response.ContentType = "text/plain";
-                var buffer = Encoding.UTF8.GetBytes(content);
-                await ctx.Response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
-                ctx.Response.Close();
+                try {
+                    var ctx = await listener.GetContextAsync();
+                    ctx.Response.StatusCode = 200;
+                    ctx.Response.ContentType = "text/plain";
+                    var buffer = Encoding.UTF8.GetBytes(content);
+                    await ctx.Response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
+                    ctx.Response.Close();
+                } catch (ObjectDisposedException) {
+                    // listener stopped before context was retrieved
+                } catch (HttpListenerException) {
+                    // listener stopped before context was retrieved
+                }
             });
 
             try {
@@ -99,7 +117,9 @@ namespace DomainDetective.Tests {
                     await ctx.Response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
                     ctx.Response.Close();
                 } catch (ObjectDisposedException) {
-                    // HttpListener was stopped before GetContextAsync completed
+                    // listener stopped before context was retrieved
+                } catch (HttpListenerException) {
+                    // listener stopped before context was retrieved
                 }
             });
 
@@ -119,12 +139,18 @@ namespace DomainDetective.Tests {
             using var listener = StartListener(out var prefix);
             var content = "Contact: not-a-valid-contact";
             var serverTask = Task.Run(async () => {
-                var ctx = await listener.GetContextAsync();
-                ctx.Response.StatusCode = 200;
-                ctx.Response.ContentType = "text/plain";
-                var buffer = Encoding.UTF8.GetBytes(content);
-                await ctx.Response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
-                ctx.Response.Close();
+                try {
+                    var ctx = await listener.GetContextAsync();
+                    ctx.Response.StatusCode = 200;
+                    ctx.Response.ContentType = "text/plain";
+                    var buffer = Encoding.UTF8.GetBytes(content);
+                    await ctx.Response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
+                    ctx.Response.Close();
+                } catch (ObjectDisposedException) {
+                    // listener stopped before context was retrieved
+                } catch (HttpListenerException) {
+                    // listener stopped before context was retrieved
+                }
             });
 
             try {
@@ -148,13 +174,19 @@ namespace DomainDetective.Tests {
             int hitCount = 0;
             var serverTask = Task.Run(async () => {
                 while (listener.IsListening) {
-                    var ctx = await listener.GetContextAsync();
-                    hitCount++;
-                    ctx.Response.StatusCode = 200;
-                    ctx.Response.ContentType = "text/plain";
-                    var buffer = Encoding.UTF8.GetBytes(content);
-                    await ctx.Response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
-                    ctx.Response.Close();
+                    try {
+                        var ctx = await listener.GetContextAsync();
+                        hitCount++;
+                        ctx.Response.StatusCode = 200;
+                        ctx.Response.ContentType = "text/plain";
+                        var buffer = Encoding.UTF8.GetBytes(content);
+                        await ctx.Response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
+                        ctx.Response.Close();
+                    } catch (ObjectDisposedException) {
+                        break;
+                    } catch (HttpListenerException) {
+                        break;
+                    }
                 }
             });
 
@@ -181,11 +213,17 @@ namespace DomainDetective.Tests {
             using var listener = StartListener(out var prefix);
             var content = "Contact: mailto:admin@example.com";
             var serverTask = Task.Run(async () => {
-                var ctx = await listener.GetContextAsync();
-                ctx.Response.StatusCode = 200;
-                var buffer = Encoding.UTF8.GetBytes(content);
-                await ctx.Response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
-                ctx.Response.Close();
+                try {
+                    var ctx = await listener.GetContextAsync();
+                    ctx.Response.StatusCode = 200;
+                    var buffer = Encoding.UTF8.GetBytes(content);
+                    await ctx.Response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
+                    ctx.Response.Close();
+                } catch (ObjectDisposedException) {
+                    // listener stopped before context was retrieved
+                } catch (HttpListenerException) {
+                    // listener stopped before context was retrieved
+                }
             });
 
             try {

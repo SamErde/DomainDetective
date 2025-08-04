@@ -2,6 +2,7 @@ using DnsClientX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.NetworkInformation;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,6 +23,9 @@ namespace DomainDetective {
 
         private static string NormalizeDomain(string input)
         {
+            if (IPAddress.TryParse(input, out _)) {
+                return input.ToLowerInvariant();
+            }
             return DomainHelper.ValidateIdn(input).ToLowerInvariant();
         }
 
@@ -60,6 +64,11 @@ namespace DomainDetective {
                     host = DomainHelper.ValidateIdn(domainName);
                 } catch (ArgumentException) {
                 }
+            }
+
+            if (IPAddress.TryParse(host, out _)) {
+                IsPublicSuffix = false;
+                return;
             }
 
             var ascii = NormalizeDomain(host);
@@ -319,10 +328,17 @@ namespace DomainDetective {
                 if (uri.Port <= 0 || uri.Port > 65535) {
                     throw new ArgumentException($"Invalid port '{uri.Port}'.", nameof(domainName));
                 }
-                return $"{NormalizeDomain(host)}:{uri.Port}";
+                if (uri.HostNameType == UriHostNameType.Dns) {
+                    return $"{NormalizeDomain(host)}:{uri.Port}";
+                }
+                return $"{host}:{uri.Port}";
             }
 
-            return NormalizeDomain(host);
+            if (uri.HostNameType == UriHostNameType.Dns) {
+                return NormalizeDomain(host);
+            }
+
+            return host;
         }
 
         /// <summary>Creates a copy with only the specified analyses included.</summary>
