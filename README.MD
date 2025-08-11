@@ -210,9 +210,9 @@ Import the module and call any of the testing cmdlets:
 
 ```powershell
 Import-Module ./Module/DomainDetective.psd1 -Force
-Test-SpfRecord -DomainName "example.com"
+Test-EmailSpf -DomainName "example.com"
 Test-Autodiscover -DomainName "example.com"
-Test-FCrDns -DomainName "example.com"
+Test-DnsFcrDns -DomainName "example.com"
 ```
 
 By default, all DNS-related cmdlets use the system DNS resolver. You can specify
@@ -227,23 +227,23 @@ Test-DnsTtl -DomainName "example.com"
 Check wildcard DNS:
 
 ```powershell
-Test-WildcardDns -DomainName "example.com"
+Test-DnsWildcard -DomainName "example.com"
 ```
 
 Check EDNS support:
 
 ```powershell
-Test-EdnsSupport -DomainName "example.com"
+Test-DnsEdnsSupport -DomainName "example.com"
 ```
 Query an S/MIMEA record:
 ```powershell
-Test-SmimeaRecord -EmailAddress "user@example.com"
+Test-DnsSmimea -EmailAddress "user@example.com"
 ```
 
 Analyze ARC headers from PowerShell:
 
 ```powershell
-Get-Content './headers.txt' -Raw | Test-Arc
+Get-Content './headers.txt' -Raw | Test-EmailArc
 ```
 
 Validate RPKI origins:
