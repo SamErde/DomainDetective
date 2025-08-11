@@ -7,7 +7,7 @@ namespace DomainDetective.PowerShell {
     /// <para>Part of the DomainDetective project.</para>
     /// <example>
     ///   <summary>Check SMIMEA record.</summary>
-    ///   <code>Test-SmimeaRecord -EmailAddress user@example.com</code>
+    ///   <code>Test-DnsSmimea -EmailAddress user@example.com</code>
     /// </example>
 [Cmdlet(VerbsDiagnostic.Test, "DDSmimeaRecord", DefaultParameterSetName = "Email")]
 [Alias("Test-DnsSmimea")]

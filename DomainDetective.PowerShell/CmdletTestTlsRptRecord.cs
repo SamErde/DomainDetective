@@ -7,7 +7,7 @@ namespace DomainDetective.PowerShell {
     /// <para>Part of the DomainDetective project.</para>
     /// <example>
     ///   <summary>Check TLS report policy.</summary>
-    ///   <code>Test-TlsRptRecord -DomainName example.com</code>
+    ///   <code>Test-EmailTlsRpt -DomainName example.com</code>
     /// </example>
 [Cmdlet(VerbsDiagnostic.Test, "DDEmailTlsRptRecord", DefaultParameterSetName = "ServerName")]
 [Alias("Test-EmailTlsRpt")]

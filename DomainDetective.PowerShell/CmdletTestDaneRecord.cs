@@ -8,7 +8,7 @@ namespace DomainDetective.PowerShell {
     /// <para>Part of the DomainDetective project.</para>
     /// <example>
     ///   <summary>Check DANE records.</summary>
-    ///   <code>Test-DaneRecord -DomainName example.com</code>
+    ///   <code>Test-TlsDane -DomainName example.com</code>
     /// </example>
 [Cmdlet(VerbsDiagnostic.Test, "DDTlsDaneRecord", DefaultParameterSetName = "ServerName")]
 [Alias("Test-TlsDane")]

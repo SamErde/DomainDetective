@@ -6,7 +6,7 @@ namespace DomainDetective.PowerShell {
     /// <para>Part of the DomainDetective project.</para>
     /// <example>
     ///   <summary>Check ports on a server.</summary>
-    ///   <code>Test-PortAvailability -HostName mail.example.com -Ports 25,443</code>
+    ///   <code>Test-NetworkPortAvailability -HostName mail.example.com -Ports 25,443</code>
     /// </example>
 [Cmdlet(VerbsDiagnostic.Test, "DDPortAvailability", DefaultParameterSetName = "ServerName")]
 [Alias("Test-NetworkPortAvailability")]
