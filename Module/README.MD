@@ -4,55 +4,55 @@ Sample usage:
 
 ```powershell
 Import-Module ./DomainDetective.psd1 -Force
-Test-SpfRecord -DomainName "example.com" -Verbose
-Test-DaneRecord -DomainName "example.com" -Verbose
-Test-NsRecord -DomainName "example.com" -Verbose
+Test-EmailSpf -DomainName "example.com" -Verbose
+Test-TlsDane -DomainName "example.com" -Verbose
+Test-DnsNs -DomainName "example.com" -Verbose
 ```
 
-`Test-SpfRecord` returns a `SpfAnalysis` object. Besides the original token lists it now includes `Resolved*` collections that contain tokens discovered while following nested `include` or `redirect` directives.
+`Test-EmailSpf` returns a `SpfAnalysis` object. Besides the original token lists it now includes `Resolved*` collections that contain tokens discovered while following nested `include` or `redirect` directives.
 
 ### Additional cmdlets
 
-- `Test-DomainBlacklist` – queries DNSBL providers to determine if a domain or IP address is listed.
+- `Test-DnsDomainBlacklist` – queries DNSBL providers to determine if a domain or IP address is listed.
   ```powershell
-  Test-DomainBlacklist -NameOrIpAddress "example.com" -Verbose
+  Test-DnsDomainBlacklist -NameOrIpAddress "example.com" -Verbose
   ```
-- `Test-DkimRecord` – verifies DKIM selectors for the given domain.
+- `Test-EmailDkim` – verifies DKIM selectors for the given domain.
   ```powershell
-  Test-DkimRecord -DomainName "example.com" -Selectors "selector1" -Verbose
+  Test-EmailDkim -DomainName "example.com" -Selectors "selector1" -Verbose
   ```
 - `Test-DnsPropagation` – checks how DNS records propagate across public resolvers. Progress is reported via `Write-Progress`.
   ```powershell
   $file = Join-Path (Split-Path ([System.Reflection.Assembly]::GetExecutingAssembly().Location)) 'Data/DNS/PublicDNS.json'
   Test-DnsPropagation -DomainName "example.com" -RecordType A -ServersFile $file -CompareResults
   ```
-- `Test-CaaRecord` – validates CAA entries.
+- `Test-DnsCaa` – validates CAA entries.
   ```powershell
-  Test-CaaRecord -DomainName "example.com"
+  Test-DnsCaa -DomainName "example.com"
   ```
-- `Test-SecurityTXT` – retrieves security.txt information and reports any issues.
+- `Test-DomainSecurityTxt` – retrieves security.txt information and reports any issues.
   ```powershell
-  Test-SecurityTXT -DomainName "example.com"
+  Test-DomainSecurityTxt -DomainName "example.com"
   ```
-- `Test-StartTls` – verifies SMTP STARTTLS support and reports downgrades via `DowngradeDetected`.
+- `Test-EmailStartTls` – verifies SMTP STARTTLS support and reports downgrades via `DowngradeDetected`.
   ```powershell
-  Test-StartTls -DomainName "example.com" -Port 587 -Verbose
+  Test-EmailStartTls -DomainName "example.com" -Port 587 -Verbose
   ```
-  To check a specific host use `Test-SmtpTls`.
+  To check a specific host use `Test-EmailSmtpTls`.
   ```powershell
-  Test-SmtpTls -HostName "mail.example.com" -Port 587
+  Test-EmailSmtpTls -HostName "mail.example.com" -Port 587
   ```
 - `Test-Autodiscover` – checks SRV and CNAME records used by mail clients.
   ```powershell
   Test-Autodiscover -DomainName "example.com"
   ```
-- `Test-FCrDns` – validates forward-confirmed reverse DNS (FCrDNS).
+- `Test-DnsFcrDns` – validates forward-confirmed reverse DNS (FCrDNS).
   ```powershell
-  Test-FCrDns -DomainName "example.com"
+  Test-DnsFcrDns -DomainName "example.com"
   ```
-- `Test-MessageHeader` – parses raw email headers.
+- `Get-EmailHeaderInfo` – parses raw email headers.
   ```powershell
-  Get-Content './headers.txt' -Raw | Test-MessageHeader
+  Get-Content './headers.txt' -Raw | Get-EmailHeaderInfo
   ```
 - `Invoke-DomainWizard` – interactive helper that guides through domain checks.
   ```powershell
