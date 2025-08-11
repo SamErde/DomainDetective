@@ -1,4 +1,4 @@
-Describe 'Test-DaneRecord cmdlet' {
+Describe 'Test-TlsDane cmdlet' {
     It 'cancels on Ctrl+C' {
         Import-Module "$PSScriptRoot/../DomainDetective.psd1" -Force
         $job = Start-Job -ScriptBlock {
