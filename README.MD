@@ -279,6 +279,7 @@ Test-Rpki -DomainName "example.com"
 | `Test-DDDnsSecStatus`          | `Test-DnsSec`            | `VerifyDNSSEC`          |
 | `Test-DDDnsBlacklistRecord`    | `Test-DnsBlacklist`      | `VerifyDNSBL` |
 | `Test-DDDnsDomainBlacklist`    | `Test-DnsDomainBlacklist`| `CheckDNSBL`                     |
+| `Test-DDDnsOpenResolver`       | `Test-OpenResolver`      | `CheckOpenResolverHost`          |
 | `Test-DDDnsDanglingCname`      | `Test-DnsDanglingCname`  | `VerifyDanglingCname`   |
 | `Test-DDDnsPropagation`        | `Test-DnsPropagation`    | `DnsPropagationAnalysis.QueryAsync` |
 | `Test-DDDnsTtl`                | `Test-DnsTtl`            | `DnsTtlAnalysis.Analyze`          |
@@ -301,6 +302,11 @@ Test-Rpki -DomainName "example.com"
 | `Get-DDDomainWhois`            | `Get-DomainWhois`        | `CheckWHOIS`                               |
 | `Get-DDFlattenedSpfIp`         | `Get-DomainFlattenedSpfIp` | `GetFlattenedIpAddresses`               |
 | `Test-DDThreatIntel`           | `Test-DomainThreatIntel` | `VerifyThreatIntel`                        |
+| `Test-DDRdap`                  | `Test-Rdap`              | `QueryRDAP`                                |
+| `Test-DDRpki`                  | `Test-Rpki`              | `VerifyRPKI`                               |
+| `Get-DDRdapObject`             | `Get-RdapObject`         | `RdapClient.Query*Async`                   |
+| `Get-DDSearchEngineInfo`       | `Get-SearchEngineInfo`   | `SearchEngineAnalysis.Search*`             |
+| `Show-DDDomainReport`          | `Export-DomainReport`<br>`New-DomainReport`<br>`Generate-DomainReport` | `DomainSecurityReport.GenerateReport` |
 
 ## 🔐 TLS Cmdlets
 
@@ -324,6 +330,7 @@ Test-Rpki -DomainName "example.com"
 | `Clear-DDDnsblProviderList`  | `Clear-DnsblProvider` | `ClearDNSBL`              |
 | `Import-DDDnsblConfig`       | `Import-DnsblConfig` | `LoadDnsblConfig`          |
 | `Import-DDDmarcReport`       | `Import-DmarcReport` | `DmarcReportParser.ParseZip` |
+| `Import-DDDmarcForensic`     | `Import-DmarcForensic` | `DmarcForensicParser.ParseZip` |
 
 ### MTA-STS
 
