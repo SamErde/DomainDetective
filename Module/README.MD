@@ -42,9 +42,9 @@ Test-DnsNs -DomainName "example.com" -Verbose
   ```powershell
   Test-EmailSmtpTls -HostName "mail.example.com" -Port 587
   ```
-- `Test-Autodiscover` – checks SRV and CNAME records used by mail clients.
+- `Test-EmailAutoDiscover` – checks SRV and CNAME records used by mail clients.
   ```powershell
-  Test-Autodiscover -DomainName "example.com"
+  Test-EmailAutoDiscover -DomainName "example.com"
   ```
 - `Test-DnsFcrDns` – validates forward-confirmed reverse DNS (FCrDNS).
   ```powershell

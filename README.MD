@@ -37,7 +37,7 @@ Current capabilities include:
 - [x] Verify BIMI
 - [x] Check for dangling CNAME records
 - [x] Detect CNAME flattening services (e.g., Cloudflare)
-- [x] Verify Autodiscover
+- [x] Verify AutoDiscover
 - [x] Verify Website Connectivity
   - [x] Verify HTTP/2
   - [x] Verify HTTP/3
@@ -159,7 +159,7 @@ all analysis details in JSON format:
 ```bash
 dotnet run --project DomainDetective.Example example.com --json
 ```
-To verify Autodiscover records only:
+To verify AutoDiscover records only:
 ```bash
 ddcli example.com --checks autodiscover
 ```
@@ -211,7 +211,7 @@ Import the module and call any of the testing cmdlets:
 ```powershell
 Import-Module ./Module/DomainDetective.psd1 -Force
 Test-EmailSpf -DomainName "example.com"
-Test-Autodiscover -DomainName "example.com"
+Test-EmailAutoDiscover -DomainName "example.com"
 Test-DnsFcrDns -DomainName "example.com"
 ```
 
@@ -257,6 +257,7 @@ Test-Rpki -DomainName "example.com"
 | Prefixed Name                   | Alias Name               | C# Method                       |
 |--------------------------------|--------------------------|---------------------------------|
 | `Test-DDEmailArcRecord`        | `Test-EmailArc`          | `VerifyARC`                     |
+| `Test-DDEmailAutoDiscover`     | `Test-EmailAutoDiscover` | `VerifyAutodiscover`            |
 | `Test-DDEmailBimiRecord`       | `Test-EmailBimi`         | `VerifyBIMI`                    |
 | `Test-DDEmailDkimRecord`       | `Test-EmailDkim`         | `VerifyDKIM`                    |
 | `Test-DDEmailDmarcRecord`      | `Test-EmailDmarc`        | `VerifyDMARC`                 |
