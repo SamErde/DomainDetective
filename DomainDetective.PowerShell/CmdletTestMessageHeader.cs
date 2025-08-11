@@ -7,7 +7,7 @@ namespace DomainDetective.PowerShell {
     /// <para>Part of the DomainDetective project.</para>
     /// <example>
     ///   <summary>Analyze headers from a file.</summary>
-    ///   <code>Get-Content './headers.txt' -Raw | Test-MessageHeader</code>
+    ///   <code>Get-Content './headers.txt' -Raw | Get-EmailHeaderInfo</code>
     /// </example>
 [Cmdlet(VerbsCommon.Get, "DDEmailMessageHeaderInfo")]
 [Alias("Get-EmailHeaderInfo")]
