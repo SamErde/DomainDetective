@@ -7,7 +7,7 @@ namespace DomainDetective.PowerShell {
     /// <para>Part of the DomainDetective project.</para>
     /// <example>
     ///   <summary>Check BIMI configuration.</summary>
-    ///   <code>Test-BimiRecord -DomainName example.com</code>
+    ///   <code>Test-EmailBimi -DomainName example.com</code>
     /// </example>
 [Cmdlet(VerbsDiagnostic.Test, "DDEmailBimiRecord", DefaultParameterSetName = "ServerName")]
 [Alias("Test-EmailBimi")]

@@ -8,7 +8,7 @@ namespace DomainDetective.PowerShell {
     /// <para>Part of the DomainDetective project.</para>
     /// <example>
     ///   <summary>Get WHOIS details.</summary>
-    ///   <code>Get-WhoisInfo -DomainName example.com</code>
+    ///   <code>Get-DomainWhois -DomainName example.com</code>
     /// </example>
 [Cmdlet(VerbsCommon.Get, "DDDomainWhois", DefaultParameterSetName = "ServerName")]
 [Alias("Get-DomainWhois")]

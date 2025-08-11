@@ -7,7 +7,7 @@ namespace DomainDetective.PowerShell;
 /// <para>Part of the DomainDetective project.</para>
 /// <example>
 ///   <summary>Check reputation listings.</summary>
-///   <code>Test-ThreatIntel -NameOrIpAddress example.com</code>
+///   <code>Test-DomainThreatIntel -NameOrIpAddress example.com</code>
 /// </example>
 [Cmdlet(VerbsDiagnostic.Test, "DDThreatIntel")]
 [Alias("Test-DomainThreatIntel")]

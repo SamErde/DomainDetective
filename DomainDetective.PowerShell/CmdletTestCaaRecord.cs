@@ -7,7 +7,7 @@ namespace DomainDetective.PowerShell {
     /// <para>Part of the DomainDetective project.</para>
     /// <example>
     ///   <summary>Check CAA entries.</summary>
-    ///   <code>Test-CaaRecord -DomainName example.com</code>
+    ///   <code>Test-DnsCaa -DomainName example.com</code>
     /// </example>
 [Cmdlet(VerbsDiagnostic.Test, "DDDnsCaaRecord", DefaultParameterSetName = "ServerName")]
 [Alias("Test-DnsCaa")]

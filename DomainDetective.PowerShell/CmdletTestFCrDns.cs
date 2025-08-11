@@ -7,7 +7,7 @@ namespace DomainDetective.PowerShell;
 /// <summary>Validates forward-confirmed reverse DNS for MX hosts.</summary>
 /// <example>
 ///   <summary>Check FCrDNS configuration.</summary>
-///   <code>Test-FCrDns -DomainName example.com</code>
+///   <code>Test-DnsFcrDns -DomainName example.com</code>
 /// </example>
 [Cmdlet(VerbsDiagnostic.Test, "DDDnsForwardReverse", DefaultParameterSetName = "ServerName")]
 [Alias("Test-DnsFcrDns")]

@@ -7,7 +7,7 @@ namespace DomainDetective.PowerShell {
     /// <para>Part of the DomainDetective project.</para>
     /// <example>
     ///   <summary>Query SOA information.</summary>
-    ///   <code>Test-SoaRecord -DomainName example.com</code>
+    ///   <code>Test-DnsSoa -DomainName example.com</code>
     /// </example>
 [Cmdlet(VerbsDiagnostic.Test, "DDDnsSoaRecord", DefaultParameterSetName = "ServerName")]
 [Alias("Test-DnsSoa")]
