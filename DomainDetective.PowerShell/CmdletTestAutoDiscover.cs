@@ -7,10 +7,11 @@ namespace DomainDetective.PowerShell {
     /// <para>Part of the DomainDetective project.</para>
     /// <example>
     ///   <summary>Verify Autodiscover setup.</summary>
-    ///   <code>Test-Autodiscover -DomainName example.com</code>
+    ///   <code>Test-EmailAutoDiscover -DomainName example.com</code>
     /// </example>
-    [Cmdlet(VerbsDiagnostic.Test, "Autodiscover", DefaultParameterSetName = "ServerName")]
-    public sealed class CmdletTestAutodiscover : AsyncPSCmdlet {
+    [Cmdlet(VerbsDiagnostic.Test, "DDEmailAutoDiscover", DefaultParameterSetName = "ServerName")]
+    [Alias("Test-EmailAutoDiscover")]
+    public sealed class CmdletTestAutoDiscover : AsyncPSCmdlet {
         /// <para>Domain to query.</para>
         [Parameter(Mandatory = true, Position = 0, ParameterSetName = "ServerName")]
         [ValidateNotNullOrEmpty]
