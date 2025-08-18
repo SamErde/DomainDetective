@@ -22,6 +22,8 @@ namespace DomainDetective {
     /// <remarks>
     /// DMARC TXT records are parsed and validated according to RFC 7489 with
     /// additional checks for common mistakes such as missing rua addresses.
+    /// DMARCbis handling follows draft-ietf-dmarcbis-base:
+    /// https://datatracker.ietf.org/doc/html/draft-ietf-dmarcbis-base
     /// </remarks>
     public class DmarcAnalysis {
         private const string TagVersion = "v";
@@ -29,15 +31,17 @@ namespace DomainDetective {
         private const string TagSubPolicy = "sp";
         private const string TagReportingInterval = "ri";
         private const string TagFailureOptions = "fo";
-        private const string TagPercent = "pct";
+        private const string TagPercent = "pct"; // deprecated in DMARCbis draft (draft-ietf-dmarcbis-base)
         private const string TagDkimAlignment = "adkim";
         private const string TagSpfAlignment = "aspf";
         private const string TagRua = "rua";
         private const string TagRuf = "ruf";
+        // DMARCbis tags defined in draft-ietf-dmarcbis-base
+        // https://datatracker.ietf.org/doc/html/draft-ietf-dmarcbis-base
         private const string TagNonexistentPolicy = "np";
         private const string TagPublicSuffixPolicy = "psd";
         private const string TagReportFeedback = "rfb";
-        private const string TagReportFormat = "rf";
+        private const string TagReportFormat = "rf"; // deprecated in DMARCbis draft (draft-ietf-dmarcbis-base)
         public DnsConfiguration DnsConfiguration { get; set; }
         public Func<string, DnsRecordType, Task<DnsAnswer[]>>? QueryDnsOverride { private get; set; }
         public Dictionary<string, bool> ExternalReportAuthorization { get; private set; } = new();
@@ -217,7 +221,7 @@ namespace DomainDetective {
                             var pctPair = $"{key}={value}";
                             if (!DeprecatedTags.Contains(pctPair)) {
                                 DeprecatedTags.Add(pctPair);
-                                logger?.WriteWarning("Tag {0} is deprecated in DMARCbis.", key);
+                                logger?.WriteWarning("Tag {0} is deprecated in DMARCbis draft (draft-ietf-dmarcbis-base).", key);
                             }
                             break;
                         case TagDkimAlignment:
@@ -255,7 +259,7 @@ namespace DomainDetective {
                             var rfPair = $"{key}={value}";
                             if (!DeprecatedTags.Contains(rfPair)) {
                                 DeprecatedTags.Add(rfPair);
-                                logger?.WriteWarning("Tag {0} is deprecated in DMARCbis.", key);
+                                logger?.WriteWarning("Tag {0} is deprecated in DMARCbis draft (draft-ietf-dmarcbis-base).", key);
                             }
                             break;
                         default:

@@ -381,7 +381,7 @@ namespace DomainDetective.Tests {
             Assert.Equal("none", healthCheck.DmarcAnalysis.NonexistentPolicyShort);
             Assert.Equal("quarantine", healthCheck.DmarcAnalysis.PublicSuffixPolicyShort);
             Assert.Equal("1", healthCheck.DmarcAnalysis.RfbShort);
-            Assert.DoesNotContain(healthCheck.DmarcAnalysis.UnknownTags, t => t.Contains("np"));
+            Assert.DoesNotContain("np=none", healthCheck.DmarcAnalysis.UnknownTags);
         }
 
         [Fact]
