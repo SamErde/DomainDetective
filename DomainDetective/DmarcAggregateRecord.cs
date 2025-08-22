@@ -23,8 +23,9 @@ public sealed class DmarcAggregateRecord {
     public string Disposition { get; set; } = string.Empty;
 
     /// <summary>Indicates whether the record passed DMARC evaluation.</summary>
-    public bool IsPass => string.Equals(Dkim, "pass", StringComparison.OrdinalIgnoreCase)
-        || string.Equals(Spf, "pass", StringComparison.OrdinalIgnoreCase)
-        || string.Equals(Disposition, "none", StringComparison.OrdinalIgnoreCase);
+    public bool IsPass => (string.Equals(Dkim, "pass", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(Spf, "pass", StringComparison.OrdinalIgnoreCase))
+        && !string.Equals(Disposition, "reject", StringComparison.OrdinalIgnoreCase)
+        && !string.Equals(Disposition, "quarantine", StringComparison.OrdinalIgnoreCase);
 }
 

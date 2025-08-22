@@ -55,5 +55,57 @@ public class TestDmarcReportParser {
         Assert.Equal("example.com", byHeaderFrom.HeaderFrom);
         Assert.Equal(2, byHeaderFrom.Count);
     }
+
+    [Fact]
+    public void ParseNegativeCountDefaultsToOne() {
+        const string xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><feedback>" +
+            "<record><identifiers><header_from>example.com</header_from></identifiers><row><source_ip>1.2.3.4</source_ip><count>-5</count><policy_evaluated><dkim>fail</dkim><spf>fail</spf><disposition>reject</disposition></policy_evaluated></row></record>" +
+            "</feedback>";
+        var tmp = Path.GetTempFileName();
+        File.Delete(tmp);
+        using (var archive = ZipFile.Open(tmp, ZipArchiveMode.Create)) {
+            var entry = archive.CreateEntry("report.xml");
+            using var stream = entry.Open();
+            using var writer = new StreamWriter(stream, Encoding.UTF8);
+            writer.Write(xml);
+        }
+        var records = DmarcReportParser.ParseZip(tmp).ToList();
+        File.Delete(tmp);
+        Assert.Single(records);
+        Assert.Equal(1, records[0].Count);
+    }
+
+    [Fact]
+    public void SummarizeByIpAggregatesCounts() {
+        const string xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><feedback>" +
+            "<record><identifiers><header_from>a.com</header_from></identifiers><row><source_ip>1.1.1.1</source_ip><count>2</count><policy_evaluated><dkim>fail</dkim><spf>fail</spf><disposition>reject</disposition></policy_evaluated></row></record>" +
+            "<record><identifiers><header_from>b.com</header_from></identifiers><row><source_ip>1.1.1.1</source_ip><count>3</count><policy_evaluated><dkim>fail</dkim><spf>fail</spf><disposition>reject</disposition></policy_evaluated></row></record>" +
+            "</feedback>";
+        var tmp = Path.GetTempFileName();
+        File.Delete(tmp);
+        using (var archive = ZipFile.Open(tmp, ZipArchiveMode.Create)) {
+            var entry = archive.CreateEntry("report.xml");
+            using var stream = entry.Open();
+            using var writer = new StreamWriter(stream, Encoding.UTF8);
+            writer.Write(xml);
+        }
+        var records = DmarcReportParser.ParseZip(tmp).ToList();
+        File.Delete(tmp);
+        var summary = records.SummarizeFailuresByIp().Single();
+        Assert.Equal("1.1.1.1", summary.SourceIp);
+        Assert.Equal(5, summary.Count);
+    }
+
+    [Fact]
+    public void ParseZipWithoutXmlEntryReturnsNoRecords() {
+        var tmp = Path.GetTempFileName();
+        File.Delete(tmp);
+        using (var archive = ZipFile.Open(tmp, ZipArchiveMode.Create)) {
+            archive.CreateEntry("readme.txt");
+        }
+        var records = DmarcReportParser.ParseZip(tmp).ToList();
+        File.Delete(tmp);
+        Assert.Empty(records);
+    }
 }
 

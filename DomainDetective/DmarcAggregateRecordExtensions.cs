@@ -32,15 +32,15 @@ public static class DmarcAggregateRecordExtensions {
     /// <summary>Summarizes failed records by source IP address.</summary>
     /// <param name="records">Collection of parsed DMARC records.</param>
     public static IEnumerable<SourceIpSummary> SummarizeFailuresByIp(this IEnumerable<DmarcAggregateRecord> records) {
-        return records.GetFailureRecords()
-            .GroupBy(r => r.SourceIp, r => r.Count, (s, c) => new SourceIpSummary { SourceIp = s, Count = c.Sum() });
+        var failures = records.GetFailureRecords().ToList();
+        return failures.GroupBy(r => r.SourceIp, r => r.Count, (s, c) => new SourceIpSummary { SourceIp = s, Count = c.Sum() });
     }
 
     /// <summary>Summarizes failed records by From header domain.</summary>
     /// <param name="records">Collection of parsed DMARC records.</param>
     public static IEnumerable<HeaderFromSummary> SummarizeFailuresByHeaderFrom(this IEnumerable<DmarcAggregateRecord> records) {
-        return records.GetFailureRecords()
-            .GroupBy(r => r.HeaderFrom, r => r.Count, (h, c) => new HeaderFromSummary { HeaderFrom = h, Count = c.Sum() });
+        var failures = records.GetFailureRecords().ToList();
+        return failures.GroupBy(r => r.HeaderFrom, r => r.Count, (h, c) => new HeaderFromSummary { HeaderFrom = h, Count = c.Sum() });
     }
 }
 

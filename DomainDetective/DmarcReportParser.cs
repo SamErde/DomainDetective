@@ -39,7 +39,7 @@ public static class DmarcReportParser {
             string spf = record.Element("row")?.Element("policy_evaluated")?.Element("spf")?.Value ?? string.Empty;
             string disposition = record.Element("row")?.Element("policy_evaluated")?.Element("disposition")?.Value ?? string.Empty;
             string countStr = record.Element("row")?.Element("count")?.Value ?? "1";
-            if (!int.TryParse(countStr, NumberStyles.Integer, CultureInfo.InvariantCulture, out int count)) {
+            if (!int.TryParse(countStr, NumberStyles.Integer, CultureInfo.InvariantCulture, out int count) || count < 0) {
                 count = 1;
             }
 
@@ -58,7 +58,8 @@ public static class DmarcReportParser {
     /// <param name="paths">Paths to zipped XML feedback reports.</param>
     public static IEnumerable<DmarcAggregateRecord> ParseMultiple(IEnumerable<string> paths) {
         foreach (var path in paths) {
-            foreach (var record in ParseZip(path)) {
+            var records = ParseZip(path).ToList();
+            foreach (var record in records) {
                 yield return record;
             }
         }
