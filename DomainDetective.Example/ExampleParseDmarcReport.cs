@@ -7,8 +7,8 @@ public static partial class Program {
     /// Example parsing a DMARC aggregate report and summarizing failures.
     /// </summary>
     public static void ExampleParseDmarcReport() {
-        var records = DmarcReportParser.ParseZip("aggregate.zip");
-        var summaries = records.SummarizeFailuresByIp().ToList();
+        var report = DmarcReportParser.Parse("aggregate.zip");
+        var summaries = report.Records.SummarizeFailuresByIp().ToList();
         Helpers.ShowPropertiesTable("DMARC failures by IP", summaries);
     }
 }

@@ -11,7 +11,7 @@ using DomainDetective.Helpers;
 
 namespace DomainDetective;
 
-/// <summary>Parser for zipped DMARC feedback reports.</summary>
+/// <summary>Parses DMARC feedback reports from various formats.</summary>
 public static class DmarcReportParser {
     private static readonly Lazy<XmlSchemaSet> V1Schemas = new(() => LoadSchemas("DomainDetective.Definitions.DmarcAggregateReport_v1.xsd"));
     private static readonly Lazy<XmlSchemaSet> V2Schemas = new(() => LoadSchemas("DomainDetective.Definitions.DmarcAggregateReport_v2.xsd"));
@@ -25,19 +25,40 @@ public static class DmarcReportParser {
         return set;
     }
 
-    /// <summary>Parses the specified zip file and returns individual report records.</summary>
-    /// <param name="path">Path to the zipped XML feedback report.</param>
+    /// <summary>Parses a DMARC feedback report from the specified path.</summary>
+    /// <param name="path">Path to a .xml, .gz, or .zip report.</param>
     /// <param name="validationMessages">Optional list collecting schema validation errors.</param>
-    public static IEnumerable<DmarcAggregateRecord> ParseZip(string path, IList<string>? validationMessages = null) {
-        using var archive = ZipFile.OpenRead(path);
-        var entry = archive.Entries.FirstOrDefault(e => e.FullName.EndsWith(".xml", StringComparison.OrdinalIgnoreCase));
-        if (entry == null) {
-            yield break;
+    /// <returns>The parsed aggregate report.</returns>
+    public static DmarcAggregateReport Parse(string path, IList<string>? validationMessages = null) {
+        using var file = File.OpenRead(path);
+        return Parse(file, path, validationMessages);
+    }
+
+    /// <summary>Parses a DMARC feedback report from a stream.</summary>
+    /// <param name="stream">Input stream containing the report data.</param>
+    /// <param name="name">Optional name used to determine the format (.xml, .gz, .zip).</param>
+    /// <param name="validationMessages">Optional list collecting schema validation errors.</param>
+    /// <returns>The parsed aggregate report.</returns>
+    public static DmarcAggregateReport Parse(Stream stream, string? name = null, IList<string>? validationMessages = null) {
+        string ext = name != null ? Path.GetExtension(name).ToLowerInvariant() : ".xml";
+        using var buffer = new MemoryStream();
+
+        if (ext == ".zip") {
+            using var archive = new ZipArchive(stream, ZipArchiveMode.Read, leaveOpen: true);
+            var entry = archive.Entries.FirstOrDefault(e => e.FullName.EndsWith(".xml", StringComparison.OrdinalIgnoreCase));
+            if (entry == null) {
+                return new DmarcAggregateReport();
+            }
+
+            using var entryStream = entry.Open();
+            entryStream.CopyTo(buffer);
+        } else if (ext == ".gz" || ext == ".gzip") {
+            using var gz = new GZipStream(stream, CompressionMode.Decompress, leaveOpen: true);
+            gz.CopyTo(buffer);
+        } else {
+            stream.CopyTo(buffer);
         }
 
-        using var baseStream = entry.Open();
-        using var buffer = new MemoryStream();
-        baseStream.CopyTo(buffer);
         buffer.Position = 0;
 
         string nsString;
@@ -64,9 +85,13 @@ public static class DmarcReportParser {
         using var reader = XmlReader.Create(buffer, settings);
         XDocument doc = XDocument.Load(reader);
         XNamespace ns = nsString;
+
+        var report = new DmarcAggregateReport {
+            PolicyPublished = ParsePolicy(doc.Root?.Element(ns + "policy_published"), ns)
+        };
+
         foreach (var record in doc.Descendants(ns + "record")) {
-            string rawDomain = record.Element(ns + "identifiers")?
-                .Element(ns + "header_from")?.Value ?? string.Empty;
+            string rawDomain = record.Element(ns + "identifiers")?.Element(ns + "header_from")?.Value ?? string.Empty;
             if (string.IsNullOrEmpty(rawDomain)) {
                 continue;
             }
@@ -88,23 +113,52 @@ public static class DmarcReportParser {
                 count = 1;
             }
 
-            yield return new DmarcAggregateRecord {
+            report.Records.Add(new DmarcAggregateRecord {
                 SourceIp = sourceIp,
                 HeaderFrom = headerFrom,
                 Count = count,
                 Dkim = dkim,
                 Spf = spf,
                 Disposition = disposition
-            };
+            });
         }
+
+        return report;
     }
 
-    /// <summary>Parses multiple zipped DMARC reports and returns individual report records.</summary>
-    /// <param name="paths">Paths to zipped XML feedback reports.</param>
+    private static DmarcPolicyPublished ParsePolicy(XElement? policy, XNamespace ns) {
+        var result = new DmarcPolicyPublished();
+        if (policy == null) {
+            return result;
+        }
+
+        result.Domain = policy.Element(ns + "domain")?.Value ?? string.Empty;
+        result.Adkim = policy.Element(ns + "adkim")?.Value;
+        result.Aspf = policy.Element(ns + "aspf")?.Value;
+        result.P = policy.Element(ns + "p")?.Value;
+        result.Sp = policy.Element(ns + "sp")?.Value;
+        result.Pct = policy.Element(ns + "pct")?.Value;
+        result.Fo = policy.Element(ns + "fo")?.Value;
+        result.Np = policy.Element(ns + "np")?.Value;
+
+        var known = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {
+            "domain", "adkim", "aspf", "p", "sp", "pct", "fo", "np"
+        };
+        foreach (var child in policy.Elements()) {
+            if (!known.Contains(child.Name.LocalName)) {
+                result.Extensions[child.Name.LocalName] = child.Value;
+            }
+        }
+
+        return result;
+    }
+
+    /// <summary>Parses multiple DMARC reports and returns individual records.</summary>
+    /// <param name="paths">Paths to report files.</param>
     public static IEnumerable<DmarcAggregateRecord> ParseMultiple(IEnumerable<string> paths) {
         foreach (var path in paths) {
-            var records = ParseZip(path).ToList();
-            foreach (var record in records) {
+            var report = Parse(path);
+            foreach (var record in report.Records) {
                 yield return record;
             }
         }

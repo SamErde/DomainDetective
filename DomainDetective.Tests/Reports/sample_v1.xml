@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feedback xmlns="http://dmarc.org/dmarc-xml/0.1">
+  <policy_published>
+    <domain>example.com</domain>
+    <adkim>r</adkim>
+    <aspf>r</aspf>
+    <p>none</p>
+    <sp>reject</sp>
+    <pct>100</pct>
+  </policy_published>
+  <record>
+    <identifiers>
+      <header_from>example.com</header_from>
+    </identifiers>
+    <row>
+      <source_ip>1.2.3.4</source_ip>
+      <count>1</count>
+      <policy_evaluated>
+        <dkim>pass</dkim>
+        <spf>pass</spf>
+        <disposition>none</disposition>
+      </policy_evaluated>
+    </row>
+  </record>
+</feedback>
