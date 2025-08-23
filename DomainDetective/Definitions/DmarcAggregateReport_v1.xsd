@@ -3,6 +3,13 @@
   <xs:element name="feedback">
     <xs:complexType>
       <xs:sequence>
+        <xs:element name="policy_published" minOccurs="0">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:any minOccurs="0" maxOccurs="unbounded" processContents="lax" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
         <xs:element name="record" minOccurs="0" maxOccurs="unbounded">
           <xs:complexType>
             <xs:sequence>

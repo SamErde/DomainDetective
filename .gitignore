@@ -374,3 +374,5 @@ packages-microsoft-prod.deb
 CLAUDE.md
 .claude/*
 DEMO/*
+DomainDetective.Tests/Reports/*.gz
+DomainDetective.Tests/Reports/*.zip
