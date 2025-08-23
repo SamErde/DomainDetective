@@ -124,6 +124,7 @@ public class TestDmarcReportParser {
         var report = DmarcReportParser.Parse(tmp, errors);
         File.Delete(tmp);
         Assert.NotEmpty(errors);
+        Assert.Equal(errors, report.ValidationMessages);
         Assert.Empty(report.Records);
     }
 
@@ -151,7 +152,8 @@ public class TestDmarcReportParser {
             using var writer = new StreamWriter(stream, Encoding.UTF8);
             writer.Write(xml);
         }
-        Assert.Throws<InvalidOperationException>(() => DmarcReportParser.Parse(tmp));
+        var ex = Assert.Throws<InvalidOperationException>(() => DmarcReportParser.Parse(tmp));
+        Assert.Equal("Unknown DMARC namespace 'http://example.com/unknown'. Supported versions are v1 (0.1) and v2 (2.0).", ex.Message);
         File.Delete(tmp);
     }
 
@@ -215,5 +217,23 @@ public class TestDmarcReportParser {
         Assert.Equal("example.net", report.PolicyPublished.Domain);
         Assert.Equal("reject", report.PolicyPublished.Np);
         Assert.Equal("1", report.PolicyPublished.Fo);
+    }
+
+    [Fact]
+    public void RecordCountMatchesParsedRecords() {
+        const string xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><feedback xmlns=\"" + V1Ns + "\">" +
+            "<record><identifiers><header_from>a.com</header_from></identifiers><row><source_ip>1.1.1.1</source_ip><policy_evaluated><dkim>pass</dkim></policy_evaluated></row></record>" +
+            "<record><identifiers><header_from>b.com</header_from></identifiers><row><source_ip>2.2.2.2</source_ip><policy_evaluated><dkim>pass</dkim></policy_evaluated></row></record>" +
+            "</feedback>";
+        var tmp = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".zip");
+        using (var archive = ZipFile.Open(tmp, ZipArchiveMode.Create)) {
+            var entry = archive.CreateEntry("report.xml");
+            using var stream = entry.Open();
+            using var writer = new StreamWriter(stream, Encoding.UTF8);
+            writer.Write(xml);
+        }
+        var report = DmarcReportParser.Parse(tmp);
+        File.Delete(tmp);
+        Assert.Equal(2, report.RecordCount);
     }
 }

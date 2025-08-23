@@ -67,19 +67,21 @@ public static class DmarcReportParser {
             nsString = nsReader.NamespaceURI;
         }
 
+        buffer.Position = 0;
+
         XmlSchemaSet schemas = nsString switch {
             "http://dmarc.org/dmarc-xml/0.1" => V1Schemas.Value,
             "http://dmarc.org/dmarc-xml/2.0" => V2Schemas.Value,
-            _ => throw new InvalidOperationException($"Unknown DMARC namespace '{nsString}'.")
+            _ => throw new InvalidOperationException($"Unknown DMARC namespace '{nsString}'. Supported versions are v1 (0.1) and v2 (2.0).")
         };
 
-        buffer.Position = 0;
         var settings = new XmlReaderSettings {
             ValidationType = ValidationType.Schema,
             Schemas = schemas
         };
+        var collected = validationMessages ?? new List<string>();
         if (validationMessages != null) {
-            settings.ValidationEventHandler += (_, e) => validationMessages.Add(e.Message);
+            settings.ValidationEventHandler += (_, e) => collected.Add(e.Message);
         }
 
         using var reader = XmlReader.Create(buffer, settings);
@@ -89,6 +91,7 @@ public static class DmarcReportParser {
         var report = new DmarcAggregateReport {
             PolicyPublished = ParsePolicy(doc.Root?.Element(ns + "policy_published"), ns)
         };
+        report.ValidationMessages.AddRange(collected);
 
         foreach (var record in doc.Descendants(ns + "record")) {
             string rawDomain = record.Element(ns + "identifiers")?.Element(ns + "header_from")?.Value ?? string.Empty;

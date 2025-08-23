@@ -26,7 +26,7 @@ public sealed class DmarcPolicyPublished {
     /// <summary>Failure reporting option.</summary>
     public string? Fo { get; set; }
 
-    /// <summary>Policy for non-existent subdomains.</summary>
+    /// <summary>Policy for non-existent subdomains (DMARC v2).</summary>
     public string? Np { get; set; }
 
     /// <summary>Any additional policy extensions.</summary>
