@@ -4,6 +4,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Text;
+using System.Xml.Schema;
 using Xunit;
 
 namespace DomainDetective.Tests;
@@ -128,6 +129,36 @@ public class TestDmarcReportParser {
         File.Delete(tmp);
         Assert.NotEmpty(errors);
         Assert.Empty(records);
+    }
+
+    [Fact]
+    public void InvalidXmlThrowsWhenNoCollector() {
+        const string xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><feedback xmlns=\"" + V1Ns + "\"><record><identifiers></identifiers><row><source_ip>1.2.3.4</source_ip><count>abc</count></row></record></feedback>"; 
+        var tmp = Path.GetTempFileName();
+        File.Delete(tmp);
+        using (var archive = ZipFile.Open(tmp, ZipArchiveMode.Create)) {
+            var entry = archive.CreateEntry("report.xml");
+            using var stream = entry.Open();
+            using var writer = new StreamWriter(stream, Encoding.UTF8);
+            writer.Write(xml);
+        }
+        Assert.Throws<XmlSchemaValidationException>(() => DmarcReportParser.ParseZip(tmp).ToList());
+        File.Delete(tmp);
+    }
+
+    [Fact]
+    public void UnknownNamespaceThrows() {
+        const string xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><feedback xmlns=\"http://example.com/unknown\"/>";
+        var tmp = Path.GetTempFileName();
+        File.Delete(tmp);
+        using (var archive = ZipFile.Open(tmp, ZipArchiveMode.Create)) {
+            var entry = archive.CreateEntry("report.xml");
+            using var stream = entry.Open();
+            using var writer = new StreamWriter(stream, Encoding.UTF8);
+            writer.Write(xml);
+        }
+        Assert.Throws<InvalidOperationException>(() => DmarcReportParser.ParseZip(tmp).ToList());
+        File.Delete(tmp);
     }
 
     [Fact]
