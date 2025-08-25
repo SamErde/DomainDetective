@@ -119,7 +119,7 @@ internal static class CommandUtilities {
         var checkPrompt = new MultiSelectionPrompt<string>()
             .Title("Select checks to run")
             .NotRequired()
-            .InstructionsText("[grey](Press <space> to toggle, <enter> to accept)[/]")
+            .InstructionsText("[grey](Press [blue]space[/] to toggle, [green]enter[/] to accept)[/]")
             .AddChoices(CheckNames);
 
         var selected = AnsiConsole.Prompt(checkPrompt);

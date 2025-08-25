@@ -17,6 +17,23 @@ internal static class Program {
             cts.Cancel();
         };
 
+        // If no arguments provided, run interactive wizard
+        if (args.Length == 0) {
+            try {
+                // Force UTF-8 for console
+                Console.OutputEncoding = System.Text.Encoding.UTF8;
+                Console.InputEncoding = System.Text.Encoding.UTF8;
+                
+                return await WizardMode.RunInteractiveWizard(CancellationToken);
+            } catch (OperationCanceledException) {
+                AnsiConsole.MarkupLine("[yellow]⚠️ Operation cancelled.[/]");
+                return 1;
+            } catch (Exception ex) {
+                AnsiConsole.MarkupLine($"[red]❌ Error: {ex.Message}[/]");
+                return 1;
+            }
+        }
+
         var app = new CommandApp();
         app.Configure(config => {
             config.SetApplicationName("DomainDetective");

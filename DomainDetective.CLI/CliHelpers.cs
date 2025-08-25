@@ -87,7 +87,7 @@ internal static class CliHelpers
                 nested.AddColumn("Value");
                 foreach (DictionaryEntry entry in dictionaryValue)
                 {
-                    var key = Markup.Escape(entry.Key.ToString());
+                    var key = Markup.Escape(entry.Key?.ToString() ?? string.Empty);
                     var val = Markup.Escape(FormatString(entry.Value?.ToString(), unicode));
                     nested.AddRow(key, val);
                 }
@@ -125,7 +125,9 @@ internal static class CliHelpers
         {
             foreach (DictionaryEntry entry in dictionary)
             {
-                AddProperties(table, entry.Value, true, unicode);
+                if (entry.Value != null) {
+                    AddProperties(table, entry.Value, true, unicode);
+                }
             }
         }
         else if (data is IList list)
