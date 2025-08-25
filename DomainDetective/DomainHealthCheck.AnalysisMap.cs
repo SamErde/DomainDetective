@@ -16,7 +16,9 @@ namespace DomainDetective
         Dictionary<HealthCheckType, PropertyInfo?> map = new();
         foreach (HealthCheckType check in Enum.GetValues(typeof(HealthCheckType)))
         {
-            PropertyInfo? property = typeof(DomainHealthCheck).GetProperty($"{check}Analysis");
+            PropertyInfo? property = typeof(DomainHealthCheck).GetProperty(
+                $"{check}Analysis",
+                BindingFlags.Instance | BindingFlags.Public | BindingFlags.IgnoreCase);
             map[check] = property;
         }
 
