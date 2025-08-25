@@ -145,14 +145,14 @@ public sealed class DomainWizard
                         }
                         catch (Exception ex)
                         {
-                            AnsiConsole.MarkupLine($"[red]✖ {title} failed:[/] {ex.Message.EscapeMarkup()}");
+                            // Do not write to console while Progress is active; update description instead
+                            task.Description = $"{title} [red]failed[/]: {ex.Message.EscapeMarkup()}";
                         }
                         task.Value = 100;
                         task.Description = $"{title} [green]complete[/]";
                         task.StopTask();
 
-                        // Print a compact stage summary so the user sees findings as we go
-                        try { Ui.RenderStageFindings(hc, i); } catch { }
+                        // Do not render panels during progress; keep bars stable
                     }
                 });
         }
