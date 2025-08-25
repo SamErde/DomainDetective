@@ -23,6 +23,7 @@ namespace DomainDetective {
             }
             var spf = await DnsConfiguration.QueryDNS(domainName, DnsRecordType.TXT, "SPF1", cancellationToken);
             await SpfAnalysis.AnalyzeSpfRecords(spf, _logger);
+            await SpfAnalysis.GetFlattenedIpAnalysis(domainName, _logger);
         }
 
         /// <summary>

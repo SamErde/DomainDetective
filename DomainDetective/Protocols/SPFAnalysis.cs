@@ -60,6 +60,8 @@ namespace DomainDetective {
 
         public List<string> UnknownMechanisms { get; private set; } = new List<string>();
 
+        public FlattenedSpfResult FlattenedIpAnalysis { get; private set; }
+
         public Dictionary<string, string> TestSpfRecords { get; } = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         public bool CycleDetected { get; private set; }
         public string CyclePath { get; private set; }
@@ -120,6 +122,7 @@ namespace DomainDetective {
             ResolvedIncludeRecords = new List<string>();
             ResolvedExistsRecords = new List<string>();
             UnknownMechanisms = new List<string>();
+            FlattenedIpAnalysis = new FlattenedSpfResult();
             ExpValue = null;
             RedirectValue = null;
             AllMechanism = null;
@@ -618,31 +621,33 @@ namespace DomainDetective {
         }
 
         /// <summary>
-        /// Returns all IP addresses referenced by the SPF record after resolving includes and redirects.
+        /// Generates a detailed analysis of flattened SPF IP addresses.
         /// </summary>
         /// <param name="domainName">Base domain used when an a or mx mechanism omits a domain.</param>
-        public async Task<List<string>> GetFlattenedIpAddresses(string domainName, InternalLogger? logger = null) {
+        public async Task<FlattenedSpfResult> GetFlattenedIpAnalysis(string domainName, InternalLogger? logger = null) {
             if (string.IsNullOrEmpty(SpfRecord)) {
-                return new List<string>();
+                FlattenedIpAnalysis = new FlattenedSpfResult();
+                return FlattenedIpAnalysis;
             }
 
             var visited = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             var tokens = await FlattenTokens(TokenizeSpfRecord(SpfRecord), visited, logger);
             var addresses = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var duplicates = new List<string>();
+            var tokenIpMap = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
 
             foreach (var t in tokens) {
                 var token = t.Trim('"');
+                var resolved = new List<string>();
                 if (token.StartsWith("ip4:", StringComparison.OrdinalIgnoreCase)) {
-                    addresses.Add(token.Substring(4));
+                    resolved.Add(token.Substring(4));
                 } else if (token.StartsWith("ip6:", StringComparison.OrdinalIgnoreCase)) {
-                    addresses.Add(token.Substring(4));
+                    resolved.Add(token.Substring(4));
                 } else if (token.Equals("a", StringComparison.OrdinalIgnoreCase) || token.StartsWith("a:", StringComparison.OrdinalIgnoreCase)) {
                     var host = token.Length > 2 ? token.Substring(2) : domainName;
                     var a = await QueryDns(host, DnsRecordType.A);
                     var aaaa = await QueryDns(host, DnsRecordType.AAAA);
-                    foreach (var ans in a.Concat(aaaa)) {
-                        addresses.Add(ans.Data);
-                    }
+                    resolved.AddRange(a.Concat(aaaa).Select(ans => ans.Data));
                 } else if (token.Equals("mx", StringComparison.OrdinalIgnoreCase) || token.StartsWith("mx:", StringComparison.OrdinalIgnoreCase)) {
                     var hostDomain = token.Length > 3 ? token.Substring(3) : domainName;
                     var mxRecords = await QueryDns(hostDomain, DnsRecordType.MX);
@@ -651,14 +656,37 @@ namespace DomainDetective {
                         var host = parts.Length == 2 ? parts[1].TrimEnd('.') : mx.Data.TrimEnd('.');
                         var a = await QueryDns(host, DnsRecordType.A);
                         var aaaa = await QueryDns(host, DnsRecordType.AAAA);
-                        foreach (var ans in a.Concat(aaaa)) {
-                            addresses.Add(ans.Data);
+                        resolved.AddRange(a.Concat(aaaa).Select(ans => ans.Data));
+                    }
+                }
+
+                if (resolved.Count > 0) {
+                    tokenIpMap[token] = resolved;
+                    foreach (var ip in resolved) {
+                        if (!addresses.Add(ip) && !duplicates.Contains(ip)) {
+                            duplicates.Add(ip);
                         }
                     }
                 }
             }
 
-            return addresses.ToList();
+            FlattenedIpAnalysis = new FlattenedSpfResult {
+                Tokens = tokens,
+                TokenIpMap = tokenIpMap,
+                UniqueIps = addresses.ToList(),
+                DuplicateIps = duplicates
+            };
+
+            return FlattenedIpAnalysis;
+        }
+
+        /// <summary>
+        /// Returns all IP addresses referenced by the SPF record after resolving includes and redirects.
+        /// </summary>
+        /// <param name="domainName">Base domain used when an a or mx mechanism omits a domain.</param>
+        public async Task<List<string>> GetFlattenedIpAddresses(string domainName, InternalLogger? logger = null) {
+            var analysis = await GetFlattenedIpAnalysis(domainName, logger);
+            return analysis.UniqueIps;
         }
 
         /// <summary>
@@ -1015,5 +1043,16 @@ namespace DomainDetective {
         public string Test { get; set; }
         public string Result { get; set; }
         public string Assessment { get; set; }
+    }
+
+    /// <summary>
+    /// Details of flattened SPF IP addresses including deduplication information.
+    /// </summary>
+    /// <para>Part of the DomainDetective project.</para>
+    public class FlattenedSpfResult {
+        public List<string> Tokens { get; set; } = new List<string>();
+        public Dictionary<string, List<string>> TokenIpMap { get; set; } = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+        public List<string> UniqueIps { get; set; } = new List<string>();
+        public List<string> DuplicateIps { get; set; } = new List<string>();
     }
 }
