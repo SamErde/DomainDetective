@@ -31,11 +31,15 @@ namespace DomainDetective {
         /// <summary>Gets a value indicating whether an ADSP record exists.</summary>
         public bool AdspRecordExists { get; private set; }
 
+        /// <summary>Summary message describing DKIM validation outcome.</summary>
+        public string Advisory { get; private set; }
+
         /// <summary>Clears <see cref="AnalysisResults"/>.</summary>
         public void Reset() {
             AnalysisResults = new Dictionary<string, DkimRecordAnalysis>();
             AdspRecord = null;
             AdspRecordExists = false;
+            Advisory = string.Empty;
         }
 
         /// <summary>
@@ -204,6 +208,23 @@ namespace DomainDetective {
             analysis.KeyTypeExists = !string.IsNullOrEmpty(analysis.KeyType);
 
             AnalysisResults[selector] = analysis;
+            UpdateAdvisory();
+        }
+
+        private void UpdateAdvisory() {
+            if (AnalysisResults.Count == 0) {
+                Advisory = "No DKIM selectors analyzed.";
+                return;
+            }
+
+            var issues = AnalysisResults
+                .Where(kvp => !kvp.Value.DkimRecordExists || !kvp.Value.StartsCorrectly || !kvp.Value.ValidPublicKey || kvp.Value.WeakKey)
+                .Select(kvp => kvp.Key)
+                .ToArray();
+
+            Advisory = issues.Length > 0
+                ? $"Issues detected with selector(s): {string.Join(", ", issues)}."
+                : "All DKIM selectors appear valid.";
         }
 
         /// <summary>

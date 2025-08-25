@@ -69,6 +69,9 @@ namespace DomainDetective {
         public List<string> RedirectVisitedDomains { get; private set; } = new List<string>();
         private HashSet<string> _visitedDomains = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
+        /// <summary>Summary message describing overall SPF status.</summary>
+        public string Advisory { get; private set; }
+
 
         public List<SpfPartAnalysis> SpfPartAnalyses { get; private set; } = new List<SpfPartAnalysis>();
         public List<SpfTestResult> SpfTestResults { get; private set; } = new List<SpfTestResult>();
@@ -131,6 +134,7 @@ namespace DomainDetective {
             _warnings.Clear();
             ExpDnsLookupsCount = 0;
             ExpExceedsDnsLookups = false;
+            Advisory = string.Empty;
         }
 
         public async Task AnalyzeSpfRecords(IEnumerable<DnsAnswer> dnsResults, InternalLogger logger) {
@@ -199,6 +203,21 @@ namespace DomainDetective {
             // GetFlattenedSpf can resolve fake DNS records in unit tests
 
             WarnIfExceedsDnsLookups(logger);
+            UpdateAdvisory();
+        }
+
+        private void UpdateAdvisory() {
+            if (!SpfRecordExists) {
+                Advisory = "No SPF record found.";
+            } else if (MultipleSpfRecords) {
+                Advisory = "Multiple SPF records published.";
+            } else if (!StartsCorrectly) {
+                Advisory = "SPF record does not start with v=spf1.";
+            } else if (ExceedsDnsLookups) {
+                Advisory = "SPF record exceeds DNS lookup limit.";
+            } else {
+                Advisory = "SPF record passed basic checks.";
+            }
         }
 
 

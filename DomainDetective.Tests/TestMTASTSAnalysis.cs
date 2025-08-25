@@ -373,6 +373,48 @@ namespace DomainDetective.Tests {
             }
         }
 
+        [Fact]
+        public async Task AdvisoryWarnsWhenNoDnsRecord() {
+            var analysis = new MTASTSAnalysis { QueryDnsOverride = (_, _) => Task.FromResult(Array.Empty<DnsAnswer>()) };
+            await analysis.AnalyzePolicy("example.com", new InternalLogger());
+            Assert.Equal("No MTA-STS record published.", analysis.Advisory);
+        }
+
+        [Fact]
+        public async Task AdvisoryReportsEnforcement() {
+            Skip.If(!HttpListener.IsSupported, "HttpListener not supported");
+            using var listener = new HttpListener();
+            var port = GetFreePort();
+            var prefix = $"http://localhost:{port}/";
+            listener.Prefixes.Add(prefix);
+            listener.Start();
+            PortHelper.ReleasePort(port);
+            const string policy = "version: STSv1\nmode: enforce\nmx: mail.example.com\nmax_age: 86400";
+            var serverTask = Task.Run(async () => {
+                var ctx = await listener.GetContextAsync();
+                if (ctx.Request.Url.AbsolutePath == "/.well-known/mta-sts.txt") {
+                    var data = Encoding.UTF8.GetBytes(policy);
+                    ctx.Response.StatusCode = 200;
+                    await ctx.Response.OutputStream.WriteAsync(data, 0, data.Length);
+                } else {
+                    ctx.Response.StatusCode = 404;
+                }
+                ctx.Response.Close();
+            });
+            try {
+                var answers = new[] { new DnsAnswer { DataRaw = "v=STSv1; id=abc", Type = DnsRecordType.TXT } };
+                var analysis = new MTASTSAnalysis {
+                    PolicyUrlOverride = prefix + ".well-known/mta-sts.txt",
+                    QueryDnsOverride = (_, _) => Task.FromResult(answers)
+                };
+                await analysis.AnalyzePolicy("example.com", new InternalLogger());
+                Assert.Equal("MTA-STS policy enforced.", analysis.Advisory);
+            } finally {
+                listener.Stop();
+                await serverTask;
+            }
+        }
+
         private static int GetFreePort() {
             return PortHelper.GetFreePort();
         }
