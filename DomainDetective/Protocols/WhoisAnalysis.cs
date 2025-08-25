@@ -118,6 +118,10 @@ public class WhoisAnalysis {
         "^\\s*(Registry Expiry Date:|Expiry date:|expire:|renewal date:)\\s*(.*)$",
         RegexOptions.IgnoreCase);
 
+    private static readonly Regex _whoisServerRegex = new(
+        "whois:\\s*([^\\s]+)",
+        RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Compiled);
+
     private void SetExpiryDate(string value) {
         if (DateTime.TryParse(value, CultureInfo.InvariantCulture,
                 DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal,
@@ -405,22 +409,63 @@ public class WhoisAnalysis {
 
     public WhoisAnalysis() { }
 
-    private string GetWhoisServer(string domain) {
-        var domainParts = domain.Split('.');
-        var tld = string.Join(".", domainParts.Skip(1));
-        TLD = tld;
+    private async Task<string?> GetWhoisServer(string domain) {
+        string[] domainParts = domain.Split('.');
+        if (domainParts.Length > 2) {
+            string compoundTld = string.Join(".", domainParts.Skip(domainParts.Length - 2));
+            lock (_whoisServersLock) {
+                if (WhoisServers.TryGetValue(compoundTld, out string server)) {
+                    TLD = compoundTld;
+                    return server;
+                }
+            }
+        }
 
+        string singleTld = domainParts[domainParts.Length - 1];
+        TLD = singleTld;
         lock (_whoisServersLock) {
-            if (WhoisServers.TryGetValue(tld, out var server)) {
+            if (WhoisServers.TryGetValue(singleTld, out string server)) {
                 return server;
             }
         }
 
-        tld = domainParts.Last();
-        TLD = tld;
-        lock (_whoisServersLock) {
-            return WhoisServers.TryGetValue(tld, out var server) ? server : null;
+        string? dynamicServer = await LookupWhoisServerAsync(singleTld).ConfigureAwait(false);
+        if (dynamicServer != null) {
+            lock (_whoisServersLock) {
+                WhoisServers[singleTld] = dynamicServer;
+            }
         }
+
+        return dynamicServer;
+    }
+
+    private async Task<string?> LookupWhoisServerAsync(string tld) {
+        var host = $"{tld}.whois-servers.net";
+        try {
+            _ = await Dns.GetHostAddressesAsync(host).ConfigureAwait(false);
+            return host;
+        } catch (SocketException) {
+            // Fallback to IANA lookup below.
+        }
+
+        string response;
+        if (IanaQueryOverride != null) {
+            response = await IanaQueryOverride(tld).ConfigureAwait(false);
+        } else {
+            try {
+#if NETSTANDARD2_0 || NET472
+                using var httpResponse = await SharedHttpClient.Instance.GetAsync($"https://www.iana.org/whois?q={tld}").ConfigureAwait(false);
+                response = await httpResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
+#else
+                response = await SharedHttpClient.Instance.GetStringAsync($"https://www.iana.org/whois?q={tld}").ConfigureAwait(false);
+#endif
+            } catch (HttpRequestException) {
+                return null;
+            }
+        }
+
+        Match match = _whoisServerRegex.Match(response);
+        return match.Success ? match.Groups[1].Value : null;
     }
 
     /// <summary>
@@ -431,7 +476,7 @@ public class WhoisAnalysis {
         if (string.IsNullOrWhiteSpace(domain) || !domain.Contains('.')) {
             throw new UnsupportedTldException(domain, domain);
         }
-        var whoisServer = GetWhoisServer(domain);
+        var whoisServer = await GetWhoisServer(domain).ConfigureAwait(false);
         if (whoisServer == null) {
             throw new UnsupportedTldException(domain, TLD);
         }

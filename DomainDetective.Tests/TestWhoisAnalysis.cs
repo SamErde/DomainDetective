@@ -13,6 +13,45 @@ namespace DomainDetective.Tests {
         }
 
         [Fact]
+        public async Task DynamicLookupUsesIanaFallback() {
+            var response = "Domain Name: example.unmapped\r\n";
+            var listener = new System.Net.Sockets.TcpListener(System.Net.IPAddress.Loopback, 0);
+            listener.Start();
+            var port = ((System.Net.IPEndPoint)listener.LocalEndpoint).Port;
+            var serverTask = System.Threading.Tasks.Task.Run(async () => {
+                for (var i = 0; i < 2; i++) {
+                    using var client = await listener.AcceptTcpClientAsync();
+                    using var stream = client.GetStream();
+                    using var reader = new System.IO.StreamReader(stream);
+                    await reader.ReadLineAsync();
+                    using var writer = new System.IO.StreamWriter(stream) { AutoFlush = true };
+                    await writer.WriteAsync(response);
+                }
+            });
+
+            try {
+                var ianaCalls = 0;
+                var whois = new WhoisAnalysis {
+                    IanaQueryOverride = _ => {
+                        ianaCalls++;
+                        return System.Threading.Tasks.Task.FromResult($"% IANA WHOIS server\nwhois: localhost:{port}\n");
+                    }
+                };
+
+                await whois.QueryWhoisServer("example.unmapped");
+                await whois.QueryWhoisServer("second.unmapped");
+                Assert.Equal(1, ianaCalls);
+
+                var field = typeof(WhoisAnalysis).GetField("WhoisServers", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                var servers = (System.Collections.Generic.Dictionary<string, string>?)field?.GetValue(whois);
+                Assert.Equal($"localhost:{port}", servers?["unmapped"]);
+            } finally {
+                listener.Stop();
+                await serverTask;
+            }
+        }
+
+        [Fact]
         public async Task QueryFromLocalWhoisServerReadsLargeResponse() {
             var responseBuilder = new System.Text.StringBuilder();
             responseBuilder.AppendLine("Domain Name: example.local");
