@@ -609,5 +609,50 @@ namespace DomainDetective.Tests {
             Assert.Contains($"127.0.0.1:{port}", eventArgs!.FullMessage);
             Assert.Contains("example.sample", eventArgs.FullMessage);
         }
+
+        [Fact]
+        public void CalculatesDaysUntilExpirationForFutureDates() {
+            var whois = new WhoisAnalysis {
+                ExpiryDate = DateTime.UtcNow.AddDays(60).ToString("o")
+            };
+            var method = typeof(WhoisAnalysis).GetMethod(
+                "UpdateExpiryFlags",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            method!.Invoke(whois, null);
+
+            Assert.Equal(60, whois.DaysUntilExpiration);
+            Assert.False(whois.ExpiresSoon);
+            Assert.False(whois.IsExpired);
+        }
+
+        [Fact]
+        public void CalculatesDaysUntilExpirationForNearFutureDates() {
+            var whois = new WhoisAnalysis {
+                ExpiryDate = DateTime.UtcNow.AddDays(5).ToString("o")
+            };
+            var method = typeof(WhoisAnalysis).GetMethod(
+                "UpdateExpiryFlags",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            method!.Invoke(whois, null);
+
+            Assert.Equal(5, whois.DaysUntilExpiration);
+            Assert.True(whois.ExpiresSoon);
+            Assert.False(whois.IsExpired);
+        }
+
+        [Fact]
+        public void CalculatesDaysUntilExpirationForPastDates() {
+            var whois = new WhoisAnalysis {
+                ExpiryDate = DateTime.UtcNow.AddDays(-3).AddHours(12).ToString("o")
+            };
+            var method = typeof(WhoisAnalysis).GetMethod(
+                "UpdateExpiryFlags",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            method!.Invoke(whois, null);
+
+            Assert.Equal(-3, whois.DaysUntilExpiration);
+            Assert.False(whois.ExpiresSoon);
+            Assert.True(whois.IsExpired);
+        }
     }
 }

@@ -16,7 +16,7 @@ namespace DomainDetective {
     ///   var health = new DomainHealthCheck();
     ///   await health.Verify("example.com");
     ///   var summary = health.BuildSummary();
-    ///   Console.WriteLine(summary.ExpiryDate);
+    ///   Console.WriteLine($"Expires on {summary.ExpiryDate} in {summary.DaysUntilExpiration} days");
     ///   </code>
     /// </example>
     public class DomainSummary {
@@ -59,6 +59,9 @@ namespace DomainDetective {
 
         /// <summary>Expiration date reported by WHOIS.</summary>
         public string ExpiryDate { get; init; }
+
+        /// <summary>Number of days until expiration; negative when already expired.</summary>
+        public int? DaysUntilExpiration { get; init; }
 
         /// <summary>True when the domain expires soon.</summary>
         public bool ExpiresSoon { get; init; }
