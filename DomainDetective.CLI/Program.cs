@@ -26,12 +26,14 @@ internal static class Program {
         // If no arguments provided, run the new Hacker Wizard with interactive prompts
         if (args.Length == 0) {
             try {
-                var domain = AnsiConsole.Prompt(
-                    new TextPrompt<string>("Enter domain to scan:")
-                        .PromptStyle("green")
-                        .ValidationErrorMessage("[red]Domain is required[/]")
-                        .Validate(s => !string.IsNullOrWhiteSpace(s))
-                ).Trim();
+                while (true)
+                {
+                    var domain = AnsiConsole.Prompt(
+                        new TextPrompt<string>("Enter domain to scan:")
+                            .PromptStyle("green")
+                            .ValidationErrorMessage("[red]Domain is required[/]")
+                            .Validate(s => !string.IsNullOrWhiteSpace(s))
+                    ).Trim();
 
                 var choices = new[]
                 {
@@ -71,18 +73,23 @@ internal static class Program {
                         .HighlightStyle(new Style(Color.Green))
                 );
 
-                var wizard = new DomainWizard(new Wizard.WizardOptions
-                {
-                    Domain = domain.ToLowerInvariant(),
-                    Mode = ScanMode.Full,
-                    Output = "console",
-                    Matrix = true,
-                    ActiveMailProbes = picked.Contains("⚙️ Active mail probes"),
-                    Details = details,
-                    Checks = list.Distinct().ToArray()
-                });
+                    var wizard = new DomainWizard(new Wizard.WizardOptions
+                    {
+                        Domain = domain.ToLowerInvariant(),
+                        Mode = ScanMode.Full,
+                        Output = "console",
+                        Matrix = false,
+                        ActiveMailProbes = picked.Contains("⚙️ Active mail probes"),
+                        Details = details,
+                        Checks = list.Distinct().ToArray()
+                    });
 
-                await wizard.RunAsync(CancellationToken);
+                    await wizard.RunAsync(CancellationToken);
+
+                    if (!AnsiConsole.Confirm("Run another scan?"))
+                        break;
+                    AnsiConsole.Clear();
+                }
                 return 0;
             } catch (OperationCanceledException) {
                 AnsiConsole.MarkupLine("[yellow]⚠️ Operation cancelled.[/]");

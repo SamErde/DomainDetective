@@ -134,15 +134,25 @@ public sealed class DomainWizard
 
                         task.StartTask();
                         task.Description = $"{title} [dim]starting…[/]";
-                        await hc.Verify(Options.Domain, types, cancellationToken: ct);
-                        // Some web/reputation bits (WHOIS) are outside Verify
-                        if (i == 3 /* Reputation */)
+                        try
                         {
-                            await hc.CheckWHOIS(Options.Domain, ct);
+                            await hc.Verify(Options.Domain, types, cancellationToken: ct);
+                            // Some web/reputation bits (WHOIS) are outside Verify
+                            if (i == 3 /* Reputation */)
+                            {
+                                await hc.CheckWHOIS(Options.Domain, ct);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            AnsiConsole.MarkupLine($"[red]✖ {title} failed:[/] {ex.Message.EscapeMarkup()}");
                         }
                         task.Value = 100;
                         task.Description = $"{title} [green]complete[/]";
                         task.StopTask();
+
+                        // Print a compact stage summary so the user sees findings as we go
+                        try { Ui.RenderStageFindings(hc, i); } catch { }
                     }
                 });
         }
@@ -433,6 +443,66 @@ file static class Fx
 
 file static class Ui
 {
+    public static void RenderStageFindings(DomainHealthCheck hc, int stageIndex)
+    {
+        switch (stageIndex)
+        {
+            case 0: // DNS
+            {
+                var rows = new List<IRenderable>
+                {
+                    new Markup($"DNSSEC: {(hc.DnsSecAnalysis?.ChainValid == true ? "[green]valid[/]" : "[red]no/invalid[/]")}"),
+                    new Markup($"NS count: {hc.NSAnalysis?.NsRecords?.Count ?? 0}"),
+                    new Markup($"Wildcard: {(hc.WildcardDnsAnalysis?.CatchAll == true ? "[red]yes[/]" : "[green]no[/]")}"),
+                    new Markup($"Open resolver(s): {hc.OpenResolverAnalysis?.ServerResults?.Count(kv => kv.Value) ?? 0}"),
+                    new Markup($"AXFR open: {hc.ZoneTransferAnalysis?.ServerResults?.Count(kv => kv.Value) ?? 0}")
+                };
+                AnsiConsole.Write(new Panel(new Rows(rows)) { Header = new PanelHeader("[bold]🧭 DNS Findings[/]"), Border = BoxBorder.Rounded });
+                AnsiConsole.WriteLine();
+                break;
+            }
+            case 1: // Mail
+            {
+                var rows = new List<IRenderable>
+                {
+                    new Markup($"SPF: {(hc.SpfAnalysis?.SpfRecordExists == true ? "[green]present[/]" : "[red]missing[/]")}"),
+                    new Markup($"DKIM selectors: {hc.DKIMAnalysis?.AnalysisResults?.Count ?? 0}"),
+                    new Markup($"DMARC: {(hc.DmarcAnalysis?.DmarcRecordExists == true ? (hc.DmarcAnalysis.PolicyShort ?? hc.DmarcAnalysis.Policy).EscapeMarkup() : "[red]missing[/]")}"),
+                    new Markup($"MTA-STS: {(hc.MTASTSAnalysis?.PolicyPresent == true ? "present" : "missing")}"),
+                    new Markup($"TLS-RPT: {(hc.TLSRPTAnalysis?.TlsRptRecord != null ? "present" : "missing")}")
+                };
+                AnsiConsole.Write(new Panel(new Rows(rows)) { Header = new PanelHeader("[bold]📧 Mail Findings[/]"), Border = BoxBorder.Rounded });
+                AnsiConsole.WriteLine();
+                break;
+            }
+            case 2: // Web
+            {
+                var rows = new List<IRenderable>
+                {
+                    new Markup($"HTTP: {(hc.HttpAnalysis?.IsReachable == true ? "[green]ok[/]" : "[red]no[/]")}"),
+                    new Markup($"HTTPS: {(hc.CertificateAnalysis?.IsReachable == true ? "[green]ok[/]" : "[red]no[/]")}"),
+                    new Markup($"HSTS: {(hc.HttpAnalysis?.HstsPresent == true ? "present" : "absent")}"),
+                    new Markup($"HTTP/2: {(hc.CertificateAnalysis?.Http2Supported == true ? "yes" : "no")}, HTTP/3: {(hc.CertificateAnalysis?.Http3Supported == true ? "yes" : "no")}"),
+                };
+                AnsiConsole.Write(new Panel(new Rows(rows)) { Header = new PanelHeader("[bold]🌐 Web Findings[/]"), Border = BoxBorder.Rounded });
+                AnsiConsole.WriteLine();
+                break;
+            }
+            case 3: // Reputation
+            {
+                var rows = new List<IRenderable>
+                {
+                    new Markup($"Registrar: {(hc.WhoisAnalysis?.Registrar?.EscapeMarkup() ?? "—")}"),
+                    new Markup($"RDAP RegistrarId: {(hc.RdapAnalysis?.RegistrarId?.EscapeMarkup() ?? "—")}"),
+                    new Markup($"RPKI all valid: {hc.RpkiAnalysis?.AllValid}"),
+                    new Markup($"DNSBL: {(hc.DNSBLAnalysis?.Blacklisted ?? 0)} listed / {(hc.DNSBLAnalysis?.RecordChecked ?? 0)} checked")
+                };
+                AnsiConsole.Write(new Panel(new Rows(rows)) { Header = new PanelHeader("[bold]🛡 Reputation Findings[/]"), Border = BoxBorder.Rounded });
+                AnsiConsole.WriteLine();
+                break;
+            }
+        }
+    }
     public static void RenderPosturePanels(DomainHealthCheck hc)
     {
         var emailBars = Fx.PostureBars(new Fx.MailPolicyScore

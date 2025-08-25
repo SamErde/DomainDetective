@@ -173,9 +173,8 @@ namespace DomainDetective {
                 if (actions.TryGetValue(healthCheckType, out var action)) {
                     await action();
                 } else {
-                    // Log and continue instead of throwing to allow UIs to remain responsive
                     _logger.WriteError("Unknown health check type: {0}", healthCheckType);
-                    continue;
+                    throw new NotSupportedException($"Health check type not implemented: {(int)healthCheckType}");
                 }
 
                 processedChecks++;
