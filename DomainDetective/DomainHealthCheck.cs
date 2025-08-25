@@ -70,9 +70,6 @@ namespace DomainDetective {
         /// <value>Results verifying PTR hostnames resolve back to their IP.</value>
         public FCrDnsAnalysis FcrDnsAnalysis { get; private set; } = new FCrDnsAnalysis();
 
-        /// <summary>Alias used by <see cref="GetAnalysisMap"/>.</summary>
-        public FCrDnsAnalysis FCRDNSAnalysis => FcrDnsAnalysis;
-
         /// <summary>
         /// Gets the CAA analysis.
         /// </summary>
@@ -154,8 +151,6 @@ namespace DomainDetective {
         /// </summary>
         /// <value>Registration data from RDAP.</value>
         public RdapAnalysis RdapAnalysis { get; private set; } = new RdapAnalysis();
-        /// <summary>Alias used by <see cref="GetAnalysisMap"/>.</summary>
-        public RdapAnalysis RDAPAnalysis => RdapAnalysis;
 
         /// <summary>
         /// Gets the zone transfer analysis.
@@ -192,16 +187,12 @@ namespace DomainDetective {
         /// </summary>
         /// <value>Results of IMAP TLS capability checks.</value>
         public IMAPTLSAnalysis ImapTlsAnalysis { get; private set; } = new IMAPTLSAnalysis();
-        /// <summary>Alias used by <see cref="GetAnalysisMap"/>.</summary>
-        public IMAPTLSAnalysis IMAPTLSAnalysis => ImapTlsAnalysis;
 
         /// <summary>
         /// Gets the POP3 TLS analysis.
         /// </summary>
         /// <value>Results of POP3 TLS capability checks.</value>
         public POP3TLSAnalysis Pop3TlsAnalysis { get; private set; } = new POP3TLSAnalysis();
-        /// <summary>Alias used by <see cref="GetAnalysisMap"/>.</summary>
-        public POP3TLSAnalysis POP3TLSAnalysis => Pop3TlsAnalysis;
 
         /// <summary>
         /// Gets the SMTP banner analysis.
@@ -214,17 +205,12 @@ namespace DomainDetective {
         /// </summary>
         /// <value>Connection and banner timing results.</value>
         public MailLatencyAnalysis MailLatencyAnalysis { get; private set; } = new MailLatencyAnalysis();
-        /// <summary>Alias used by <see cref="GetAnalysisMap"/>.</summary>
-        public MailLatencyAnalysis MAILLATENCYAnalysis => MailLatencyAnalysis;
 
         /// <summary>
         /// Gets the SMTP AUTH analysis.
         /// </summary>
         /// <value>Advertised authentication mechanisms.</value>
         public SmtpAuthAnalysis SmtpAuthAnalysis { get; private set; } = new SmtpAuthAnalysis();
-
-        /// <summary>Alias used by <see cref="GetAnalysisMap"/>.</summary>
-        public SmtpAuthAnalysis SMTPAUTHAnalysis => SmtpAuthAnalysis;
 
         /// <summary>
         /// Gets the TLSRPT analysis.
@@ -304,8 +290,6 @@ namespace DomainDetective {
         /// <summary>Gets the SNMP analysis.</summary>
         /// <value>Results from SNMP service checks.</value>
         public SnmpAnalysis SnmpAnalysis { get; private set; } = new SnmpAnalysis();
-        /// <summary>Alias used by <see cref="GetAnalysisMap"/>.</summary>
-        public SnmpAnalysis SNMPAnalysis => SnmpAnalysis;
 
         /// <summary>Gets the IP neighbor analysis.</summary>
         /// <value>Domains sharing the same IP address.</value>
@@ -314,8 +298,6 @@ namespace DomainDetective {
         /// <summary>Gets the RPKI analysis.</summary>
         /// <value>Origin validation results.</value>
         public RPKIAnalysis RpkiAnalysis { get; private set; } = new RPKIAnalysis();
-        /// <summary>Alias used by <see cref="GetAnalysisMap"/>.</summary>
-        public RPKIAnalysis RPKIAnalysis => RpkiAnalysis;
 
         /// <summary>Gets the DNS tunneling analysis.</summary>
         /// <value>Possible tunneling activities.</value>
@@ -328,44 +310,30 @@ namespace DomainDetective {
         /// <summary>Gets the threat intelligence analysis.</summary>
         /// <value>Results from reputation services.</value>
         public ThreatIntelAnalysis ThreatIntelAnalysis { get; private set; } = new ThreatIntelAnalysis();
-        /// <summary>Alias used by <see cref="GetAnalysisMap"/>.</summary>
-        public ThreatIntelAnalysis THREATINTELAnalysis => ThreatIntelAnalysis;
 
         /// <summary>Gets the threat feed analysis.</summary>
         /// <value>Results from external threat feeds.</value>
         public ThreatFeedAnalysis ThreatFeedAnalysis { get; private set; } = new ThreatFeedAnalysis();
-        /// <summary>Alias used by <see cref="GetAnalysisMap"/>.</summary>
-        public ThreatFeedAnalysis THREATFEEDAnalysis => ThreatFeedAnalysis;
 
         /// <summary>Gets the wildcard DNS analysis.</summary>
         /// <value>Results of wildcard detection.</value>
         public WildcardDnsAnalysis WildcardDnsAnalysis { get; private set; } = new WildcardDnsAnalysis();
-        /// <summary>Alias used by <see cref="GetAnalysisMap"/>.</summary>
-        public WildcardDnsAnalysis WILDCARDDNSAnalysis => WildcardDnsAnalysis;
 
         /// <summary>Gets the EDNS support analysis.</summary>
         /// <value>Information about EDNS capabilities.</value>
         public EdnsSupportAnalysis EdnsSupportAnalysis { get; private set; } = new EdnsSupportAnalysis();
-        /// <summary>Alias used by <see cref="GetAnalysisMap"/>.</summary>
-        public EdnsSupportAnalysis EDNSSUPPORTAnalysis => EdnsSupportAnalysis;
 
         /// <summary>Gets the flattening service analysis.</summary>
         /// <value>Information about CNAME flattening services.</value>
         public FlatteningServiceAnalysis FlatteningServiceAnalysis { get; private set; } = new FlatteningServiceAnalysis();
-        /// <summary>Alias used by <see cref="GetAnalysisMap"/>.</summary>
-        public FlatteningServiceAnalysis FLATTENINGSERVICEAnalysis => FlatteningServiceAnalysis;
 
         /// <summary>Gets the takeover CNAME analysis.</summary>
         /// <value>Information about risky cloud provider aliases.</value>
         public TakeoverCnameAnalysis TakeoverCnameAnalysis { get; private set; } = new TakeoverCnameAnalysis();
-        /// <summary>Alias used by <see cref="GetAnalysisMap"/>.</summary>
-        public TakeoverCnameAnalysis TAKEOVERCNAMEAnalysis => TakeoverCnameAnalysis;
 
         /// <summary>Gets the directory exposure analysis.</summary>
         /// <value>Results of exposed directory checks.</value>
         public DirectoryExposureAnalysis DirectoryExposureAnalysis { get; private set; } = new DirectoryExposureAnalysis();
-        /// <summary>Alias used by <see cref="GetAnalysisMap"/>.</summary>
-        public DirectoryExposureAnalysis DIRECTORYEXPOSUREAnalysis => DirectoryExposureAnalysis;
 
         /// <summary>Gets the NTP analysis.</summary>
         /// <value>Clock information from NTP servers.</value>

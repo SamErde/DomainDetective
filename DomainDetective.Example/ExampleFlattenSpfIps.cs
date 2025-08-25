@@ -9,7 +9,8 @@ public static partial class Program {
     public static async Task ExampleFlattenSpfIps() {
         var healthCheck = new DomainHealthCheck();
         await healthCheck.Verify("github.com", [HealthCheckType.SPF]);
-        var ips = await healthCheck.SpfAnalysis.GetFlattenedIpAddresses("github.com");
-        Helpers.ShowPropertiesTable("Flattened SPF IPs for github.com", ips);
+        var analysis = healthCheck.SpfAnalysis.FlattenedIpAnalysis;
+        Helpers.ShowPropertiesTable("Flattened SPF IPs for github.com", analysis.UniqueIps);
+        Helpers.ShowPropertiesTable("Duplicate SPF IPs for github.com", analysis.DuplicateIps);
     }
 }
