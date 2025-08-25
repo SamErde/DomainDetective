@@ -470,6 +470,19 @@ namespace DomainDetective.Tests {
         }
 
         [Fact]
+        public async Task FlattenedIpAnalysisReportsDuplicates() {
+            var healthCheck = new DomainHealthCheck();
+            await healthCheck.CheckSPF("v=spf1 ip4:192.0.2.1 ip4:192.0.2.1 ip4:198.51.100.2 -all");
+
+            var analysis = await healthCheck.SpfAnalysis.GetFlattenedIpAnalysis("example.com");
+
+            Assert.Contains("192.0.2.1", analysis.UniqueIps);
+            Assert.Contains("198.51.100.2", analysis.UniqueIps);
+            Assert.Contains("192.0.2.1", analysis.DuplicateIps);
+            Assert.True(analysis.TokenIpMap["ip4:192.0.2.1"].Contains("192.0.2.1"));
+        }
+
+        [Fact]
         public async Task WarnsWhenDnsLookupLimitExceeded() {
             var includes = string.Join(" ", Enumerable.Range(0, 11).Select(i => $"include:a{i}.example.com"));
             var record = $"v=spf1 {includes} -all";

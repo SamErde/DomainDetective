@@ -1,18 +1,18 @@
 using DnsClientX;
-using System.Collections.Generic;
 using System.Management.Automation;
 using System.Threading.Tasks;
 
 namespace DomainDetective.PowerShell {
-    /// <summary>Retrieves flattened SPF IP addresses for a domain.</summary>
+    /// <summary>Retrieves flattened SPF IP analysis for a domain.</summary>
     /// <para>Part of the DomainDetective project.</para>
     /// <para>Use the <c>TestSpfRecord</c> parameter to supply an SPF record during tests.</para>
     /// <example>
-    ///   <summary>Get flattened SPF IPs.</summary>
+    ///   <summary>Get flattened SPF IP analysis.</summary>
     ///   <code>Get-DomainFlattenedSpfIp -DomainName example.com</code>
     /// </example>
 [Cmdlet(VerbsCommon.Get, "DDFlattenedSpfIp", DefaultParameterSetName = "ServerName")]
 [Alias("Get-DomainFlattenedSpfIp")]
+    [OutputType(typeof(FlattenedSpfResult))]
     public sealed class CmdletGetFlattenedSpfIp : AsyncPSCmdlet {
         /// <para>Domain to query.</para>
         [Parameter(Mandatory = true, Position = 0, ParameterSetName = "ServerName")]
@@ -54,7 +54,7 @@ namespace DomainDetective.PowerShell {
         }
 
         /// <summary>
-        /// Performs SPF verification and outputs flattened IP addresses.
+        /// Performs SPF verification and outputs flattened IP analysis.
         /// </summary>
         /// <returns>A task that represents the asynchronous operation.</returns>
         protected override async Task ProcessRecordAsync() {
@@ -64,8 +64,8 @@ namespace DomainDetective.PowerShell {
             } else {
                 await _healthCheck.VerifySPF(DomainName);
             }
-            var ips = await _healthCheck.SpfAnalysis.GetFlattenedIpAddresses(DomainName, _logger);
-            WriteObject(ips, true);
+            var analysis = await _healthCheck.SpfAnalysis.GetFlattenedIpAnalysis(DomainName, _logger);
+            WriteObject(analysis);
         }
     }
 }
