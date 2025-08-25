@@ -152,7 +152,6 @@ namespace DomainDetective.PowerShell {
 
         /// <summary>Deprecated DKIM tags detected in the record.</summary>
         public IReadOnlyList<string> DeprecatedTags { get; set; }
-
     }
 
     /// <summary>
