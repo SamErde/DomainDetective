@@ -1,4 +1,5 @@
 using DnsClientX;
+using System;
 using System.Linq;
 using System.Management.Automation;
 using System.Threading.Tasks;
@@ -44,6 +45,9 @@ namespace DomainDetective.PowerShell {
         protected override async Task ProcessRecordAsync() {
             _logger.WriteVerbose("Querying SPF record for domain: {0}", DomainName);
             await healthCheck.VerifySPF(DomainName);
+            if (!string.IsNullOrEmpty(healthCheck.SpfAnalysis.Advisory)) {
+                WriteInformation(healthCheck.SpfAnalysis.Advisory, Array.Empty<string>());
+            }
             WriteObject(healthCheck.SpfAnalysis);
         }
     }

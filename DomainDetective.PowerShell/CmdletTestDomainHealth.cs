@@ -1,4 +1,5 @@
 using DnsClientX;
+using System;
 using System.Management.Automation;
 using System.Threading.Tasks;
 using DomainDetective;
@@ -80,8 +81,18 @@ namespace DomainDetective.PowerShell {
                 _healthCheck.TyposquattingBrandKeywords.AddRange(BrandKeyword);
             }
             await _healthCheck.Verify(DomainName, HealthCheckType, DkimSelectors, DaneServiceType, DanePorts, PortScanProfile);
+            Emit(_healthCheck.SpfAnalysis?.Advisory);
+            Emit(_healthCheck.DmarcAnalysis?.Advisory);
+            Emit(_healthCheck.DKIMAnalysis?.Advisory);
+            Emit(_healthCheck.MTASTSAnalysis?.Advisory);
             var result = _healthCheck.FilterAnalyses(HealthCheckType);
             WriteObject(result);
+        }
+
+        private void Emit(string message) {
+            if (!string.IsNullOrEmpty(message)) {
+                WriteInformation(message, Array.Empty<string>());
+            }
         }
     }
 }

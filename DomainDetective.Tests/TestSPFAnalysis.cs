@@ -533,5 +533,20 @@ namespace DomainDetective.Tests {
             Assert.Contains("Flattened SPF record exceeds", healthCheck.SpfAnalysis.Warnings.First());
             Assert.True(tree.Count > 0);
         }
+
+        [Fact]
+        public async Task AdvisoryWarnsWhenNoRecord() {
+            var analysis = new SpfAnalysis();
+            await analysis.AnalyzeSpfRecords(Array.Empty<DnsAnswer>(), new InternalLogger());
+            Assert.Equal("No SPF record found.", analysis.Advisory);
+        }
+
+        [Fact]
+        public async Task AdvisoryReportsValidRecord() {
+            var analysis = new SpfAnalysis();
+            var answers = new[] { new DnsAnswer { DataRaw = "v=spf1 -all", Type = DnsRecordType.TXT } };
+            await analysis.AnalyzeSpfRecords(answers, new InternalLogger());
+            Assert.Equal("SPF record passed basic checks.", analysis.Advisory);
+        }
     }
 }
