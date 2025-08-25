@@ -405,7 +405,7 @@ public class WhoisAnalysis {
 
     public WhoisAnalysis() { }
 
-    private string GetWhoisServer(string domain) {
+    private async Task<string?> GetWhoisServer(string domain) {
         var domainParts = domain.Split('.');
         var tld = string.Join(".", domainParts.Skip(1));
         TLD = tld;
@@ -419,8 +419,48 @@ public class WhoisAnalysis {
         tld = domainParts.Last();
         TLD = tld;
         lock (_whoisServersLock) {
-            return WhoisServers.TryGetValue(tld, out var server) ? server : null;
+            if (WhoisServers.TryGetValue(tld, out var server)) {
+                return server;
+            }
         }
+
+        var dynamicServer = await LookupWhoisServerAsync(tld).ConfigureAwait(false);
+        if (dynamicServer != null) {
+            lock (_whoisServersLock) {
+                WhoisServers[tld] = dynamicServer;
+            }
+        }
+
+        return dynamicServer;
+    }
+
+    private async Task<string?> LookupWhoisServerAsync(string tld) {
+        var host = $"{tld}.whois-servers.net";
+        try {
+            _ = await Dns.GetHostAddressesAsync(host).ConfigureAwait(false);
+            return host;
+        } catch (SocketException) {
+            // Fallback to IANA lookup below.
+        }
+
+        string response;
+        if (IanaQueryOverride != null) {
+            response = await IanaQueryOverride(tld).ConfigureAwait(false);
+        } else {
+            try {
+#if NETSTANDARD2_0 || NET472
+                using var httpResponse = await SharedHttpClient.Instance.GetAsync($"https://www.iana.org/whois?q={tld}").ConfigureAwait(false);
+                response = await httpResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
+#else
+                response = await SharedHttpClient.Instance.GetStringAsync($"https://www.iana.org/whois?q={tld}").ConfigureAwait(false);
+#endif
+            } catch (HttpRequestException) {
+                return null;
+            }
+        }
+
+        var match = Regex.Match(response, "whois:\\s*([^\\s]+)", RegexOptions.IgnoreCase);
+        return match.Success ? match.Groups[1].Value : null;
     }
 
     /// <summary>
@@ -431,7 +471,7 @@ public class WhoisAnalysis {
         if (string.IsNullOrWhiteSpace(domain) || !domain.Contains('.')) {
             throw new UnsupportedTldException(domain, domain);
         }
-        var whoisServer = GetWhoisServer(domain);
+        var whoisServer = await GetWhoisServer(domain).ConfigureAwait(false);
         if (whoisServer == null) {
             throw new UnsupportedTldException(domain, TLD);
         }
