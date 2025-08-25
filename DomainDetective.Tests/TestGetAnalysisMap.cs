@@ -1,3 +1,4 @@
+using System.Reflection;
 using Xunit;
 
 namespace DomainDetective.Tests;
@@ -14,7 +15,9 @@ public class TestGetAnalysisMap
 
         foreach (HealthCheckType type in Enum.GetValues(typeof(HealthCheckType)))
         {
-            var prop = typeof(DomainHealthCheck).GetProperty($"{type}Analysis");
+            var prop = typeof(DomainHealthCheck).GetProperty(
+                $"{type}Analysis",
+                BindingFlags.Instance | BindingFlags.Public | BindingFlags.IgnoreCase);
             var expected = prop?.GetValue(healthCheck);
 
             Assert.True(map.TryGetValue(type, out var actual));
