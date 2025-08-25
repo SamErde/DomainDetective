@@ -41,8 +41,7 @@ namespace DomainDetective.PowerShell {
                     CreationDate = result.CreationDate,
                     KeyAgeDays = result.KeyAgeDays,
                     OldKey = result.OldKey,
-                    DeprecatedTags = result.DeprecatedTags,
-                    Advisory = analysis.Advisory
+                    DeprecatedTags = result.DeprecatedTags
                 };
             }
         }
@@ -74,8 +73,7 @@ namespace DomainDetective.PowerShell {
                 HttpRuf = analysis.HttpRuf,
                 ExternalReportAuthorization = analysis.ExternalReportAuthorization,
                 InvalidReportUri = analysis.InvalidReportUri,
-                DeprecatedTags = analysis.DeprecatedTags,
-                Advisory = analysis.Advisory
+                DeprecatedTags = analysis.DeprecatedTags
             };
         }
     }
@@ -155,8 +153,6 @@ namespace DomainDetective.PowerShell {
         /// <summary>Deprecated DKIM tags detected in the record.</summary>
         public IReadOnlyList<string> DeprecatedTags { get; set; }
 
-        /// <summary>Summary advisory for all selectors.</summary>
-        public string Advisory { get; set; }
     }
 
     /// <summary>
@@ -226,7 +222,5 @@ namespace DomainDetective.PowerShell {
 
         /// <summary>Deprecated DMARC tags detected.</summary>
         public IReadOnlyList<string> DeprecatedTags { get; set; }
-        /// <summary>Summary advisory for the DMARC record.</summary>
-        public string Advisory { get; set; }
     }
 }

@@ -59,9 +59,6 @@ namespace DomainDetective.PowerShell {
         protected override async Task ProcessRecordAsync() {
             _logger.WriteVerbose("Querying DKIM records for domain: {0}", DomainName);
             await healthCheck.VerifyDKIM(DomainName, Selectors);
-            if (!string.IsNullOrEmpty(healthCheck.DKIMAnalysis.Advisory)) {
-                WriteInformation(healthCheck.DKIMAnalysis.Advisory, Array.Empty<string>());
-            }
             if (Raw) {
                 WriteObject(healthCheck.DKIMAnalysis);
             } else {

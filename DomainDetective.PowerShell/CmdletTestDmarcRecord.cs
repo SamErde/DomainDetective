@@ -44,9 +44,6 @@ namespace DomainDetective.PowerShell {
         protected override async Task ProcessRecordAsync() {
             _logger.WriteVerbose("Querying DMARC record for domain: {0}", DomainName);
             await healthCheck.VerifyDMARC(DomainName);
-            if (!string.IsNullOrEmpty(healthCheck.DmarcAnalysis.Advisory)) {
-                WriteInformation(healthCheck.DmarcAnalysis.Advisory, Array.Empty<string>());
-            }
             if (Raw) {
                 WriteObject(healthCheck.DmarcAnalysis);
             } else {
