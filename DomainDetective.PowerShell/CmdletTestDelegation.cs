@@ -6,7 +6,7 @@ namespace DomainDetective.PowerShell {
     /// <summary>Validates delegation records for a domain.</summary>
     /// <example>
     ///   <summary>Check delegation.</summary>
-    ///   <code>Test-DnsDelegation -DomainName example.com</code>
+    ///   <code>Test-DDDnsDelegation -DomainName example.com</code>
     /// </example>
     [Cmdlet(VerbsDiagnostic.Test, "DDDnsDelegation", DefaultParameterSetName = "ServerName")]
     [Alias("Test-DnsDelegation", "Test-Delegation")]

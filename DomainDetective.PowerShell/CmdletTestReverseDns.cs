@@ -7,7 +7,7 @@ namespace DomainDetective.PowerShell {
     /// <para>Part of the DomainDetective project.</para>
     /// <example>
     ///   <summary>Check reverse DNS configuration.</summary>
-    ///   <code>Test-DnsReverseDns -DomainName example.com</code>
+    ///   <code>Test-DDDnsReverseDns -DomainName example.com</code>
     /// </example>
     [Cmdlet(VerbsDiagnostic.Test, "DDDnsReverseDns", DefaultParameterSetName = "ServerName")]
     [Alias("Test-DnsReverseDns", "Test-ReverseDns")]

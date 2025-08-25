@@ -12,7 +12,7 @@ namespace DomainDetective.PowerShell {
     /// <para>Part of the DomainDetective project.</para>
     /// <example>
     ///   <summary>Launch the wizard.</summary>
-    ///   <code>Invoke-DomainWizard</code>
+    ///   <code>Invoke-DDDomainWizard</code>
     /// </example>
     [Cmdlet(VerbsLifecycle.Invoke, "DDDomainWizard")]
     [Alias("Invoke-DomainWizard")]

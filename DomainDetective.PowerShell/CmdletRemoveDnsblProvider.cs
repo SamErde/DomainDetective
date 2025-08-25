@@ -5,7 +5,7 @@ namespace DomainDetective.PowerShell {
     /// <para>Part of the DomainDetective project.</para>
     /// <example>
     ///   <summary>Remove a provider by domain.</summary>
-    ///   <code>Remove-DnsblProvider -Domain dnsbl.example.com</code>
+    ///   <code>Remove-DDDnsblProvider -Domain dnsbl.example.com</code>
     /// </example>
 [Cmdlet(VerbsCommon.Remove, "DDDnsblProvider")]
 [Alias("Remove-DnsblProvider")]

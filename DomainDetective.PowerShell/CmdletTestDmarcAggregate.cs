@@ -14,7 +14,7 @@ namespace DomainDetective.PowerShell {
     /// <para>Part of the DomainDetective project.</para>
     /// <example>
     ///   <summary>Summarize aggregate reports.</summary>
-    ///   <code>Get-ChildItem ./reports/*.xml | Test-EmailDmarcAggregate</code>
+    ///   <code>Get-ChildItem ./reports/*.xml | Test-DDDmarcAggregate</code>
     /// </example>
     [Cmdlet(VerbsDiagnostic.Test, "DDDmarcAggregate")]
     [Alias("Test-EmailDmarcAggregate", "Test-DmarcAggregate")]

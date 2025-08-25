@@ -7,7 +7,7 @@ namespace DomainDetective.PowerShell {
     /// <para>Part of the DomainDetective project.</para>
     /// <example>
     ///   <summary>Stop monitoring.</summary>
-    ///   <code>Stop-DnsPropagationMonitor -Monitor $monitor</code>
+    ///   <code>Stop-DDDnsPropagationMonitor -Monitor $monitor</code>
     /// </example>
     [Cmdlet(VerbsLifecycle.Stop, "DDDnsPropagationMonitor")]
     [Alias("Stop-DnsPropagationMonitor")]

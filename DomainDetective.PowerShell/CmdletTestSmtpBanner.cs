@@ -6,7 +6,7 @@ namespace DomainDetective.PowerShell {
     /// <para>Part of the DomainDetective project.</para>
     /// <example>
     ///   <summary>Check SMTP banner.</summary>
-    ///   <code>Test-EmailSmtpBanner -HostName mail.example.com -Port 25</code>
+    ///   <code>Test-DDEmailSmtpBanner -HostName mail.example.com -Port 25</code>
     /// </example>
     [Cmdlet(VerbsDiagnostic.Test, "DDEmailSmtpBanner", DefaultParameterSetName = "ServerName")]
     [Alias("Test-EmailSmtpBanner", "Test-SmtpBanner")]

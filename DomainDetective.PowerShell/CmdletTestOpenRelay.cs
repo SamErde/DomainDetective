@@ -7,7 +7,7 @@ namespace DomainDetective.PowerShell {
     /// <example>
     ///   <summary>Test a mail server.</summary>
     /// <para>Part of the DomainDetective project.</para>
-    ///   <code>Test-EmailOpenRelay -HostName mail.example.com -Port 25</code>
+    ///   <code>Test-DDEmailOpenRelay -HostName mail.example.com -Port 25</code>
     /// </example>
 [Cmdlet(VerbsDiagnostic.Test, "DDEmailOpenRelay", DefaultParameterSetName = "ServerName")]
 [Alias("Test-EmailOpenRelay")]

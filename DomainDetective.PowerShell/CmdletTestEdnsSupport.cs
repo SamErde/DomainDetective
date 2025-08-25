@@ -8,7 +8,7 @@ namespace DomainDetective.PowerShell;
 /// <para>Part of the DomainDetective project.</para>
 /// <example>
 ///   <summary>Check EDNS support.</summary>
-///   <code>Test-DnsEdnsSupport -DomainName example.com</code>
+///   <code>Test-DDDnsEdnsSupport -DomainName example.com</code>
 /// </example>
 [Cmdlet(VerbsDiagnostic.Test, "DDDnsEdnsSupport", DefaultParameterSetName = "ServerName")]
 [Alias("Test-DnsEdnsSupport")]

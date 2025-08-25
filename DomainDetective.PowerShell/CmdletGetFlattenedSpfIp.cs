@@ -9,7 +9,7 @@ namespace DomainDetective.PowerShell {
     /// <para>Use the <c>TestSpfRecord</c> parameter to supply an SPF record during tests.</para>
     /// <example>
     ///   <summary>Get flattened SPF IPs.</summary>
-    ///   <code>Get-DomainFlattenedSpfIp -DomainName example.com</code>
+    ///   <code>Get-DDDomainFlattenedSpfIp -DomainName example.com</code>
     /// </example>
 [Cmdlet(VerbsCommon.Get, "DDDomainFlattenedSpfIp", DefaultParameterSetName = "ServerName")]
 [Alias("Get-DomainFlattenedSpfIp")]

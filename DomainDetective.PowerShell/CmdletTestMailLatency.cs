@@ -6,7 +6,7 @@ namespace DomainDetective.PowerShell {
     /// <para>Part of the DomainDetective project.</para>
     /// <example>
     ///   <summary>Check mail latency for a server.</summary>
-    ///   <code>Test-EmailLatency -HostName mail.example.com -Port 25</code>
+    ///   <code>Test-DDEmailLatency -HostName mail.example.com -Port 25</code>
     /// </example>
 [Cmdlet(VerbsDiagnostic.Test, "DDEmailLatency", DefaultParameterSetName = "ServerName")]
 [Alias("Test-EmailLatency")]

@@ -5,7 +5,7 @@ namespace DomainDetective.PowerShell {
     /// <para>Part of the DomainDetective project.</para>
     /// <example>
     ///   <summary>Import TLS report file.</summary>
-    ///   <code>Import-EmailTlsRpt -Path ./report.json</code>
+    ///   <code>Import-DDEmailTlsRpt -Path ./report.json</code>
     /// </example>
     [Cmdlet(VerbsData.Import, "DDEmailTlsRpt")]
     [Alias("Import-EmailTlsRpt", "Import-TlsRpt")]

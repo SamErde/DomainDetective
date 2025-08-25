@@ -7,7 +7,7 @@ namespace DomainDetective.PowerShell {
     /// <para>Part of the DomainDetective project.</para>
     /// <example>
     ///   <summary>Analyze a PEM certificate.</summary>
-    ///   <code>Get-CertificateInfo -Path ./cert.pem</code>
+    ///   <code>Get-DDTlsCertificateInfo -Path ./cert.pem</code>
     /// </example>
     [Cmdlet(VerbsCommon.Get, "DDTlsCertificateInfo")]
     [Alias("Get-CertificateInfo")]

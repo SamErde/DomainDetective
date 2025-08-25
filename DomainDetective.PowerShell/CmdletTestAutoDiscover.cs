@@ -7,7 +7,7 @@ namespace DomainDetective.PowerShell {
     /// <para>Part of the DomainDetective project.</para>
     /// <example>
     ///   <summary>Verify Autodiscover setup.</summary>
-    ///   <code>Test-EmailAutoDiscover -DomainName example.com</code>
+    ///   <code>Test-DDEmailAutoDiscover -DomainName example.com</code>
     /// </example>
     [Cmdlet(VerbsDiagnostic.Test, "DDEmailAutoDiscover", DefaultParameterSetName = "ServerName")]
     [Alias("Test-EmailAutoDiscover")]

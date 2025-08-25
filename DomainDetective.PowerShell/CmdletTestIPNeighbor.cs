@@ -7,7 +7,7 @@ namespace DomainDetective.PowerShell {
     /// <para>Part of the DomainDetective project.</para>
     /// <example>
     ///   <summary>Check IP neighbors.</summary>
-    ///   <code>Test-NetworkIpNeighbor -DomainName example.com</code>
+    ///   <code>Test-DDNetworkIpNeighbor -DomainName example.com</code>
     /// </example>
 [Cmdlet(VerbsDiagnostic.Test, "DDNetworkIpNeighbor", DefaultParameterSetName = "ServerName")]
 [Alias("Test-NetworkIpNeighbor")]
