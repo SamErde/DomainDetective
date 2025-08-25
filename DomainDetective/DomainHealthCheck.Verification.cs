@@ -245,6 +245,7 @@ namespace DomainDetective {
                 DnsSecKeyExpiresSoon = DnsSecAnalysis?.KeyExpiresSoon ?? false,
                 IsPublicSuffix = IsPublicSuffix,
                 ExpiryDate = WhoisAnalysis.ExpiryDate,
+                DaysUntilExpiration = WhoisAnalysis.DaysUntilExpiration,
                 ExpiresSoon = WhoisAnalysis.ExpiresSoon,
                 IsExpired = WhoisAnalysis.IsExpired,
                 RegistrarLocked = WhoisAnalysis.RegistrarLocked,

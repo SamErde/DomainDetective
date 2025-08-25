@@ -87,6 +87,7 @@ public class WhoisAnalysis {
     public string WhoisData { get; set; }
     public bool ExpiresSoon { get; private set; }
     public bool IsExpired { get; private set; }
+    public int? DaysUntilExpiration { get; private set; }
     public bool RegistrarLocked { get; private set; }
     public bool PrivacyProtected { get; private set; }
     public TimeSpan ExpirationWarningThreshold { get; set; } = TimeSpan.FromDays(30);
@@ -998,13 +999,18 @@ public class WhoisAnalysis {
     private void UpdateExpiryFlags() {
         ExpiresSoon = false;
         IsExpired = false;
+        DaysUntilExpiration = null;
         if (!string.IsNullOrWhiteSpace(ExpiryDate) &&
             DateTime.TryParse(ExpiryDate, CultureInfo.InvariantCulture,
                 DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal,
                 out var expiry)) {
-            IsExpired = expiry <= DateTime.UtcNow;
+            var delta = expiry - DateTime.UtcNow;
+            DaysUntilExpiration = delta >= TimeSpan.Zero
+                ? (int)Math.Ceiling(delta.TotalDays)
+                : (int)Math.Floor(delta.TotalDays);
+            IsExpired = delta <= TimeSpan.Zero;
             ExpiresSoon = !IsExpired &&
-                expiry <= DateTime.UtcNow + ExpirationWarningThreshold;
+                delta <= ExpirationWarningThreshold;
         }
     }
 
