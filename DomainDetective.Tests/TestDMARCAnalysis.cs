@@ -407,5 +407,22 @@ namespace DomainDetective.Tests {
             Assert.Contains(warnings, w => w.FullMessage.Contains("Invalid reporting interval"));
             Assert.Equal("1 days", healthCheck.DmarcAnalysis.ReportingInterval);
         }
+
+        [Fact]
+        public async Task AdvisoryWarnsWhenMissingRecord() {
+            var analysis = new DmarcAnalysis();
+            await analysis.AnalyzeDmarcRecords(Array.Empty<DnsAnswer>(), new InternalLogger());
+            analysis.EvaluatePolicyStrength();
+            Assert.Equal("No DMARC record found.", analysis.Advisory);
+        }
+
+        [Fact]
+        public async Task AdvisoryReportsPolicy() {
+            var answers = new[] { new DnsAnswer { DataRaw = "v=DMARC1; p=reject", Type = DnsRecordType.TXT } };
+            var analysis = new DmarcAnalysis();
+            await analysis.AnalyzeDmarcRecords(answers, new InternalLogger());
+            analysis.EvaluatePolicyStrength();
+            Assert.Equal("DMARC policy reject in effect.", analysis.Advisory);
+        }
     }
 }

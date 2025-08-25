@@ -73,6 +73,9 @@ namespace DomainDetective {
         /// <summary>Recommendation message when a weak policy is found.</summary>
         public string? PolicyRecommendation { get; private set; }
 
+        /// <summary>Summary message describing DMARC status.</summary>
+        public string Advisory { get; private set; }
+
         /// <summary>Indicates whether the SPF domain aligns with the policy.</summary>
         public bool SpfAligned { get; private set; }
         /// <summary>Indicates whether the DKIM domain aligns with the policy.</summary>
@@ -145,6 +148,7 @@ namespace DomainDetective {
             OriginalPct = null;
             ReportingIntervalShort = string.Empty;
             ExternalReportAuthorization = new Dictionary<string, bool>();
+            Advisory = string.Empty;
 
             if (dnsResults == null) {
                 logger?.WriteVerbose("DNS query returned no results.");
@@ -316,6 +320,7 @@ namespace DomainDetective {
             HasMandatoryTags = StartsCorrectly && policyTagFound;
             // set the default value for the pct tag if it is not present
             Pct ??= 100;
+            UpdateAdvisory();
         }
 
         private void AddUriToList(string uri, List<string> mailtoList, List<string> httpList, InternalLogger? logger = null, bool isRuf = false) {
@@ -521,6 +526,19 @@ namespace DomainDetective {
 
             WeakPolicy = string.Equals(policy, "none", StringComparison.OrdinalIgnoreCase);
             PolicyRecommendation = WeakPolicy ? "Consider quarantine or reject." : string.Empty;
+            UpdateAdvisory();
+        }
+
+        private void UpdateAdvisory() {
+            if (!DmarcRecordExists) {
+                Advisory = "No DMARC record found.";
+            } else if (!StartsCorrectly || !HasMandatoryTags || !IsPolicyValid) {
+                Advisory = "DMARC record misconfigured.";
+            } else if (WeakPolicy) {
+                Advisory = "DMARC policy is weak.";
+            } else {
+                Advisory = $"DMARC policy {PolicyShort} in effect.";
+            }
         }
 
 

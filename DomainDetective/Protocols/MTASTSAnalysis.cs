@@ -130,6 +130,9 @@ public class MTASTSAnalysis {
         /// </summary>
         public string PolicyId { get; private set; }
 
+        /// <summary>Summary message describing MTA-STS status.</summary>
+        public string Advisory { get; private set; }
+
         /// <summary>
         /// Resets analysis state so the instance can be reused.
         /// </summary>
@@ -150,6 +153,7 @@ public class MTASTSAnalysis {
             DnsRecordPresent = false;
             DnsRecordValid = false;
             PolicyId = null;
+            Advisory = string.Empty;
         }
 
         /// <summary>
@@ -171,12 +175,14 @@ public class MTASTSAnalysis {
             DnsRecordPresent = dns?.Any() == true;
             if (!DnsRecordPresent) {
                 PolicyValid = false;
+                UpdateAdvisory();
                 return;
             }
 
             ParseDnsRecord(string.Join(string.Empty, dns.Select(r => r.Data)));
             if (!DnsRecordValid) {
                 PolicyValid = false;
+                UpdateAdvisory();
                 return;
             }
 
@@ -188,6 +194,7 @@ public class MTASTSAnalysis {
                 Policy = entry.Policy;
                 ParsePolicy(entry.Policy);
                 PolicyValid = PolicyValid && DnsRecordValid;
+                UpdateAdvisory();
                 return;
             }
 
@@ -195,6 +202,7 @@ public class MTASTSAnalysis {
             if (content == null) {
                 PolicyPresent = false;
                 PolicyValid = false;
+                UpdateAdvisory();
                 return;
             }
 
@@ -211,6 +219,7 @@ public class MTASTSAnalysis {
             }
             var cacheEntry = new CacheEntry(PolicyId, content, expiration);
             _cache[key] = cacheEntry;
+            UpdateAdvisory();
         }
 
         /// <summary>
@@ -220,6 +229,19 @@ public class MTASTSAnalysis {
         public void AnalyzePolicyText(string text) {
             Reset();
             ParsePolicy(text);
+            UpdateAdvisory();
+        }
+
+        private void UpdateAdvisory() {
+            if (!DnsRecordPresent) {
+                Advisory = "No MTA-STS record published.";
+            } else if (!PolicyValid) {
+                Advisory = "MTA-STS policy invalid.";
+            } else if (!EnforcesMtaSts) {
+                Advisory = "MTA-STS policy present but not enforcing.";
+            } else {
+                Advisory = "MTA-STS policy enforced.";
+            }
         }
 
         /// <summary>

@@ -225,6 +225,22 @@ namespace DomainDetective.Tests {
         }
 
         [Fact]
+        public async Task AdvisoryWarnsOnWeakKey() {
+            const string record = "v=DKIM1; k=rsa; p=MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBANYkh3Tqv0f70ACXB6PdpgIRnmX06BMA/5HXYhSggzSJ1ROtTNpo0pmATwwthSMleldrWUVcxf+A5sQ/jvWVnBMCAwEAAQ==;";
+            var healthCheck = new DomainHealthCheck();
+            await healthCheck.CheckDKIM(record);
+            Assert.Equal("Issues detected with selector(s): default.", healthCheck.DKIMAnalysis.Advisory);
+        }
+
+        [Fact]
+        public async Task AdvisoryReportsValidSelectors() {
+            const string record = "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA21OfspkRgPHhdCgu3kWgBX+xLyw7wRqM+Y4KaX82Pul9ikEDfZCJ35siFzV2WMH9Od/yM2TtMnubRqm9QN6paEB0VhNgNURQMmyTVsBO1usTJS9IvkIt3JtTFEinzVJLEaOC/F3d6bJaW9MMKUTBra9RcUf/E6dWAaJX8lrK8SefL9adNTwED8ZgFBnFcoJJn6e1W2WyIZ/8XAk+5Jwc7JMFZsdjFYdBSDPNyEfhNsKahVdRvdCG+OeDHyLSiNuFE27wtXaUI2TySDcfSSzE8k8z/Td9mMb0DQ2qaJ6xxk/5cwzwYSXr3sdGp++mHpGOJm18OwfsJmFCuSEcFGrHAQIDAQAB;";
+            var healthCheck = new DomainHealthCheck();
+            await healthCheck.CheckDKIM(record);
+            Assert.Equal("All DKIM selectors appear valid.", healthCheck.DKIMAnalysis.Advisory);
+        }
+
+        [Fact]
         public async Task DetectsAdspRecord() {
             var answers = new List<DnsAnswer> {
                 new DnsAnswer { DataRaw = "dkim=all", Type = DnsRecordType.TXT }
