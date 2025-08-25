@@ -8,7 +8,7 @@ namespace DomainDetective.PowerShell {
     ///   <summary>Check mail latency for a server.</summary>
     ///   <code>Test-EmailLatency -HostName mail.example.com -Port 25</code>
     /// </example>
-[Cmdlet(VerbsDiagnostic.Test, "DDMailLatency", DefaultParameterSetName = "ServerName")]
+[Cmdlet(VerbsDiagnostic.Test, "DDEmailLatency", DefaultParameterSetName = "ServerName")]
 [Alias("Test-EmailLatency")]
     public sealed class CmdletTestMailLatency : AsyncPSCmdlet {
         /// <summary>SMTP host to check.</summary>

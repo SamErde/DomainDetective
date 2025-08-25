@@ -9,7 +9,7 @@ namespace DomainDetective.PowerShell {
     ///   <summary>Check IP neighbors.</summary>
     ///   <code>Test-NetworkIpNeighbor -DomainName example.com</code>
     /// </example>
-[Cmdlet(VerbsDiagnostic.Test, "DDIpNeighbor", DefaultParameterSetName = "ServerName")]
+[Cmdlet(VerbsDiagnostic.Test, "DDNetworkIpNeighbor", DefaultParameterSetName = "ServerName")]
 [Alias("Test-NetworkIpNeighbor")]
     public sealed class CmdletTestIPNeighbor : AsyncPSCmdlet {
         /// <summary>Domain to query.</summary>

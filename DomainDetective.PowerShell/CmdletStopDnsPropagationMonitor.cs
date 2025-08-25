@@ -9,7 +9,8 @@ namespace DomainDetective.PowerShell {
     ///   <summary>Stop monitoring.</summary>
     ///   <code>Stop-DnsPropagationMonitor -Monitor $monitor</code>
     /// </example>
-    [Cmdlet(VerbsLifecycle.Stop, "DnsPropagationMonitor")]
+    [Cmdlet(VerbsLifecycle.Stop, "DDDnsPropagationMonitor")]
+    [Alias("Stop-DnsPropagationMonitor")]
     public sealed class CmdletStopDnsPropagationMonitor : AsyncPSCmdlet {
         /// <summary>Monitor instance returned by Start-DnsPropagationMonitor.</summary>
         [Parameter(Mandatory = true, Position = 0)]

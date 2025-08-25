@@ -9,7 +9,7 @@ namespace DomainDetective.PowerShell {
     ///   <code>Test-OpenResolver -Server 8.8.8.8 -Port 53</code>
     /// </example>
     [Cmdlet(VerbsDiagnostic.Test, "DDDnsOpenResolver")]
-    [Alias("Test-OpenResolver")]
+    [Alias("Test-DnsOpenResolver", "Test-OpenResolver")]
     public sealed class CmdletTestOpenResolver : AsyncPSCmdlet {
         /// <summary>DNS server to check.</summary>
         [Parameter(Mandatory = true, Position = 0)]

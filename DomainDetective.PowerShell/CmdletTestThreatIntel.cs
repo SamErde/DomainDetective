@@ -9,7 +9,7 @@ namespace DomainDetective.PowerShell;
 ///   <summary>Check reputation listings.</summary>
 ///   <code>Test-DomainThreatIntel -NameOrIpAddress example.com</code>
 /// </example>
-[Cmdlet(VerbsDiagnostic.Test, "DDThreatIntel")]
+[Cmdlet(VerbsDiagnostic.Test, "DDDomainThreatIntel")]
 [Alias("Test-DomainThreatIntel")]
 public sealed class CmdletTestThreatIntel : AsyncPSCmdlet {
     /// <summary>Domain or IP address to query.</summary>

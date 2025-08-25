@@ -267,7 +267,12 @@ Test-Rpki -DomainName "example.com"
 | `Test-DDEmailSmtpTls`          | `Test-EmailSmtpTls`      | `CheckSmtpTlsHost`              |
 | `Test-DDEmailOpenRelay`        | `Test-EmailOpenRelay`    | `CheckOpenRelayHost`            |
 | `Get-DDEmailMessageHeaderInfo` | `Get-EmailHeaderInfo`    | `CheckMessageHeaders`           |
-| `Test-DDMailLatency`           | `Test-EmailLatency`      | `CheckMailLatency`              |
+| `Test-DDEmailLatency`          | `Test-EmailLatency`      | `CheckMailLatency`              |
+| `Test-DDEmailImapTls`          | `Test-EmailImapTls`      | `CheckImapTlsHost`              |
+| `Test-DDEmailPop3Tls`          | `Test-EmailPop3Tls`      | `CheckPop3TlsHost`              |
+| `Test-DDEmailSmtpBanner`       | `Test-EmailSmtpBanner`   | `CheckSmtpBannerHost`           |
+| `Test-DDDmarcAggregate`        | `Test-EmailDmarcAggregate` | `Parse DMARC Aggregate`       |
+| `New-DDDmarcRecord`            | `New-DmarcRecord`        | `Build DMARC Record`            |
 
 ## 🌐 DNS-Related Cmdlets
 
@@ -279,16 +284,19 @@ Test-Rpki -DomainName "example.com"
 | `Test-DDDnsSecStatus`          | `Test-DnsSec`            | `VerifyDNSSEC`          |
 | `Test-DDDnsBlacklistRecord`    | `Test-DnsBlacklist`      | `VerifyDNSBL` |
 | `Test-DDDnsDomainBlacklist`    | `Test-DnsDomainBlacklist`| `CheckDNSBL`                     |
-| `Test-DDDnsOpenResolver`       | `Test-OpenResolver`      | `CheckOpenResolverHost`          |
+| `Test-DDDnsOpenResolver`       | `Test-DnsOpenResolver`   | `CheckOpenResolverHost`          |
 | `Test-DDDnsDanglingCname`      | `Test-DnsDanglingCname`  | `VerifyDanglingCname`   |
 | `Test-DDDnsPropagation`        | `Test-DnsPropagation`    | `DnsPropagationAnalysis.QueryAsync` |
 | `Test-DDDnsTtl`                | `Test-DnsTtl`            | `DnsTtlAnalysis.Analyze`          |
 | `Test-DDDnsTunneling`          | `Test-DnsTunneling`      | `CheckDnsTunneling`               |
 | `Test-DDDnsWildcard`           | `Test-DnsWildcard`       | `VerifyWildcardDns`     |
-| `Test-DDEdnsSupport`           | `Test-DnsEdnsSupport`    | `VerifyEdnsSupport`     |
-| `Test-DDSmimeaRecord`          | `Test-DnsSmimea`         | `VerifySMIMEA`                    |
+| `Test-DDDnsEdnsSupport`        | `Test-DnsEdnsSupport`    | `VerifyEdnsSupport`     |
+| `Test-DDDnsSmimeaRecord`       | `Test-DnsSmimea`         | `VerifySMIMEA`                    |
 | `Test-DDDnsForwardReverse`     | `Test-DnsFcrDns`         | `FcrDnsAnalysis.Analyze`          |
-| `Test-DDDnsMxRecord`           | `Test-MxRecord`          | `VerifyMX`     |
+| `Test-DDDnsMxRecord`           | `Test-DnsMx`             | `VerifyMX`     |
+| `Test-DDDnsDelegation`         | `Test-DnsDelegation`     | `VerifyDelegation`               |
+| `Test-DDDnsReverseDns`         | `Test-DnsReverseDns`     | `Reverse DNS Analysis`           |
+| `Test-DDDnsZoneTransfer`       | `Test-DnsZoneTransfer`   | `VerifyZoneTransfer`             |
 
 ## 🏷 Domain-Level Cmdlets
 
@@ -300,9 +308,9 @@ Test-Rpki -DomainName "example.com"
 | `Test-DDDomainOverallHealth`   | `Test-DomainHealth`      | `Verify`                                    |
 | `Get-DDDomainHealthReport`     | `Get-DomainSummary`      | `BuildSummary`                              |
 | `Get-DDDomainWhois`            | `Get-DomainWhois`        | `CheckWHOIS`                               |
-| `Get-DDFlattenedSpfIp`         | `Get-DomainFlattenedSpfIp` | `GetFlattenedIpAddresses`               |
-| `Test-DDThreatIntel`           | `Test-DomainThreatIntel` | `VerifyThreatIntel`                        |
-| `Test-DDRdap`                  | `Test-Rdap`              | `QueryRDAP`                                |
+| `Get-DDDomainFlattenedSpfIp`   | `Get-DomainFlattenedSpfIp` | `GetFlattenedIpAddresses`               |
+| `Test-DDDomainThreatIntel`     | `Test-DomainThreatIntel` | `VerifyThreatIntel`                        |
+| `Get-DDRdap`                   | `Get-Rdap`               | `QueryRDAP`                                |
 | `Test-DDRpki`                  | `Test-Rpki`              | `VerifyRPKI`                               |
 | `Get-DDRdapObject`             | `Get-RdapObject`         | `RdapClient.Query*Async`                   |
 | `Get-DDSearchEngineInfo`       | `Get-SearchEngineInfo`   | `SearchEngineAnalysis.Search*`             |
@@ -313,13 +321,14 @@ Test-Rpki -DomainName "example.com"
 | Prefixed Name                   | Alias Name | C# Method  |
 |--------------------------------|------------|------------|
 | `Test-DDTlsDaneRecord`         | `Test-TlsDane` | `VerifyDANE` |
+| `Get-DDTlsCertificateInfo`     | `Get-CertificateInfo` | `CertificateAnalysis` |
 
 ## 🌐 Networking Cmdlets
 
 | Prefixed Name              | Alias Name                  | C# Method             |
 |----------------------------|-----------------------------|-----------------------|
-| `Test-DDIpNeighbor`        | `Test-NetworkIpNeighbor`    | `CheckIPNeighbors`    |
-| `Test-DDPortAvailability`  | `Test-NetworkPortAvailability` | `CheckPortAvailability` |
+| `Test-DDNetworkIpNeighbor` | `Test-NetworkIpNeighbor`    | `CheckIPNeighbors`    |
+| `Test-DDNetworkPortAvailability`  | `Test-NetworkPortAvailability` | `CheckPortAvailability` |
 
 ## 🛠 Configuration and Data Management
 
@@ -331,6 +340,7 @@ Test-Rpki -DomainName "example.com"
 | `Import-DDDnsblConfig`       | `Import-DnsblConfig` | `LoadDnsblConfig`          |
 | `Import-DDDmarcReport`       | `Import-DmarcReport` | `DmarcReportParser.ParseZip` |
 | `Import-DDDmarcForensic`     | `Import-DmarcForensic` | `DmarcForensicParser.ParseZip` |
+| `Import-DDEmailTlsRpt`       | `Import-EmailTlsRpt` | `TlsRptJsonParser.ParseReport` |
 
 ### MTA-STS
 

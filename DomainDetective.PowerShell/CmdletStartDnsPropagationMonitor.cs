@@ -16,9 +16,10 @@ namespace DomainDetective.PowerShell {
     /// </example>
     [Cmdlet(
         VerbsLifecycle.Start,
-        "DnsPropagationMonitor",
+        "DDDnsPropagationMonitor",
         SupportsShouldProcess = false,
         DefaultParameterSetName = "File")]
+    [Alias("Start-DnsPropagationMonitor")]
     public sealed class CmdletStartDnsPropagationMonitor : AsyncPSCmdlet {
         /// <summary>Domain to monitor.</summary>
         [Parameter(Mandatory = true, Position = 0, ParameterSetName = "File")]

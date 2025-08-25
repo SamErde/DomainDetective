@@ -11,7 +11,7 @@ namespace DomainDetective.PowerShell {
     ///   <summary>Get flattened SPF IPs.</summary>
     ///   <code>Get-DomainFlattenedSpfIp -DomainName example.com</code>
     /// </example>
-[Cmdlet(VerbsCommon.Get, "DDFlattenedSpfIp", DefaultParameterSetName = "ServerName")]
+[Cmdlet(VerbsCommon.Get, "DDDomainFlattenedSpfIp", DefaultParameterSetName = "ServerName")]
 [Alias("Get-DomainFlattenedSpfIp")]
     public sealed class CmdletGetFlattenedSpfIp : AsyncPSCmdlet {
         /// <para>Domain to query.</para>
