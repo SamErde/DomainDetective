@@ -1,49 +1,49 @@
-Describe 'Add-DnsblProvider cmdlet' {
+Describe 'Add-DDDnsblProvider cmdlet' {
     It 'executes and returns analysis' {
         Import-Module "$PSScriptRoot/../DomainDetective.psd1" -Force
-        $result = Add-DnsblProvider -Domain 'dnsbl.example.com' -Comment 'test'
+        $result = Add-DDDnsblProvider -Domain 'dnsbl.example.com' -Comment 'test'
         $result | Should -Not -BeNullOrEmpty
     }
     It 'throws if Domain is empty' {
         Import-Module "$PSScriptRoot/../DomainDetective.psd1" -Force
-        { Add-DnsblProvider -Domain '' } | Should -Throw
+        { Add-DDDnsblProvider -Domain '' } | Should -Throw
     }
 }
 
-Describe 'Remove-DnsblProvider cmdlet' {
+Describe 'Remove-DDDnsblProvider cmdlet' {
     It 'executes and returns analysis' {
         Import-Module "$PSScriptRoot/../DomainDetective.psd1" -Force
-        $analysis = Add-DnsblProvider -Domain 'remove.example.com'
-        $result = $analysis | Remove-DnsblProvider -Domain 'remove.example.com'
+        $analysis = Add-DDDnsblProvider -Domain 'remove.example.com'
+        $result = $analysis | Remove-DDDnsblProvider -Domain 'remove.example.com'
         $result | Should -Not -BeNullOrEmpty
     }
     It 'throws if Domain is empty' {
         Import-Module "$PSScriptRoot/../DomainDetective.psd1" -Force
-        { Remove-DnsblProvider -Domain '' } | Should -Throw
+        { Remove-DDDnsblProvider -Domain '' } | Should -Throw
     }
 }
 
-Describe 'Clear-DnsblProvider cmdlet' {
+Describe 'Clear-DDDnsblProviderList cmdlet' {
     It 'executes and returns analysis' {
         Import-Module "$PSScriptRoot/../DomainDetective.psd1" -Force
-        Add-DnsblProvider -Domain 'clear.example.com' | Out-Null
-        $result = Clear-DnsblProvider
+        Add-DDDnsblProvider -Domain 'clear.example.com' | Out-Null
+        $result = Clear-DDDnsblProviderList
         $result | Should -Not -BeNullOrEmpty
     }
 }
 
-Describe 'Import-DnsblConfig cmdlet' {
+Describe 'Import-DDDnsblConfig cmdlet' {
     It 'executes and returns analysis' {
         Import-Module "$PSScriptRoot/../DomainDetective.psd1" -Force
         $source = Join-Path $PSScriptRoot '../../DnsblProviders.sample.json'
         $path = Join-Path $TestDrive 'DnsblProviders.sample.json'
         Copy-Item -Path $source -Destination $path
-        $result = Import-DnsblConfig -Path $path -OverwriteExisting
+        $result = Import-DDDnsblConfig -Path $path -OverwriteExisting
         $result | Should -Not -BeNullOrEmpty
     }
     It 'throws if Path is empty' {
         Import-Module "$PSScriptRoot/../DomainDetective.psd1" -Force
-        { Import-DnsblConfig -Path '' } | Should -Throw
+        { Import-DDDnsblConfig -Path '' } | Should -Throw
     }
 
     It 'skips duplicate domains' {
@@ -52,7 +52,7 @@ Describe 'Import-DnsblConfig cmdlet' {
         $path = Join-Path $TestDrive (([guid]::NewGuid()).ToString() + '.json')
         $json | Set-Content -Path $path
         try {
-            $result = Import-DnsblConfig -Path $path -ClearExisting
+            $result = Import-DDDnsblConfig -Path $path -ClearExisting
             ($result.GetDNSBL() | Where-Object { $_.Domain -ieq 'dup.test' }).Count | Should -Be 1
         } finally {
             Remove-Item $path -ErrorAction SilentlyContinue

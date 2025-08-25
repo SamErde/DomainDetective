@@ -1,7 +1,7 @@
-describe 'Test-DomainHealth BrandKeyword parameter' {
+describe 'Test-DDDomainOverallHealth BrandKeyword parameter' {
     It 'exposes BrandKeyword parameter' {
         Import-Module "$PSScriptRoot/../DomainDetective.psd1" -Force
-        $command = Get-Command Test-DomainHealth
+        $command = Get-Command Test-DDDomainOverallHealth
         $command.Parameters.Keys | Should -Contain 'BrandKeyword'
     }
     It 'has empty BrandKeyword by default' {
