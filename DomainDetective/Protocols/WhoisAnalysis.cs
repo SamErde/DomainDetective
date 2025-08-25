@@ -118,6 +118,10 @@ public class WhoisAnalysis {
         "^\\s*(Registry Expiry Date:|Expiry date:|expire:|renewal date:)\\s*(.*)$",
         RegexOptions.IgnoreCase);
 
+    private static readonly Regex _whoisServerRegex = new(
+        "whois:\\s*([^\\s]+)",
+        RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Compiled);
+
     private void SetExpiryDate(string value) {
         if (DateTime.TryParse(value, CultureInfo.InvariantCulture,
                 DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal,
@@ -406,28 +410,29 @@ public class WhoisAnalysis {
     public WhoisAnalysis() { }
 
     private async Task<string?> GetWhoisServer(string domain) {
-        var domainParts = domain.Split('.');
-        var tld = string.Join(".", domainParts.Skip(1));
-        TLD = tld;
+        string[] domainParts = domain.Split('.');
+        if (domainParts.Length > 2) {
+            string compoundTld = string.Join(".", domainParts.Skip(domainParts.Length - 2));
+            lock (_whoisServersLock) {
+                if (WhoisServers.TryGetValue(compoundTld, out string server)) {
+                    TLD = compoundTld;
+                    return server;
+                }
+            }
+        }
 
+        string singleTld = domainParts[domainParts.Length - 1];
+        TLD = singleTld;
         lock (_whoisServersLock) {
-            if (WhoisServers.TryGetValue(tld, out var server)) {
+            if (WhoisServers.TryGetValue(singleTld, out string server)) {
                 return server;
             }
         }
 
-        tld = domainParts.Last();
-        TLD = tld;
-        lock (_whoisServersLock) {
-            if (WhoisServers.TryGetValue(tld, out var server)) {
-                return server;
-            }
-        }
-
-        var dynamicServer = await LookupWhoisServerAsync(tld).ConfigureAwait(false);
+        string? dynamicServer = await LookupWhoisServerAsync(singleTld).ConfigureAwait(false);
         if (dynamicServer != null) {
             lock (_whoisServersLock) {
-                WhoisServers[tld] = dynamicServer;
+                WhoisServers[singleTld] = dynamicServer;
             }
         }
 
@@ -459,7 +464,7 @@ public class WhoisAnalysis {
             }
         }
 
-        var match = Regex.Match(response, "whois:\\s*([^\\s]+)", RegexOptions.IgnoreCase);
+        Match match = _whoisServerRegex.Match(response);
         return match.Success ? match.Groups[1].Value : null;
     }
 
