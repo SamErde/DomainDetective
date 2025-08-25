@@ -7,7 +7,7 @@ namespace DomainDetective.PowerShell {
     /// <para>Part of the DomainDetective project.</para>
     /// <example>
     ///   <summary>Check DMARC settings.</summary>
-    ///   <code>Test-EmailDmarc -DomainName example.com</code>
+    ///   <code>Test-DDEmailDmarcRecord -DomainName example.com</code>
     /// </example>
 [Cmdlet(VerbsDiagnostic.Test, "DDEmailDmarcRecord", DefaultParameterSetName = "ServerName")]
 [Alias("Test-EmailDmarc")]

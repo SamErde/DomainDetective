@@ -1,5 +1,6 @@
 using Spectre.Console.Cli;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
 namespace DomainDetective.CLI
@@ -45,6 +46,8 @@ internal sealed class SearchEngineInfoSettings : CommandSettings
 internal sealed class SearchEngineInfoCommand : AsyncCommand<SearchEngineInfoSettings>
 {
     /// <inheritdoc />
+    [RequiresUnreferencedCode("Calls System.Text.Json.JsonSerializer.Serialize<TValue>(TValue, JsonSerializerOptions)")]
+    [RequiresDynamicCode("Calls System.Text.Json.JsonSerializer.Serialize<TValue>(TValue, JsonSerializerOptions)")]
     public override async Task<int> ExecuteAsync(CommandContext context, SearchEngineInfoSettings settings)
     {
         var analysis = new SearchEngineAnalysis

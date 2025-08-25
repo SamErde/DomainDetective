@@ -6,10 +6,10 @@ namespace DomainDetective.PowerShell {
     /// <para>Part of the DomainDetective project.</para>
     /// <example>
     ///   <summary>Test a DNS server.</summary>
-    ///   <code>Test-OpenResolver -Server 8.8.8.8 -Port 53</code>
+    ///   <code>Test-DDDnsOpenResolver -Server 8.8.8.8 -Port 53</code>
     /// </example>
     [Cmdlet(VerbsDiagnostic.Test, "DDDnsOpenResolver")]
-    [Alias("Test-OpenResolver")]
+    [Alias("Test-DnsOpenResolver", "Test-OpenResolver")]
     public sealed class CmdletTestOpenResolver : AsyncPSCmdlet {
         /// <summary>DNS server to check.</summary>
         [Parameter(Mandatory = true, Position = 0)]

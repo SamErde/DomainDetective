@@ -9,7 +9,7 @@ namespace DomainDetective.PowerShell {
     /// <para>Part of the DomainDetective project.</para>
     /// <example>
     ///   <summary>Perform a full health test.</summary>
-    ///   <code>Test-DomainHealth -DomainName example.com -Verbose</code>
+    ///   <code>Test-DDDomainOverallHealth -DomainName example.com -Verbose</code>
     /// </example>
 [Cmdlet(VerbsDiagnostic.Test, "DDDomainOverallHealth", DefaultParameterSetName = "ServerName")]
 [Alias("Test-DomainHealth")]

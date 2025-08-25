@@ -7,7 +7,7 @@ namespace DomainDetective.PowerShell {
     /// <para>Part of the DomainDetective project.</para>
     /// <example>
     ///   <summary>Get contact details.</summary>
-    ///   <code>Test-DomainContact -DomainName example.com</code>
+    ///   <code>Test-DDDomainContactRecord -DomainName example.com</code>
     /// </example>
 [Cmdlet(VerbsDiagnostic.Test, "DDDomainContactRecord", DefaultParameterSetName = "ServerName")]
 [Alias("Test-DomainContact")]

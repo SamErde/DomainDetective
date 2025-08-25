@@ -7,7 +7,7 @@ namespace DomainDetective.PowerShell {
     /// <para>Part of the DomainDetective project.</para>
     /// <example>
     ///   <summary>Detect unclaimed CNAMEs.</summary>
-    ///   <code>Test-DnsDanglingCname -DomainName example.com</code>
+    ///   <code>Test-DDDnsDanglingCname -DomainName example.com</code>
     /// </example>
 [Cmdlet(VerbsDiagnostic.Test, "DDDnsDanglingCname", DefaultParameterSetName = "ServerName")]
 [Alias("Test-DnsDanglingCname")]

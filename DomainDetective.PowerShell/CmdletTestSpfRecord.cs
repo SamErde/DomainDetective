@@ -8,7 +8,7 @@ namespace DomainDetective.PowerShell {
     /// <para>Part of the DomainDetective project.</para>
     /// <example>
     ///   <summary>Check SPF configuration.</summary>
-    ///   <code>Test-EmailSpf -DomainName example.com</code>
+    ///   <code>Test-DDEmailSpfRecord -DomainName example.com</code>
     /// </example>
 [Cmdlet(VerbsDiagnostic.Test, "DDEmailSpfRecord", DefaultParameterSetName = "ServerName")]
 [Alias("Test-EmailSpf")]

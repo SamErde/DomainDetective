@@ -7,7 +7,7 @@ namespace DomainDetective.PowerShell {
     /// <para>Part of the DomainDetective project.</para>
     /// <example>
     ///   <summary>Check TTL values.</summary>
-    ///   <code>Test-DnsTtl -DomainName example.com</code>
+    ///   <code>Test-DDDnsTtl -DomainName example.com</code>
     /// </example>
 [Cmdlet(VerbsDiagnostic.Test, "DDDnsTtl", DefaultParameterSetName = "ServerName")]
 [Alias("Test-DnsTtl")]

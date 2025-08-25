@@ -8,7 +8,7 @@ namespace DomainDetective.PowerShell {
     /// <para>Part of the DomainDetective project.</para>
     /// <example>
     ///   <summary>Get basic domain overview.</summary>
-    ///   <code>Get-DomainSummary -DomainName example.com</code>
+    ///   <code>Get-DDDomainHealthReport -DomainName example.com</code>
     /// </example>
 [Cmdlet(VerbsCommon.Get, "DDDomainHealthReport", DefaultParameterSetName = "ServerName")]
 [Alias("Get-DomainSummary")]

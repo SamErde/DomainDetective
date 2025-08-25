@@ -7,7 +7,7 @@ namespace DomainDetective.PowerShell {
     /// <para>Part of the DomainDetective project.</para>
     /// <example>
     ///   <summary>Analyze logs.</summary>
-    ///   <code>Test-DnsTunneling -DomainName example.com -Path ./dns.log</code>
+    ///   <code>Test-DDDnsTunneling -DomainName example.com -Path ./dns.log</code>
     /// </example>
 [Cmdlet(VerbsDiagnostic.Test, "DDDnsTunneling", DefaultParameterSetName = "File")]
 [Alias("Test-DnsTunneling")]

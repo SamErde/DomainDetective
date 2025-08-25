@@ -376,3 +376,4 @@ CLAUDE.md
 DEMO/*
 DomainDetective.Tests/Reports/*.gz
 DomainDetective.Tests/Reports/*.zip
+nul

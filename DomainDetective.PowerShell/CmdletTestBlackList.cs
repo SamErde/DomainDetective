@@ -8,7 +8,7 @@ namespace DomainDetective.PowerShell {
     /// <para>Part of the DomainDetective project.</para>
     /// <example>
     ///   <summary>Check a single host.</summary>
-    ///   <code>Test-DnsDomainBlacklist -NameOrIpAddress example.com</code>
+    ///   <code>Test-DDDnsDomainBlacklist -NameOrIpAddress example.com</code>
     /// </example>
 [Cmdlet(VerbsDiagnostic.Test, "DDDnsDomainBlacklist", DefaultParameterSetName = "ServerName")]
 [Alias("Test-DnsDomainBlacklist")]

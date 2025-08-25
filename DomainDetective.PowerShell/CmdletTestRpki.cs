@@ -7,7 +7,7 @@ namespace DomainDetective.PowerShell {
     /// <para>Part of the DomainDetective project.</para>
     /// <example>
     ///   <summary>Check RPKI status.</summary>
-    ///   <code>Test-Rpki -DomainName example.com</code>
+    ///   <code>Test-DDRpki -DomainName example.com</code>
     /// </example>
     [Cmdlet(VerbsDiagnostic.Test, "DDRpki", DefaultParameterSetName = "ServerName")]
     [Alias("Test-Rpki")]

@@ -6,7 +6,7 @@ namespace DomainDetective.PowerShell {
     /// <para>Part of the DomainDetective project.</para>
     /// <example>
     ///   <summary>Import feedback from a zip file.</summary>
-    ///   <code>Import-DmarcReport -Path ./report.zip</code>
+    ///   <code>Import-DDDmarcReport -Path ./report.zip</code>
     /// </example>
 [Cmdlet(VerbsData.Import, "DDDmarcReport")]
 [Alias("Import-DmarcReport")]

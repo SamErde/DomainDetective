@@ -151,6 +151,7 @@ namespace DomainDetective {
                 [HealthCheckType.SNMP] = () => CheckSnmpHost(domainName, 161, cancellationToken),
                 [HealthCheckType.IPNEIGHBOR] = () => CheckIPNeighbors(domainName, cancellationToken),
                 [HealthCheckType.RPKI] = () => VerifyRPKI(domainName, cancellationToken),
+                [HealthCheckType.RDAP] = () => QueryRDAP(domainName, cancellationToken),
                 [HealthCheckType.DNSTUNNELING] = () => CheckDnsTunnelingAsync(domainName, cancellationToken),
                 [HealthCheckType.TYPOSQUATTING] = () => VerifyTyposquatting(domainName, cancellationToken),
                 [HealthCheckType.WILDCARDDNS] = () => VerifyWildcardDns(domainName),

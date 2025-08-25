@@ -7,7 +7,7 @@ namespace DomainDetective.PowerShell {
     /// <para>Part of the DomainDetective project.</para>
     /// <example>
     ///   <summary>Verify STARTTLS.</summary>
-    ///   <code>Test-EmailStartTls -DomainName example.com -Port 587</code>
+    ///   <code>Test-DDEmailStartTls -DomainName example.com -Port 587</code>
     /// </example>
 [Cmdlet(VerbsDiagnostic.Test, "DDEmailStartTls", DefaultParameterSetName = "ServerName")]
 [Alias("Test-EmailStartTls")]
