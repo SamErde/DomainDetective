@@ -151,6 +151,7 @@ namespace DomainDetective {
                 [HealthCheckType.SNMP] = () => CheckSnmpHost(domainName, 161, cancellationToken),
                 [HealthCheckType.IPNEIGHBOR] = () => CheckIPNeighbors(domainName, cancellationToken),
                 [HealthCheckType.RPKI] = () => VerifyRPKI(domainName, cancellationToken),
+                [HealthCheckType.RDAP] = () => QueryRDAP(domainName, cancellationToken),
                 [HealthCheckType.DNSTUNNELING] = () => CheckDnsTunnelingAsync(domainName, cancellationToken),
                 [HealthCheckType.TYPOSQUATTING] = () => VerifyTyposquatting(domainName, cancellationToken),
                 [HealthCheckType.WILDCARDDNS] = () => VerifyWildcardDns(domainName),
@@ -172,8 +173,9 @@ namespace DomainDetective {
                 if (actions.TryGetValue(healthCheckType, out var action)) {
                     await action();
                 } else {
+                    // Log and continue instead of throwing to allow UIs to remain responsive
                     _logger.WriteError("Unknown health check type: {0}", healthCheckType);
-                    throw new NotSupportedException($"Health check type not implemented: {(int)healthCheckType}");
+                    continue;
                 }
 
                 processedChecks++;

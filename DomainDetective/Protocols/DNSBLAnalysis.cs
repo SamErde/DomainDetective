@@ -105,29 +105,34 @@ namespace DomainDetective {
         private const string DefaultUpdateUrl = "https://raw.githubusercontent.com/EvotecIT/DomainDetective/refs/heads/master/Data/dnsbl.json";
 
         static DNSBLAnalysis() {
-            using var stream = typeof(DNSBLAnalysis).Assembly.GetManifestResourceStream("DomainDetective.dnsbl.json");
-            if (stream != null) {
-                using var reader = new StreamReader(stream);
-                var json = reader.ReadToEnd();
-                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                var config = JsonSerializer.Deserialize<DnsblConfiguration>(json, options);
-                if (config != null) {
-                    if (config.Providers != null) {
-                        foreach (var provider in config.Providers) {
-                            _defaultEntries.Add(provider);
-                            if (provider.ReplyCodes?.Count > 0) {
-                                _providerReplyCodes[provider.Domain] = provider.ReplyCodes.ToDictionary(
-                                    c => c.Key,
-                                    c => (c.Value.IsListed, c.Value.Meaning),
-                                    StringComparer.OrdinalIgnoreCase);
+            try {
+                using var stream = typeof(DNSBLAnalysis).Assembly.GetManifestResourceStream("DomainDetective.dnsbl.json");
+                if (stream != null) {
+                    using var reader = new StreamReader(stream);
+                    var json = reader.ReadToEnd();
+                    var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                    var config = JsonSerializer.Deserialize<DnsblConfiguration>(json, options);
+                    if (config != null) {
+                        if (config.Providers != null) {
+                            foreach (var provider in config.Providers) {
+                                _defaultEntries.Add(provider);
+                                if (provider.ReplyCodes?.Count > 0) {
+                                    _providerReplyCodes[provider.Domain] = provider.ReplyCodes.ToDictionary(
+                                        c => c.Key,
+                                        c => (c.Value.IsListed, c.Value.Meaning),
+                                        StringComparer.OrdinalIgnoreCase);
+                                }
                             }
                         }
+                        if (config.DomainBlockLists != null)
+                            _defaultDomainBlockLists.AddRange(config.DomainBlockLists);
+                        if (config.IpBlockLists != null)
+                            _defaultIpBlockLists.AddRange(config.IpBlockLists);
                     }
-                    if (config.DomainBlockLists != null)
-                        _defaultDomainBlockLists.AddRange(config.DomainBlockLists);
-                    if (config.IpBlockLists != null)
-                        _defaultIpBlockLists.AddRange(config.IpBlockLists);
                 }
+            } catch {
+                // If loading embedded resource fails, initialize with empty collections
+                // The lists can be populated later using LoadDNSBL or UpdateDNSBL methods
             }
         }
 
@@ -313,6 +318,11 @@ namespace DomainDetective {
         }
 
         private async IAsyncEnumerable<DNSBLRecord> QueryDNSBL(IEnumerable<string> dnsblList, string ipAddressOrHostname) {
+            // Gracefully handle missing/empty provider lists to avoid crashes when configuration isn't loaded
+            if (dnsblList == null)
+                yield break;
+            if (!dnsblList.Any())
+                yield break;
 
             // Check if the input is an IP address or a hostname
             string name;
@@ -329,6 +339,9 @@ namespace DomainDetective {
                 Logger?.WriteVerbose($"Querying blacklist domain {dnsbl} with query {query}");
                 queries.Add(query);
             }
+
+            if (queries.Count == 0)
+                yield break;
 
             var responses = new Dictionary<string, List<DnsAnswer>>(StringComparer.OrdinalIgnoreCase);
 
