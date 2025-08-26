@@ -1,9 +1,9 @@
-Describe 'Test-TlsDane cmdlet' {
+Describe 'Test-DDTlsDaneRecord cmdlet' {
     It 'cancels on Ctrl+C' {
         Import-Module "$PSScriptRoot/../DomainDetective.psd1" -Force
         $job = Start-Job -ScriptBlock {
             Import-Module "$using:PSScriptRoot/../DomainDetective.psd1" -Force
-            Test-TlsDane -DomainName 'does-not-exist.invalid' -DnsEndpoint System -Verbose
+            Test-DDTlsDaneRecord -DomainName 'does-not-exist.invalid' -DnsEndpoint System -Verbose
         }
         $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
         while ($job.State -eq 'NotStarted' -and $stopwatch.ElapsedMilliseconds -lt 1000) {
@@ -17,7 +17,7 @@ Describe 'Test-TlsDane cmdlet' {
     It 'cancels using PowerShell.Stop()' {
         Import-Module "$PSScriptRoot/../DomainDetective.psd1" -Force
         $ps = [powershell]::Create()
-        $ps.AddScript("Import-Module '$PSScriptRoot/../DomainDetective.psd1' -Force; Test-TlsDane -DomainName 'does-not-exist.invalid' -DnsEndpoint System -Verbose") | Out-Null
+        $ps.AddScript("Import-Module '$PSScriptRoot/../DomainDetective.psd1' -Force; Test-DDTlsDaneRecord -DomainName 'does-not-exist.invalid' -DnsEndpoint System -Verbose") | Out-Null
         $handle = $ps.BeginInvoke()
         $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
         while ($ps.InvocationStateInfo.State -eq 'NotStarted' -and $stopwatch.ElapsedMilliseconds -lt 1000) {

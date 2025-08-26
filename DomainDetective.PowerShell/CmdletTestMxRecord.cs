@@ -7,10 +7,10 @@ namespace DomainDetective.PowerShell {
     /// <para>Part of the DomainDetective project.</para>
     /// <example>
     ///   <summary>Check MX configuration.</summary>
-    ///   <code>Test-MxRecord -DomainName example.com</code>
+    ///   <code>Test-DDDnsMxRecord -DomainName example.com</code>
     /// </example>
     [Cmdlet(VerbsDiagnostic.Test, "DDDnsMxRecord", DefaultParameterSetName = "ServerName")]
-    [Alias("Test-MxRecord")]
+    [Alias("Test-DnsMx", "Test-MxRecord")]
     public sealed class CmdletTestMxRecord : AsyncPSCmdlet {
         /// <summary>Domain to query.</summary>
         [Parameter(Mandatory = true, Position = 0, ParameterSetName = "ServerName")]

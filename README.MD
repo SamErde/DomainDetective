@@ -3,63 +3,112 @@
 [![codecov](https://codecov.io/gh/EvotecIT/DomainDetective/branch/master/graph/badge.svg)](https://codecov.io/gh/EvotecIT/DomainDetective)
 [![Discord](https://img.shields.io/discord/508328927853281280?style=flat-square&label=discord%20chat)](https://evo.yt/discord)
 
-Domain Detective is a C# library, Tool and PowerShell module in one project. It is designed to help you find interesting information about a domain name.
-While there are plenty of tools on the internet that can do this, most of them are web based and require you to enter the domain name into a web form.
-This is not ideal if you want to automate the process or if you are working with sensitive information.
+Domain Detective is a domain, DNS, and email security auditing toolkit. It ships as:
 
-Current capabilities include:
-- [x] Verify SPF
-- [x] Verify DMARC
-- [x] Verify DKIM
-- [x] Verify CAA
-- [x] Verify NS Records
-- [x] Verify Delegation (parent NS and glue consistency)
-- [x] Verify SOA Records
-- [x] Verify MX Records
-- [x] Verify reverse DNS (PTR)
-- [x] Verify forward-confirmed reverse DNS (FCrDNS)
-- [x] Verify DNSSEC
-- [x] Follow the delegation chain and validate DS records
-- [x] Summarize DNSSEC mismatches across the chain
-- [x] Map DNSSEC algorithm numbers to names per RFC 4034
-- [x] Analyze DNS TTL
-- [x] Validate ARC headers
- - [x] Verify DANE/TLSA (queries `_tcp` or `_udp` names, HTTPS on port 443 by default)
-- [x] Query S/MIMEA records
-- [x] Verify STARTTLS (detect advertisement downgrades)
-- [x] Verify MTA-STS
-- [x] Verify SMTP TLS
-- [x] Verify IMAP TLS
-- [x] Verify POP3 TLS
-- [x] Verify SMTP Banner
-- [x] Verify TLS-RPT
-- [x] Validate RPKI origins for domain IPs
-- [x] Verify BIMI
-- [x] Check for dangling CNAME records
-- [x] Detect CNAME flattening services (e.g., Cloudflare)
-- [x] Verify AutoDiscover
-- [x] Verify Website Connectivity
-  - [x] Verify HTTP/2
-  - [x] Verify HTTP/3
-  - [x] Verify Certificate
-  - [x] Verify Response Time
-  - [x] Verify Headers
-  - [x] Verify HTTP Security Headers (CSP, Referrer-Policy, X-Frame-Options, Permissions-Policy, Origin-Agent-Cluster)
-  - [x] Verify HSTS
-  - [x] Verify HPKP
-- [x] Verify SecurityTXT
-- [x] Verify Open Relay (SMTP)
-- [x] Verify Blacklist (DNSBL)
-- [x] List IP neighbors via reverse/passive DNS
-- [x] Detect DNS tunneling from logs
-- [x] Detect wildcard DNS catch-all
-- [x] Verify EDNS support
-- [x] Scan TCP/UDP ports for a host
-- [x] Check propagation of DNS records across the world/country/company
-- [x] Verify WHOIS
-- [ ] Other things that I haven't thought of yet
+- C# library: compose and automate checks in .NET
+- PowerShell module: fast, scriptable cmdlets with sensible aliases
+- CLI: quick interactive and batch workflows
 
-### DNSBL Configuration
+It’s built for automation, reproducibility, and working with sensitive data without depending on web forms.
+
+## Features Overview
+
+- DNS: NS, SOA, Delegation, MX, PTR/Reverse, FCrDNS, DNSSEC chain and DS validation, TTL analysis, EDNS support, wildcard detection, open resolver, zone transfer, DNS propagation (ad-hoc + background monitor)
+- Email: SPF, DKIM, DMARC (records + aggregate/forensic parsing), BIMI, MTA-STS policy validation, TLS-RPT import, SMTP STARTTLS and TLS posture, SMTP banner, IMAP/POP3 TLS, open relay
+- Web/Certificates: website connectivity, HTTP/2/3, HSTS and security headers, CT/chain details, DANE/TLSA, S/MIMEA
+- Reputation & intel: threat intel lookups
+- Registry & routing: WHOIS, RDAP, RPKI origin validation
+- Reporting & UX: HTML/JSON report generation, interactive CLI wizard
+
+## Available Cmdlets and Aliases
+
+### Email
+
+| Prefixed Name                   | Alias Name               | Purpose                         |
+|--------------------------------|--------------------------|---------------------------------|
+| `Test-DDEmailArcRecord`        | `Test-EmailArc`          | Validate ARC headers            |
+| `Test-DDEmailAutoDiscover`     | `Test-EmailAutoDiscover` | Check mail client discovery     |
+| `Test-DDEmailBimiRecord`       | `Test-EmailBimi`         | Verify BIMI record              |
+| `Test-DDEmailDkimRecord`       | `Test-EmailDkim`         | Verify DKIM selectors           |
+| `Test-DDEmailDmarcRecord`      | `Test-EmailDmarc`        | Verify DMARC policy             |
+| `Test-DDEmailSpfRecord`        | `Test-EmailSpf`          | Verify SPF policy               |
+| `Test-DDEmailTlsRptRecord`     | `Test-EmailTlsRpt`       | Inspect TLS-RPT                 |
+| `Test-DDEmailStartTls`         | `Test-EmailStartTls`     | Check STARTTLS advertisement    |
+| `Test-DDEmailSmtpTls`          | `Test-EmailSmtpTls`      | Check SMTP TLS posture          |
+| `Test-DDEmailOpenRelay`        | `Test-EmailOpenRelay`    | Detect open SMTP relay          |
+| `Get-DDEmailMessageHeaderInfo` | `Get-EmailHeaderInfo`    | Parse raw email headers         |
+| `Test-DDEmailLatency`          | `Test-EmailLatency`      | Measure SMTP responsiveness     |
+| `Test-DDEmailImapTls`          | `Test-EmailImapTls`      | IMAP TLS check                  |
+| `Test-DDEmailPop3Tls`          | `Test-EmailPop3Tls`      | POP3 TLS check                  |
+| `Test-DDEmailSmtpBanner`       | `Test-EmailSmtpBanner`   | Inspect SMTP banner             |
+| `Test-DDDmarcAggregate`        | `Test-EmailDmarcAggregate` | Parse DMARC aggregate reports |
+| `New-DDDmarcRecord`            | `New-DmarcRecord`        | Build DMARC record              |
+
+### DNS
+
+| Prefixed Name                   | Alias Name               | Purpose                         |
+|--------------------------------|--------------------------|---------------------------------|
+| `Test-DDDnsCaaRecord`          | `Test-DnsCaa`            | Verify CAA                      |
+| `Test-DDDnsNsRecord`           | `Test-DnsNs`             | Verify NS                       |
+| `Test-DDDnsSoaRecord`          | `Test-DnsSoa`            | Verify SOA                      |
+| `Test-DDDnsSecStatus`          | `Test-DnsSec`            | Verify DNSSEC                   |
+| `Test-DDDnsBlacklistRecord`    | `Test-DnsBlacklist`      | Check DNSBL                     |
+| `Test-DDDnsDomainBlacklist`    | `Test-DnsDomainBlacklist`| Check domain against DNSBL      |
+| `Test-DDDnsOpenResolver`       | `Test-DnsOpenResolver`   | Detect open resolver            |
+| `Test-DDDnsDanglingCname`      | `Test-DnsDanglingCname`  | Find dangling CNAME             |
+| `Test-DDDnsPropagation`        | `Test-DnsPropagation`    | Check global propagation        |
+| `Start-DDDnsPropagationMonitor`| `Start-DnsPropagationMonitor` | Background propagation monitor |
+| `Stop-DDDnsPropagationMonitor` | `Stop-DnsPropagationMonitor`  | Stop propagation monitor       |
+| `Test-DDDnsTtl`                | `Test-DnsTtl`            | TTL analysis                    |
+| `Test-DDDnsTunneling`          | `Test-DnsTunneling`      | Detect DNS tunneling (logs)     |
+| `Test-DDDnsWildcard`           | `Test-DnsWildcard`       | Detect wildcard catch-all       |
+| `Test-DDDnsEdnsSupport`        | `Test-DnsEdnsSupport`    | EDNS support                    |
+| `Test-DDDnsSmimeaRecord`       | `Test-DnsSmimea`         | S/MIMEA                         |
+| `Test-DDDnsForwardReverse`     | `Test-DnsFcrDns`         | FCrDNS                          |
+| `Test-DDDnsMxRecord`           | `Test-DnsMx`             | MX records                      |
+| `Test-DDDnsDelegation`         | `Test-DnsDelegation`     | Parent NS/glue consistency      |
+| `Test-DDDnsReverseDns`         | `Test-DnsReverseDns`     | Reverse DNS                     |
+| `Test-DDDnsZoneTransfer`       | `Test-DnsZoneTransfer`   | AXFR exposure                   |
+
+### Domain
+
+| Prefixed Name                   | Alias Name               | Purpose                         |
+|--------------------------------|--------------------------|---------------------------------|
+| `Test-DDDomainContactRecord`   | `Test-DomainContact`     | WHOIS contact sanity            |
+| `Test-DDDomainSecurityTxt`     | `Test-DomainSecurityTxt` | security.txt checks             |
+| `Test-DDDomainCertificate`     | `Test-DomainCertificate` | Website certificate checks      |
+| `Test-DDDomainOverallHealth`   | `Test-DomainHealth`      | Composite domain health         |
+| `Get-DDDomainHealthReport`     | `Get-DomainSummary`      | Summary object                  |
+| `Get-DDDomainWhois`            | `Get-DomainWhois`        | WHOIS                           |
+| `Get-DDDomainFlattenedSpfIp`   | `Get-DomainFlattenedSpfIp` | Flatten SPF to IPs            |
+| `Test-DDDomainThreatIntel`     | `Test-DomainThreatIntel` | Threat intel lookups            |
+| `Get-DDRdap`                   | `Get-Rdap`               | RDAP                            |
+| `Get-DDRdapObject`             | `Get-RdapObject`         | RDAP raw object                 |
+| `Get-DDSearchEngineInfo`       | `Get-SearchEngineInfo`   | Search engine queries           |
+| `Show-DDDomainReport`          | `Export-DomainReport`    | Report generation               |
+
+### TLS & Networking
+
+| Prefixed Name                   | Alias Name               | Purpose                         |
+|--------------------------------|--------------------------|---------------------------------|
+| `Test-DDTlsDaneRecord`         | `Test-TlsDane`           | DANE/TLSA                       |
+| `Get-DDTlsCertificateInfo`     | `Get-CertificateInfo`    | Parse PEM/DER certs             |
+| `Test-DDNetworkIpNeighbor`     | `Test-NetworkIpNeighbor` | Passive DNS neighbors           |
+| `Test-DDNetworkPortAvailability` | `Test-NetworkPortAvailability` | Port scanning              |
+
+### Configuration & Data
+
+| Prefixed Name                | Alias Name           | Purpose                         |
+|------------------------------|----------------------|---------------------------------|
+| `Add-DDDnsblProvider`        | `Add-DnsblProvider`  | Manage DNSBL                    |
+| `Remove-DDDnsblProvider`     | `Remove-DnsblProvider` | Manage DNSBL                  |
+| `Clear-DDDnsblProviderList`  | `Clear-DnsblProvider` | Manage DNSBL                  |
+| `Import-DDDnsblConfig`       | `Import-DnsblConfig` | Manage DNSBL                    |
+| `Import-DDDmarcReport`       | `Import-DmarcReport` | DMARC aggregate zip             |
+| `Import-DDDmarcForensic`     | `Import-DmarcForensic` | DMARC forensic zip            |
+| `Import-DDEmailTlsRpt`       | `Import-EmailTlsRpt` | TLS-RPT JSON                    |
+
+## DNSBL Configuration
 DNSBL lists used for blacklist checks can be customized. `DNSBLAnalysis` comes with a built-in list, but you can modify it at runtime. Each list entry exposes `Domain`, `Enabled`, and `Comment` fields. Use the following methods on `DNSBLAnalysis` to manage the list:
 
 - `AddDNSBL`/`AddDNSBL(IEnumerable<string>)`
@@ -96,7 +145,7 @@ Clear-DnsblProvider
 Import-DnsblConfig -Path './DnsblProviders.json' -OverwriteExisting
 ```
 
-### Verifying Website Certificates
+## Website Certificates (overview)
 `VerifyWebsiteCertificate` can be called with or without a URL scheme. When the scheme is omitted, `https://` is used automatically before checking the certificate.
 
 The `CertificateAnalysis` result now includes:
@@ -110,18 +159,18 @@ The `CertificateAnalysis` result now includes:
 - `CtLogApiTemplates` allows customizing the list of CT log APIs queried.
 - `SkipRevocation` disables CRL and OCSP checks. Use with care as revoked certificates may appear valid.
 
-### DKIM Analysis
+## DKIM Analysis (overview)
 `DkimRecordAnalysis` exposes several indicators:
 
 - `WeakKey` when the RSA key is under 2048 bits.
 - `OldKey` when the creation date is over 12 months old.
 - `DeprecatedTags` listing tags such as `g` or `h=sha1`.
 
-### Verifying SMTP TLS
+## SMTP TLS (overview)
 `SMTPTLSAnalysis` now stores the negotiated certificate and reports expiration
 details and chain validity for each server.
 
-### HTTP Security Headers
+## HTTP Security Headers (overview)
 `HttpAnalysis.DefaultSecurityHeaders` lists security headers that are inspected when header collection is enabled. The list includes `Content-Security-Policy`, `Referrer-Policy`, `X-Frame-Options`, `Permissions-Policy`, `Origin-Agent-Cluster` and several Cross-Origin policies. You can modify the list to capture additional headers.
 `HttpAnalysis` also sets `HstsPreloaded` when the host is found in the bundled HSTS preload list.
 
@@ -151,60 +200,9 @@ foreach (var r in hc.RpkiAnalysis.Results)
     Console.WriteLine($"{r.IpAddress} {r.Asn} {r.Valid}");
 ```
 
-### Command Line Example
+<!-- CLI usage moved under Install & Usage -->
 
-Run the `DomainDetective.Example` project to check a domain. Use `--json` to output
-all analysis details in JSON format:
-
-```bash
-dotnet run --project DomainDetective.Example example.com --json
-```
-To verify AutoDiscover records only:
-```bash
-ddcli example.com --checks autodiscover
-```
-Check DMARC subdomain policy:
-```bash
-ddcli example.com --subdomain-policy
-```
-Check forward-confirmed reverse DNS:
-```bash
-ddcli example.com --checks fcrdns
-```
-Query an S/MIMEA record:
-```bash
-ddcli TestSMIMEA user@example.com
-```
-Check DNS propagation:
-```bash
-ddcli DnsPropagation --domain example.com --record-type A
-```
-Progress is displayed as each resolver responds.
-
-### Interactive CLI Wizard
-
-Run `ddcli` without parameters to launch an interactive wizard. It guides you
-through entering domain names, selecting checks and choosing between JSON output
-or a condensed summary. The wizard is built with **Spectre.Console** for a more
-pleasant terminal experience.
-
-### Analyze Message Headers
-
-Parse email headers from a file or raw string:
-
-```bash
-ddcli AnalyzeMessageHeader --file ./headers.txt --json
-```
-
-### Analyze ARC Headers
-
-Validate an ARC chain from raw headers:
-
-```bash
-ddcli AnalyzeARC --file ./headers.txt --json
-```
-
-### PowerShell Module
+## Install & Usage
 
 Import the module and call any of the testing cmdlets:
 
@@ -252,96 +250,41 @@ Validate RPKI origins:
 Test-Rpki -DomainName "example.com"
 ```
 
-### 🧪 DomainDetective Alias Naming – Standardized `Verb-AreaSubject` Format
+### CLI examples
 
-| Prefixed Name                   | Alias Name               | C# Method                       |
-|--------------------------------|--------------------------|---------------------------------|
-| `Test-DDEmailArcRecord`        | `Test-EmailArc`          | `VerifyARC`                     |
-| `Test-DDEmailAutoDiscover`     | `Test-EmailAutoDiscover` | `VerifyAutodiscover`            |
-| `Test-DDEmailBimiRecord`       | `Test-EmailBimi`         | `VerifyBIMI`                    |
-| `Test-DDEmailDkimRecord`       | `Test-EmailDkim`         | `VerifyDKIM`                    |
-| `Test-DDEmailDmarcRecord`      | `Test-EmailDmarc`        | `VerifyDMARC`                 |
-| `Test-DDEmailSpfRecord`        | `Test-EmailSpf`          | `VerifySPF`                     |
-| `Test-DDEmailTlsRptRecord`     | `Test-EmailTlsRpt`       | `VerifyTLSRPT`                  |
-| `Test-DDEmailStartTls`         | `Test-EmailStartTls`     | `VerifySTARTTLS`                |
-| `Test-DDEmailSmtpTls`          | `Test-EmailSmtpTls`      | `CheckSmtpTlsHost`              |
-| `Test-DDEmailOpenRelay`        | `Test-EmailOpenRelay`    | `CheckOpenRelayHost`            |
-| `Get-DDEmailMessageHeaderInfo` | `Get-EmailHeaderInfo`    | `CheckMessageHeaders`           |
-| `Test-DDMailLatency`           | `Test-EmailLatency`      | `CheckMailLatency`              |
+Run the example project and CLI scenarios:
 
-## 🌐 DNS-Related Cmdlets
+```bash
+dotnet run --project DomainDetective.Example example.com --json
+ddcli example.com --checks autodiscover
+ddcli example.com --subdomain-policy
+ddcli example.com --checks fcrdns
+ddcli TestSMIMEA user@example.com
+ddcli DnsPropagation --domain example.com --record-type A
+```
 
-| Prefixed Name                   | Alias Name               | C# Method                         |
-|--------------------------------|--------------------------|-----------------------------------|
-| `Test-DDDnsCaaRecord`          | `Test-DnsCaa`            | `VerifyCAA`   |
-| `Test-DDDnsNsRecord`           | `Test-DnsNs`             | `VerifyNS`     |
-| `Test-DDDnsSoaRecord`          | `Test-DnsSoa`            | `VerifySOA`   |
-| `Test-DDDnsSecStatus`          | `Test-DnsSec`            | `VerifyDNSSEC`          |
-| `Test-DDDnsBlacklistRecord`    | `Test-DnsBlacklist`      | `VerifyDNSBL` |
-| `Test-DDDnsDomainBlacklist`    | `Test-DnsDomainBlacklist`| `CheckDNSBL`                     |
-| `Test-DDDnsOpenResolver`       | `Test-OpenResolver`      | `CheckOpenResolverHost`          |
-| `Test-DDDnsDanglingCname`      | `Test-DnsDanglingCname`  | `VerifyDanglingCname`   |
-| `Test-DDDnsPropagation`        | `Test-DnsPropagation`    | `DnsPropagationAnalysis.QueryAsync` |
-| `Test-DDDnsTtl`                | `Test-DnsTtl`            | `DnsTtlAnalysis.Analyze`          |
-| `Test-DDDnsTunneling`          | `Test-DnsTunneling`      | `CheckDnsTunneling`               |
-| `Test-DDDnsWildcard`           | `Test-DnsWildcard`       | `VerifyWildcardDns`     |
-| `Test-DDEdnsSupport`           | `Test-DnsEdnsSupport`    | `VerifyEdnsSupport`     |
-| `Test-DDSmimeaRecord`          | `Test-DnsSmimea`         | `VerifySMIMEA`                    |
-| `Test-DDDnsForwardReverse`     | `Test-DnsFcrDns`         | `FcrDnsAnalysis.Analyze`          |
-| `Test-DDDnsMxRecord`           | `Test-MxRecord`          | `VerifyMX`     |
+### CLI wizard
 
-## 🏷 Domain-Level Cmdlets
+```bash
+ddcli
+```
+Guides you through domain entry, check selection, and JSON vs summary output.
 
-| Prefixed Name                   | Alias Name               | C# Method                                   |
-|--------------------------------|--------------------------|---------------------------------------------|
-| `Test-DDDomainContactRecord`   | `Test-DomainContact`     | `VerifyContactInfo` |
-| `Test-DDDomainSecurityTxt`     | `Test-DomainSecurityTxt` | `SecurityTXTAnalysis.AnalyzeSecurityTxtRecord` |
-| `Test-DDDomainCertificate`     | `Test-DomainCertificate` | `VerifyWebsiteCertificate`                 |
-| `Test-DDDomainOverallHealth`   | `Test-DomainHealth`      | `Verify`                                    |
-| `Get-DDDomainHealthReport`     | `Get-DomainSummary`      | `BuildSummary`                              |
-| `Get-DDDomainWhois`            | `Get-DomainWhois`        | `CheckWHOIS`                               |
-| `Get-DDFlattenedSpfIp`         | `Get-DomainFlattenedSpfIp` | `GetFlattenedIpAddresses`               |
-| `Test-DDThreatIntel`           | `Test-DomainThreatIntel` | `VerifyThreatIntel`                        |
-| `Test-DDRdap`                  | `Test-Rdap`              | `QueryRDAP`                                |
-| `Test-DDRpki`                  | `Test-Rpki`              | `VerifyRPKI`                               |
-| `Get-DDRdapObject`             | `Get-RdapObject`         | `RdapClient.Query*Async`                   |
-| `Get-DDSearchEngineInfo`       | `Get-SearchEngineInfo`   | `SearchEngineAnalysis.Search*`             |
-| `Show-DDDomainReport`          | `Export-DomainReport`<br>`New-DomainReport`<br>`Generate-DomainReport` | `DomainSecurityReport.GenerateReport` |
+### CLI: analyze messages
 
-## 🔐 TLS Cmdlets
+```bash
+ddcli AnalyzeMessageHeader --file ./headers.txt --json
+ddcli AnalyzeARC --file ./headers.txt --json
+```
 
-| Prefixed Name                   | Alias Name | C# Method  |
-|--------------------------------|------------|------------|
-| `Test-DDTlsDaneRecord`         | `Test-TlsDane` | `VerifyDANE` |
+<!-- Tables moved to top under "Available Cmdlets and Aliases" -->
 
-## 🌐 Networking Cmdlets
+## Configuration knobs (common)
 
-| Prefixed Name              | Alias Name                  | C# Method             |
-|----------------------------|-----------------------------|-----------------------|
-| `Test-DDIpNeighbor`        | `Test-NetworkIpNeighbor`    | `CheckIPNeighbors`    |
-| `Test-DDPortAvailability`  | `Test-NetworkPortAvailability` | `CheckPortAvailability` |
-
-## 🛠 Configuration and Data Management
-
-| Prefixed Name                | Alias Name           | C# Method                  |
-|------------------------------|----------------------|----------------------------|
-| `Add-DDDnsblProvider`        | `Add-DnsblProvider`  | `AddDNSBL`                 |
-| `Remove-DDDnsblProvider`     | `Remove-DnsblProvider` | `RemoveDNSBL`            |
-| `Clear-DDDnsblProviderList`  | `Clear-DnsblProvider` | `ClearDNSBL`              |
-| `Import-DDDnsblConfig`       | `Import-DnsblConfig` | `LoadDnsblConfig`          |
-| `Import-DDDmarcReport`       | `Import-DmarcReport` | `DmarcReportParser.ParseZip` |
-| `Import-DDDmarcForensic`     | `Import-DmarcForensic` | `DmarcForensicParser.ParseZip` |
-
-### MTA-STS
-
-`VerifyMTASTS` now validates the `_mta-sts.<domain>` TXT record before downloading
-the policy file. If the DNS record is missing or does not contain both `v=STSv1`
-and a valid `id` value, the analysis fails. The parsed identifier is exposed via
-`PolicyId` and the properties `DnsRecordPresent` and `DnsRecordValid` reflect the
-DNS state.
-
-Policy downloads are cached for one hour. Use `CacheDuration` to adjust or call
-`ClearCache()` to reset the cache.
+- Dns endpoint: most cmdlets accept `-DnsEndpoint` to control resolution.
+- Scope selection: DNS propagation supports `-Country`, `-Location`, `-Take` and background monitor with start/stop cmdlets.
+- Snapshots and diffs: `-SnapshotPath` and `-Diff` compare against stored snapshots.
+- Output formats: report tooling supports HTML/Word/Excel/PDF/JSON (work-in-progress where noted).
 
 ## Alternatives
 If you don't need to automate the process, or if you just want to quickly query for your domain name, you can use the following web based tools:
@@ -360,6 +303,11 @@ This project uses GitHub Actions to run .NET and PowerShell tests on Windows, Li
 Code coverage results are published to [Codecov](https://codecov.io/gh/EvotecIT/DomainDetective).
 
 ## Understanding Results
+
+Project status: pre-release; some checks are under active development. For gaps and current limitations see issues:
+https://github.com/EvotecIT/DomainDetective/issues?q=sort%3Aupdated-desc+is%3Aissue+is%3Aopen
+
+We welcome feedback, PRs, and ideas to improve coverage and reporting.
 
 Each analysis type returns an object exposing properties that map to fields described in the relevant RFCs. For example, SPF checks follow [RFC&nbsp;7208](https://datatracker.ietf.org/doc/html/rfc7208) and DMARC analysis references [RFC&nbsp;7489](https://datatracker.ietf.org/doc/html/rfc7489). DKIM validations follow [RFC&nbsp;6376](https://datatracker.ietf.org/doc/html/rfc6376) and enforce RSA public keys of at least 1024&nbsp;bits. DKIM analysis also sets `WeakKey` when the RSA key is shorter than 2048&nbsp;bits. DANE TLSA lookups follow [RFC&nbsp;6698](https://datatracker.ietf.org/doc/html/rfc6698). SMIMEA records are parsed according to [RFC&nbsp;8162](https://www.rfc-editor.org/rfc/rfc8162).
 

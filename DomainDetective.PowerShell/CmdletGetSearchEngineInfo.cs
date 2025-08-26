@@ -8,7 +8,7 @@ namespace DomainDetective.PowerShell
 /// <para>Part of the DomainDetective project.</para>
 /// <example>
 ///   <summary>Query Google search engine.</summary>
-///   <code>Get-SearchEngineInfo -Query 'example'</code>
+///   <code>Get-DDSearchEngineInfo -Query 'example'</code>
 /// </example>
 [Cmdlet(VerbsCommon.Get, "DDSearchEngineInfo")]
 [Alias("Get-SearchEngineInfo")]

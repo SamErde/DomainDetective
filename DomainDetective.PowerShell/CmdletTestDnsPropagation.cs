@@ -14,11 +14,11 @@ namespace DomainDetective.PowerShell {
     /// <para>Part of the DomainDetective project.</para>
     /// <example>
     ///   <summary>Test propagation of an A record.</summary>
-    ///   <code>$file = Join-Path (Split-Path ([System.Reflection.Assembly]::GetExecutingAssembly().Location)) 'Data/DNS/PublicDNS.json'; Test-DnsPropagation -DomainName example.com -RecordType A -ServersFile $file</code>
+    ///   <code>$file = Join-Path (Split-Path ([System.Reflection.Assembly]::GetExecutingAssembly().Location)) 'Data/DNS/PublicDNS.json'; Test-DDDnsPropagation -DomainName example.com -RecordType A -ServersFile $file</code>
     /// </example>
     /// <example>
     ///   <summary>Select servers by country.</summary>
-    ///   <code>Test-DnsPropagation -DomainName example.com -RecordType A -CountryCount @{PL=3;DE=2}</code>
+    ///   <code>Test-DDDnsPropagation -DomainName example.com -RecordType A -CountryCount @{PL=3;DE=2}</code>
     /// </example>
     [Cmdlet(
         VerbsDiagnostic.Test,

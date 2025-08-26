@@ -233,7 +233,7 @@ public class PortScanAnalysis
         }
     }
 
-    private static async Task<string?> DetectServiceAsync(TcpClient client, int port, CancellationToken token)
+    private async Task<string?> DetectServiceAsync(TcpClient client, int port, CancellationToken token)
     {
         var stream = client.GetStream();
         foreach (var strategy in GetStrategies(port))
@@ -241,7 +241,9 @@ public class PortScanAnalysis
             try
             {
                 using var cts = CancellationTokenSource.CreateLinkedTokenSource(token);
-                cts.CancelAfter(TimeSpan.FromMilliseconds(200));
+                // Allow banner/protocol detection to run up to the caller's Timeout budget
+                // to reduce flakiness on slower CI environments.
+                cts.CancelAfter(Timeout);
                 var result = await strategy(stream, cts.Token).ConfigureAwait(false);
                 if (!string.IsNullOrEmpty(result))
                 {

@@ -2,6 +2,7 @@ using Spectre.Console;
 using Spectre.Console.Cli;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text.Json;
 using System.Threading;
@@ -58,6 +59,8 @@ internal sealed class SearchDomainSettings : CommandSettings
 internal sealed class SearchDomainCommand : AsyncCommand<SearchDomainSettings>
 {
     /// <inheritdoc />
+    [RequiresUnreferencedCode("Calls System.Text.Json.JsonSerializer.Serialize")]
+    [RequiresDynamicCode("Calls System.Text.Json.JsonSerializer.Serialize")]
     public override async Task<int> ExecuteAsync(CommandContext context, SearchDomainSettings settings)
     {
         if (settings.Keywords.Length == 0)
@@ -92,7 +95,7 @@ internal sealed class SearchDomainCommand : AsyncCommand<SearchDomainSettings>
                 {
                     list.Add(r);
                 }
-                var json = JsonSerializer.Serialize(list, JsonOptions.Default);
+                var json = JsonSerializer.Serialize(list, DomainDetective.Helpers.JsonOptions.Default);
                 Console.WriteLine(json);
                 break;
             }
@@ -100,7 +103,7 @@ internal sealed class SearchDomainCommand : AsyncCommand<SearchDomainSettings>
             {
                 await foreach (var r in results)
                 {
-                    Console.WriteLine(JsonSerializer.Serialize(r));
+                    Console.WriteLine(JsonSerializer.Serialize(r, DomainDetective.Helpers.JsonOptions.Default));
                 }
                 break;
             }
@@ -111,7 +114,7 @@ internal sealed class SearchDomainCommand : AsyncCommand<SearchDomainSettings>
                 {
                     list.Add(r);
                 }
-                Console.WriteLine(JsonSerializer.Serialize(list));
+                Console.WriteLine(JsonSerializer.Serialize(list, DomainDetective.Helpers.JsonOptions.Default));
                 break;
             }
             case "csv":

@@ -8,7 +8,7 @@ namespace DomainDetective.PowerShell;
 /// <para>Part of the DomainDetective project.</para>
 /// <example>
 ///   <summary>Check for wildcard DNS.</summary>
-///   <code>Test-DnsWildcard -DomainName example.com</code>
+///   <code>Test-DDDnsWildcard -DomainName example.com</code>
 /// </example>
 [Cmdlet(VerbsDiagnostic.Test, "DDDnsWildcard", DefaultParameterSetName = "ServerName")]
 [Alias("Test-DnsWildcard")]

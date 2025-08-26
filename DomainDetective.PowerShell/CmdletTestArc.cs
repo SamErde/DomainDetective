@@ -8,11 +8,11 @@ namespace DomainDetective.PowerShell {
     /// <para>Part of the DomainDetective project.</para>
     /// <example>
     ///   <summary>Analyze ARC headers from a file.</summary>
-    ///   <code>Test-EmailArc -File './headers.txt'</code>
+    ///   <code>Test-DDEmailArcRecord -File './headers.txt'</code>
     /// </example>
     /// <example>
     ///   <summary>Analyze ARC headers from pipeline input.</summary>
-    ///   <code>Get-Content './headers.txt' -Raw | Test-EmailArc</code>
+    ///   <code>Get-Content './headers.txt' -Raw | Test-DDEmailArcRecord</code>
     /// </example>
 [Cmdlet(VerbsDiagnostic.Test, "DDEmailArcRecord", DefaultParameterSetName = "Text")]
 [Alias("Test-EmailArc")]

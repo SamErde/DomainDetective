@@ -8,7 +8,7 @@ namespace DomainDetective.PowerShell {
     /// <para>Part of the DomainDetective project.</para>
     /// <example>
     ///   <summary>Check DNSSEC records.</summary>
-    ///   <code>Test-DnsSec -DomainName example.com</code>
+    ///   <code>Test-DDDnsSecStatus -DomainName example.com</code>
     /// </example>
 [Cmdlet(VerbsDiagnostic.Test, "DDDnsSecStatus", DefaultParameterSetName = "ServerName")]
 [Alias("Test-DnsSec")]

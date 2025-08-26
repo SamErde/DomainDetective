@@ -36,8 +36,9 @@ internal sealed class CheckDomainCommand : AsyncCommand<CheckDomainSettings> {
         }
 
         if (settings.Domains.Length == 0) {
-            await CommandUtilities.RunWizard(Program.CancellationToken);
-            return 0;
+            Console.OutputEncoding = System.Text.Encoding.UTF8;
+            Console.InputEncoding = System.Text.Encoding.UTF8;
+            return await WizardMode.RunInteractiveWizard(Program.CancellationToken);
         }
 
         settings.Domains = settings.Domains

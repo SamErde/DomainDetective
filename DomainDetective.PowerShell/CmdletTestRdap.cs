@@ -8,10 +8,10 @@ namespace DomainDetective.PowerShell {
     /// <para>Part of the DomainDetective project.</para>
     /// <example>
     ///   <summary>Query RDAP.</summary>
-    ///   <code>Test-Rdap -DomainName example.com</code>
+    ///   <code>Get-DDRdap -DomainName example.com</code>
     /// </example>
-    [Cmdlet(VerbsDiagnostic.Test, "DDRdap", DefaultParameterSetName = "ServerName")]
-    [Alias("Test-Rdap")]
+    [Cmdlet(VerbsCommon.Get, "DDRdap", DefaultParameterSetName = "ServerName")]
+    [Alias("Get-Rdap", "Test-Rdap")]
     public sealed class CmdletTestRdap : AsyncPSCmdlet {
         /// <summary>Domain to query.</summary>
         [Parameter(Mandatory = true, Position = 0, ParameterSetName = "ServerName")]

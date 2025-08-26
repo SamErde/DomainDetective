@@ -6,7 +6,7 @@ namespace DomainDetective.PowerShell {
     /// <para>Part of the DomainDetective project.</para>
     /// <example>
     ///   <summary>Check HTTPS certificate.</summary>
-    ///   <code>Test-DomainCertificate -Url https://example.com</code>
+    ///   <code>Test-DDDomainCertificate -Url https://example.com</code>
     /// </example>
 [Cmdlet(VerbsDiagnostic.Test, "DDDomainCertificate", DefaultParameterSetName = "Url")]
 [Alias("Test-DomainCertificate")]

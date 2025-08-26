@@ -8,7 +8,7 @@ namespace DomainDetective.PowerShell {
     /// <para>Part of the DomainDetective project.</para>
     /// <example>
     ///   <summary>Verify DKIM selectors.</summary>
-    ///   <code>Test-EmailDkim -DomainName example.com -Selectors selector1</code>
+    ///   <code>Test-DDEmailDkimRecord -DomainName example.com -Selectors selector1</code>
     /// </example>
 [Cmdlet(VerbsDiagnostic.Test, "DDEmailDkimRecord", DefaultParameterSetName = "ServerName")]
 [Alias("Test-EmailDkim")]

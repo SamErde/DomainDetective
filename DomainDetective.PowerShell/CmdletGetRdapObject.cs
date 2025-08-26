@@ -8,7 +8,7 @@ namespace DomainDetective.PowerShell {
 /// <para>Part of the DomainDetective project.</para>
 /// <example>
 ///   <summary>Query domain data.</summary>
-///   <code>Get-RdapObject -Domain example.com</code>
+///   <code>Get-DDRdapObject -Domain example.com</code>
 /// </example>
 [Cmdlet(VerbsCommon.Get, "DDRdapObject", DefaultParameterSetName = "Domain")]
 [Alias("Get-RdapObject")]

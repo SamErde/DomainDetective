@@ -42,6 +42,15 @@ Test-DnsNs -DomainName "example.com" -Verbose
   ```powershell
   Test-EmailSmtpTls -HostName "mail.example.com" -Port 587
   ```
+- `Test-EmailImapTls` / `Test-EmailPop3Tls` – validates TLS on mailbox protocols.
+  ```powershell
+  Test-EmailImapTls -HostName "imap.example.com" -Port 993
+  Test-EmailPop3Tls -HostName "pop.example.com" -Port 995
+  ```
+- `Test-EmailSmtpBanner` – retrieves and validates SMTP banner.
+  ```powershell
+  Test-EmailSmtpBanner -HostName "mail.example.com" -Port 25
+  ```
 - `Test-EmailAutoDiscover` – checks SRV and CNAME records used by mail clients.
   ```powershell
   Test-EmailAutoDiscover -DomainName "example.com"
@@ -49,6 +58,18 @@ Test-DnsNs -DomainName "example.com" -Verbose
 - `Test-DnsFcrDns` – validates forward-confirmed reverse DNS (FCrDNS).
   ```powershell
   Test-DnsFcrDns -DomainName "example.com"
+  ```
+- `Test-DnsMx` – checks MX records.
+  ```powershell
+  Test-DnsMx -DomainName "example.com"
+  ```
+- `Import-EmailTlsRpt` – imports TLS-RPT JSON files and summarizes results.
+  ```powershell
+  Import-EmailTlsRpt -Path "./tlsrpt.json"
+  ```
+- `Get-CertificateInfo` – parses PEM/DER certificate files and (optionally) shows chain.
+  ```powershell
+  Get-CertificateInfo -Path "./cert.pem" -ShowChain
   ```
 - `Get-EmailHeaderInfo` – parses raw email headers.
   ```powershell
