@@ -1,4 +1,6 @@
-﻿Perfect — so you’re imagining **DomainDetective** starting with just a domain name, and then the wizard kicks off a guided, “hacker-fancy” console session that progressively uncovers layers of DNS, Email, Web, Reputation, Routing, etc.
+﻿# _
+
+Perfect — so you’re imagining **DomainDetective** starting with just a domain name, and then the wizard kicks off a guided, “hacker-fancy” console session that progressively uncovers layers of DNS, Email, Web, Reputation, Routing, etc.
 We want this to **flow like a scan**, not just a dump of tables.
 
 Let’s structure this in two parts:
